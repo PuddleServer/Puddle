@@ -50,7 +50,7 @@ export class Route {
      */
     URL(...urls: String[]): String[] | Promise<Route> {
 
-        if(!urls) return this.#URL
+        if(!urls.length) return this.#URL;
 
         this.#URL = urls;
         return new Promise((resolve)=>resolve(this));
