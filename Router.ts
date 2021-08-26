@@ -2,7 +2,7 @@
  * ルーティングを行うクラスファイル。
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-08-26
+ * @Date   2021-08-27
  */
 export class Route {
 
@@ -118,7 +118,7 @@ export class Route {
      * @param route 比較対象のRouteオブジェクト。
      * @returns 同じオブジェクトであればtrueを、そうでなければfalseを返す。
      */
-    equals(route: Route): Boolean {
+    equals(route: any): Boolean {
         const Path: Boolean = this.#PATH == route.PATH();
         const Url: Boolean = this.#URL.toString() == route.URL().toString();
         const Get: Boolean = this.#GET.toString() == route.GET().toString();
