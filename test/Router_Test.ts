@@ -2,7 +2,7 @@
  * Router.tsのテストファイル
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-08-24
+ * @Date   2021-08-27
  */
 
 import { assertEquals }     from "https://deno.land/std@0.88.0/testing/asserts.ts";
@@ -23,6 +23,31 @@ Deno.test({
     name: "Route生成テスト",
     fn(): void {
         const route: Route = new Route(path, urls, get, put, pos, del);
+        
+    },
+});
+
+/**
+ * equalsテスト
+ */
+Deno.test({
+    name: "equalsテスト",
+    fn(): void {
+        const route: Route = new Route(path, urls, get, put, pos, del);
+        const route2: Route = new Route("/route2.html", urls, get, put, pos, del);
+        const route3: Route = new Route(path, ["/route3"], get, put, pos, del);
+        const route4: Route = new Route(path, urls, put, put, pos, del);
+        const route5: Route = new Route(path, urls, get, pos, pos, del);
+        const route6: Route = new Route(path, urls, get, put, del, del);
+        const route7: Route = new Route(path, urls, get, put, pos, get);
+
+        assertEquals(true, route.equals(route));
+        assertEquals(false, route.equals(route2));
+        assertEquals(false, route.equals(route3));
+        assertEquals(false, route.equals(route4));
+        assertEquals(false, route.equals(route5));
+        assertEquals(false, route.equals(route6));
+        assertEquals(false, route.equals(route7));
 
     },
 });
@@ -50,7 +75,7 @@ Deno.test({
         // 引数無しの時は#URLが返る
         assertEquals(urls, route.URL());
         // アリの時はthisが返る
-        assertEquals(route, route.URL("/", "/top", "/Top", "/トップ"));
+        assertEquals(true, route.equals(route.URL("/", "/top", "/Top", "/トップ")));
     },
 });
 
@@ -65,7 +90,7 @@ Deno.test({
         // 引数無しの時は#GETが返る
         assertEquals(get, route.GET());
         // アリの時はthisが返る
-        assertEquals(route, route.GET(get));
+        assertEquals(true, route.equals(route.GET(get)));
     },
 });
 
@@ -78,9 +103,9 @@ Deno.test({
         const route: Route = new Route(path, urls, get, put, pos, del);
 
         // 引数無しの時は#PUTが返る
-        assertEquals(get, route.PUT());
+        assertEquals(put, route.PUT());
         // アリの時はthisが返る
-        assertEquals(route, route.PUT(put));
+        assertEquals(true, route.equals(route.PUT(put)));
     },
 });
 
@@ -93,9 +118,9 @@ Deno.test({
         const route: Route = new Route(path, urls, get, put, pos, del);
 
         // 引数無しの時は#POSTが返る
-        assertEquals(get, route.POST());
+        assertEquals(pos, route.POST());
         // アリの時はthisが返る
-        assertEquals(route, route.POST(pos));
+        assertEquals(true, route.equals(route.POST(pos)));
     },
 });
 
@@ -108,8 +133,8 @@ Deno.test({
         const route: Route = new Route(path, urls, get, put, pos, del);
 
         // 引数無しの時は#DELETEが返る
-        assertEquals(get, route.DELETE());
+        assertEquals(del, route.DELETE());
         // アリの時はthisが返る
-        assertEquals(route, route.DELETE(del));
+        assertEquals(true, route.equals(route.DELETE(del)));
     },
 });
