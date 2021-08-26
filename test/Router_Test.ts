@@ -8,8 +8,15 @@
 import { assertEquals }     from "https://deno.land/std@0.88.0/testing/asserts.ts";
 import { Route }            from "../Router.ts";
 
+/**
+ * ディープコピー関数
+ */
+ const deepCopy: any = (_object: any) => {
+    return JSON.parse(JSON.stringify(_object));
+  }
+
 // Routeオブジェクトに必要なもの
-const path: String   = "index.html";
+const path: String   = "/index.html";
 const urls: String[] = ["/", "/top", "/Top", "/トップ"];
 const get: Function = function() { return "GET!";    }
 const put: Function = function() { return "PUT!";    }
@@ -22,7 +29,8 @@ const del: Function = function() { return "DELETE!"; }
 Deno.test({
     name: "Route生成テスト",
     fn(): void {
-        let route: Route = new Route(path, urls, get, put, pos, del);
+        let urls1: String[] = deepCopy(urls);
+        let route: Route = new Route(path, urls1, get, put, pos, del);
         route = new Route(path);
         
     },
@@ -34,13 +42,13 @@ Deno.test({
 Deno.test({
     name: "equalsテスト",
     fn(): void {
-        const route: Route = new Route(path, urls, get, put, pos, del);
-        const route2: Route = new Route("/route2.html", urls, get, put, pos, del);
+        const route: Route = new Route(path, deepCopy(urls), get, put, pos, del);
+        const route2: Route = new Route("/route2.html", deepCopy(urls), get, put, pos, del);
         const route3: Route = new Route(path, ["/route3"], get, put, pos, del);
-        const route4: Route = new Route(path, urls, put, put, pos, del);
-        const route5: Route = new Route(path, urls, get, pos, pos, del);
-        const route6: Route = new Route(path, urls, get, put, del, del);
-        const route7: Route = new Route(path, urls, get, put, pos, get);
+        const route4: Route = new Route(path, deepCopy(urls), put, put, pos, del);
+        const route5: Route = new Route(path, deepCopy(urls), get, pos, pos, del);
+        const route6: Route = new Route(path, deepCopy(urls), get, put, del, del);
+        const route7: Route = new Route(path, deepCopy(urls), get, put, pos, get);
 
         assertEquals(true, route.equals(route));
         assertEquals(false, route.equals(route2));
@@ -59,7 +67,7 @@ Deno.test({
 Deno.test({
     name: "PATH取得テスト",
     fn(): void {
-        const route: Route = new Route(path, urls, get, put, pos, del);
+        const route: Route = new Route(path, deepCopy(urls), get, put, pos, del);
 
         assertEquals(path, route.PATH());
     },
@@ -71,12 +79,16 @@ Deno.test({
 Deno.test({
     name: "URL取得テスト",
     fn(): void {
-        const route: Route = new Route(path, urls, get, put, pos, del);
-
+        let route_after: Route = new Route(path, deepCopy(urls), get, put, pos, del);
+        let route_before: Route = route_after.clone();
+        
         // 引数無しの時は#URLが返る
-        assertEquals(urls, route.URL());
+        console.log(urls, route_after.URL(), route_before.URL())
+        assertEquals([ "/", "/top", "/Top", "/トップ", "/index.html" ], route_after.URL());
         // アリの時はthisが返る
-        assertEquals(true, route.equals(route.URL("/", "/top", "/Top", "/トップ")));
+        assertEquals(true, route_before.equals(route_after.URL("/", "/top", "/Top", "/トップ", "/index.html")));
+        assertEquals(false, route_before.equals(route_after.URL("/", "/top", "/Top", "/トップ")));
+
     },
 });
 
