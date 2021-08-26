@@ -2,7 +2,7 @@
  * ルーティングを行うクラスファイル。
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-08-24
+ * @Date   2021-08-26
  */
 export class Route {
 
@@ -48,12 +48,12 @@ export class Route {
      * @param urls 許可するリクエストURL(可変長引数)。
      * @returns 引数がない場合はURLを、ある場合はthisを返す。
      */
-    URL(...urls: String[]): String[] | Promise<Route> {
+    URL(...urls: String[]): String[] | Route {
 
         if(!urls.length) return this.#URL;
 
         this.#URL = urls;
-        return new Promise((resolve)=>resolve(this));
+        return this;
 
     }
 
@@ -62,12 +62,12 @@ export class Route {
      * @param process 処理内容を記述した関数。
      * @returns 引数がない場合はGETを、ある場合はthisを返す。
      */
-    GET(process: Function): Function | Promise<Route> {
+    GET(process?: Function): Function | Route {
 
         if(!process) return this.#GET;
 
         this.#GET = process;
-        return new Promise((resolve)=>resolve(this));
+        return this;
 
     }
 
@@ -76,12 +76,12 @@ export class Route {
      * @param process 処理内容を記述した関数。
      * @returns 引数がない場合はPUTを、ある場合はthisを返す。
      */
-    PUT(process: Function): Function | Promise<Route> {
+    PUT(process?: Function): Function | Route {
 
         if(!process) return this.#PUT;
 
         this.#PUT = process;
-        return new Promise((resolve)=>resolve(this));
+        return this;
 
     }
 
@@ -90,12 +90,12 @@ export class Route {
      * @param process 処理内容を記述した関数。
      * @returns 引数がない場合はPOSTを、ある場合はthisを返す。
      */
-    POST(process: Function): Function | Promise<Route> {
+    POST(process?: Function): Function | Route {
 
         if(!process) return this.#POST;
 
         this.#POST = process;
-        return new Promise((resolve)=>resolve(this));
+        return this;
 
     }
 
@@ -104,12 +104,27 @@ export class Route {
      * @param process 処理内容を記述した関数。
      * @returns 引数がない場合はDELETEを、ある場合はthisを返す。
      */
-    DELETE(process: Function): Function | Promise<Route> {
+    DELETE(process?: Function): Function | Route {
 
         if(!process) return this.#DELETE;
 
         this.#DELETE = process;
-        return new Promise((resolve)=>resolve(this));
+        return this;
 
+    }
+
+    /**
+     * Routeオブジェクト動詞を比較する。
+     * @param route 比較対象のRouteオブジェクト。
+     * @returns 同じオブジェクトであればtrueを、そうでなければfalseを返す。
+     */
+    equals(route: Route): Boolean {
+        const Path: Boolean = this.#PATH == route.PATH();
+        const Url: Boolean = this.#URL.toString() == route.URL().toString();
+        const Get: Boolean = this.#GET.toString() == route.GET().toString();
+        const Put: Boolean = this.#PUT.toString() == route.PUT().toString();
+        const Post: Boolean = this.#POST.toString() == route.POST().toString();
+        const Delete: Boolean = this.#DELETE.toString() == route.DELETE().toString();
+        return Path && Url && Get && Put && Post && Delete;
     }
 }
