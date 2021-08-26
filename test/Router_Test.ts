@@ -6,7 +6,7 @@
  */
 
 import { assertEquals }     from "https://deno.land/std@0.88.0/testing/asserts.ts";
-import { Route } from "../Router.ts";
+import { Route }            from "../Router.ts";
 
 /**
  * Route生成テスト
@@ -14,8 +14,8 @@ import { Route } from "../Router.ts";
 Deno.test({
     name: "Route生成テスト",
     fn(): void {
-        let func = function() {  }
-        let route = new Route("PATH", ["URL1", "URL2"], func, func, func, func);
+        const func: Function = function() {}
+        const route: Route = new Route("PATH", ["URL1", "URL2"], func, func, func, func);
 
     },
 });
