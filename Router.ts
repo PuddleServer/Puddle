@@ -24,7 +24,7 @@ export class Route {
     /** DELETEリクエスト時の処理まとめた関数 */
     #DELETE: Function;
 
-    constructor(PATH: String, URL: String[], GET: Function, PUT: Function, POST: Function, DELETE: Function) {
+    constructor(PATH: String, URL?: String[], GET?: Function, PUT?: Function, POST?: Function, DELETE?: Function) {
         this.#PATH = PATH;
         this.#URL = URL || [];
         this.#GET = GET;// || default_get;
@@ -126,5 +126,13 @@ export class Route {
         const Post: Boolean = this.#POST.toString() == route.POST().toString();
         const Delete: Boolean = this.#DELETE.toString() == route.DELETE().toString();
         return Path && Url && Get && Put && Post && Delete;
+    }
+
+    /**
+     * 自身をディープコピーする。
+     * @returns 自身と同じパラメータを持つRouteオブジェクトを返す。
+     */
+    clone(): Route {
+        return new Route(this.#PATH, this.#URL, this.#GET, this.#PUT, this.#POST, this.#DELETE);
     }
 }
