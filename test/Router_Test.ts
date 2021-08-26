@@ -22,7 +22,8 @@ const del: Function = function() { return "DELETE!"; }
 Deno.test({
     name: "Route生成テスト",
     fn(): void {
-        const route: Route = new Route(path, urls, get, put, pos, del);
+        let route: Route = new Route(path, urls, get, put, pos, del);
+        route = new Route(path);
         
     },
 });
