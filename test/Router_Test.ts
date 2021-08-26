@@ -14,8 +14,8 @@ import { Route }            from "../Router.ts";
 Deno.test({
     name: "Route生成テスト",
     fn(): void {
-        let func: Function = function() {}
-        let route: Route = new Route("PATH", ["URL1", "URL2"], func, func, func, func);
+        const func: Function = function() {}
+        const route: Route = new Route("PATH", ["URL1", "URL2"], func, func, func, func);
 
     },
 });
