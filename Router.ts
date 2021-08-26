@@ -31,6 +31,8 @@ export class Route {
         this.#PUT = PUT;// || default_PUT;
         this.#POST = POST;// || default_POST;
         this.#DELETE = DELETE;// || default_DELETE;
+
+        if(!this.#URL.includes(this.#PATH)) this.#URL.push(this.#PATH);
     }
 
     /**
@@ -38,9 +40,7 @@ export class Route {
      * @returns PATH
      */
     PATH(): String {
-
         return this.#PATH;
-
     }
 
     /**
