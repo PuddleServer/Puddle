@@ -76,6 +76,11 @@ export class System {
         return new Promise((resolve) => resolve(routeList));
     }
 
+    /**
+     * 指定したpathが設定されたRouteオブジェクトを返す。
+     * @param path RouteオブジェクトのPATH
+     * @returns 指定されたRouteオブジェクト。
+     */
     Route(path: Route): Route | undefined {
 
         const route: Route[] = this.#routes.filter( (route: Route) => route.PATH() == path );
