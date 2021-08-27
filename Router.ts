@@ -7,10 +7,10 @@
 export class Route {
 
     /** サーバーへのリクエストの名前 */
-    #PATH: String;
+    #PATH: string;
 
     /** リクエストを許可する別名 */
-    #URL: String[];
+    #URL: string[];
 
     /** GETリクエスト時の処理をまとめた関数 */
     #GET: Function;
@@ -24,7 +24,7 @@ export class Route {
     /** DELETEリクエスト時の処理まとめた関数 */
     #DELETE: Function;
 
-    constructor(PATH: String, URL?: String[], GET?: Function, PUT?: Function, POST?: Function, DELETE?: Function) {
+    constructor(PATH: string, URL?: string[], GET?: Function, PUT?: Function, POST?: Function, DELETE?: Function) {
         this.#PATH = PATH;
         this.#URL = URL || [];
         this.#GET = GET;// || default_get;
@@ -39,7 +39,7 @@ export class Route {
      * サーバーへのリクエストの名前を返す。
      * @returns PATH
      */
-    PATH(): String {
+    PATH(): string {
         return this.#PATH;
     }
 
@@ -48,7 +48,7 @@ export class Route {
      * @param urls 許可するリクエストURL(可変長引数)。
      * @returns 引数がない場合はURLを、ある場合はthisを返す。
      */
-    URL(...urls: String[]): String[] | Route {
+    URL(...urls: string[]): string[] | Route {
 
         if(!urls.length) return this.#URL;
 
@@ -118,13 +118,13 @@ export class Route {
      * @param route 比較対象のRouteオブジェクト。
      * @returns 同じオブジェクトであればtrueを、そうでなければfalseを返す。
      */
-    equals(route: any): Boolean {
-        const Path: Boolean = this.#PATH == route.PATH();
-        const Url: Boolean = this.#URL.toString() == route.URL().toString();
-        const Get: Boolean = this.#GET.toString() == route.GET().toString();
-        const Put: Boolean = this.#PUT.toString() == route.PUT().toString();
-        const Post: Boolean = this.#POST.toString() == route.POST().toString();
-        const Delete: Boolean = this.#DELETE.toString() == route.DELETE().toString();
+    equals(route: any): boolean {
+        const Path: boolean = this.#PATH == route.PATH();
+        const Url: boolean = this.#URL.toString() == route.URL().toString();
+        const Get: boolean = this.#GET.toString() == route.GET().toString();
+        const Put: boolean = this.#PUT.toString() == route.PUT().toString();
+        const Post: boolean = this.#POST.toString() == route.POST().toString();
+        const Delete: boolean = this.#DELETE.toString() == route.DELETE().toString();
         return Path && Url && Get && Put && Post && Delete;
     }
 
