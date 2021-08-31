@@ -15,7 +15,7 @@ import {
 } from "https://deno.land/std@0.104.0/ws/mod.ts"
 import { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
 import { Route, Routes } from "./Router.ts"
-import { htmlCompile } from "./HtmlCompiler"
+import { htmlCompile } from "./HtmlCompiler.ts"
 
 /**
  * 起動構成
