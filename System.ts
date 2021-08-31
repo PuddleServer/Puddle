@@ -2,7 +2,7 @@
  * 実行クラス
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-08-27
+ * @Date   2021-08-31
  */
 
 import { Server, ServerRequest, Response } from "deno.land / std@0.104.0 / http / server.ts"
@@ -16,6 +16,14 @@ import {
 import { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
 import { Route, Routes } from "./Router.ts"
 
+/**
+ * 起動構成
+ */
+export interface StartupConfig {
+    hostname?: string;
+    port?: string;
+}
+
 
 export class System {
 
@@ -26,7 +34,7 @@ export class System {
     #wsHandler: Function;
 
     /** 起動構成を保持する変数 */
-    //#startupConfig: StartupConfig;
+    #startupConfig: StartupConfig;
 
     /** 開発者が追加したモジュールを保持する */
     #modules: any[];
