@@ -24,13 +24,16 @@ export class Route {
     /** DELETEリクエスト時の処理まとめた関数 */
     #DELETE: Function;
 
-    constructor(PATH: string, URL?: string[], GET?: Function, PUT?: Function, POST?: Function, DELETE?: Function) {
+    isWebSocket: boolean;
+
+    constructor(PATH: string, URL?: string[] | null, GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null, isWebSocket?: boolean | null) {
         this.#PATH = PATH;
         this.#URL = URL || [];
         this.#GET = GET;// || default_get;
         this.#PUT = PUT;// || default_PUT;
         this.#POST = POST;// || default_POST;
         this.#DELETE = DELETE;// || default_DELETE;
+        this.isWebSocket = Boolean(isWebSocket);
 
         if(!this.#URL.includes(this.#PATH)) this.#URL.push(this.#PATH);
     }
