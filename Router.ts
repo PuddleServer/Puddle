@@ -29,10 +29,10 @@ export class Route {
     constructor(PATH: string, URL?: string[] | null, GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null, isWebSocket?: boolean | null) {
         this.#PATH = PATH;
         this.#URL = URL || [];
-        this.#GET = GET;// || default_get;
-        this.#PUT = PUT;// || default_PUT;
-        this.#POST = POST;// || default_POST;
-        this.#DELETE = DELETE;// || default_DELETE;
+        this.#GET = GET || function(){console.log("GET")};// || default_get;
+        this.#PUT = PUT || function(){console.log("PUT")};// || default_PUT;
+        this.#POST = POST || function(){console.log("POST")};// || default_POST;
+        this.#DELETE = DELETE || function(){console.log("DELETE")};// || default_DELETE;
         this.isWebSocket = Boolean(isWebSocket);
 
         if(!this.#URL.includes(this.#PATH)) this.#URL.push(this.#PATH);
