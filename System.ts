@@ -5,8 +5,8 @@
  * @Date   2021-08-31
  */
 
-import { Server, ServerRequest, Response } from "deno.land / std@0.104.0 / http / server.ts"
-import { getCookies, setCookie, deleteCookie } from "https://deno.land/std@0.104.0/http/cookie.ts"
+import { Server, ServerRequest, Response } from "https://deno.land / std@0.104.0 / http / server.ts"
+import { Cookie, getCookies, setCookie, deleteCookie } from "https://deno.land/std@0.104.0/http/cookie.ts"
 import { 
     acceptWebSocket,
     isWebSocketCloseEvent,
@@ -15,6 +15,7 @@ import {
 } from "https://deno.land/std@0.104.0/ws/mod.ts"
 import { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
 import { Route, Routes } from "./Router.ts"
+import { htmlCompile } from "./HtmlCompiler.ts"
 
 /**
  * 起動構成
@@ -22,6 +23,114 @@ import { Route, Routes } from "./Router.ts"
 export interface StartupConfig {
     hostname?: string;
     port?: string;
+}
+
+/**
+ * Serverのresponse関連の機能をまとめたクラス。
+ */
+export class SystemResponse {
+
+    /** requestを格納する変数 */
+    #request: ServerRequest;
+
+    /** presetを格納する変数 */
+    #preset: { [key: string]: any; };
+
+    /** レスポンスオブジェクト */
+    response: Response;
+
+    /** 強制ダウンロードかどうか（初期値はfalse） */
+    isForceDownload: boolean;
+
+    constructor(request: ServerRequest) {
+        this.#request = request;
+
+        this.response = {
+            status: 500,
+            headers: new Headers(),
+            body: "500 Internal Server Error"
+        }
+
+        this.#preset = {};
+
+        this.isForceDownload = false;
+    }
+
+    /**
+     * Responseオブジェクトにテキストを設定する。
+     * @param text クライアントに返す文字列。
+     * @param status ステータスコード（デフォルトは200）。
+     * @param statusText ステータステキスト。
+     */
+    setText(text: String, status: Number = 200, statusText: String | null = null): void {
+        this.response.text = htmlCompile(text, this.#preset);
+        this.response.status = status;
+        if(statusText != null) this.response.statusText = statusText;
+        else if(this.response.statusText != undefined) delete this.response.statusText;
+        this.response.headers.set('Content-Type', 'text/plain');
+    }
+
+    /**
+     * Responseオブジェクトにファイルを設定する。
+     * @param filePath クライアントに返すファイルのパス。
+     * @param status ステータスコード（デフォルトは200）。
+     * @param statusText ステータステキスト。
+     */
+    async setFile(filePath: String, status: Number = 200, statusText: String | null = null): Promise<void> {
+        const file = await Deno.open(filePath);
+        let file_data: string;
+        try {
+            file_data = await Deno.readAll(file);
+            this.setText(file_data, status, statusText);
+            const extensions: false | string = lookup(filePath);
+            if(extensions) this.response.headers.set('Content-Type', extensions);
+        } catch {
+            console.log(`\n[ error ]\n
+            The "${filePath}" file could not be read.\n
+            "${filePath}"ファイルが読み取れませんでした。\n`);
+            this.setText("500 Internal Server Error", 500);
+        }
+    }
+
+    /**
+     * セットしたファイルや文字列に変数が埋め込まれていた場合に、参照されるオブジェクトを定義する。
+     * @param object 参照される変数を格納したオブジェクト。
+     */
+    preset(object: { [key: string]: any; }): void {
+        this.#preset = object;
+    }
+
+    /**
+     * Cookieのセットを行う。
+     * @param cookie 
+     */
+    setCookie(cookie: Cookie): void {
+        setCookie(this.response, cookie);
+    }
+
+    /**
+     * Cookieの削除を行う。
+     * @param name 削除するCookie名。
+     */
+    deleteCookie(
+        name: string,
+        attributes?: { path?: string; domain?: string }
+    ): void {
+        this.setCookie({
+            name: name,
+            value: "",
+            expires: new Date(0),
+            ...attributes,
+        });
+    }
+
+    /**
+     * ServerRequestのrespondを実行する。
+     */
+    respond(): void {
+        if(this.isForceDownload) this.response.headers.set('Content-Type', 'application/octet-stream');
+        this.#request.respond(this.response);
+    }
 }
 
 
