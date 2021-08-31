@@ -2,11 +2,11 @@
  * 実行クラス
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-08-27
+ * @Date   2021-08-31
  */
 
-import { Server, ServerRequest, Response } from "deno.land / std@0.104.0 / http / server.ts"
-import { getCookies, setCookie, deleteCookie } from "https://deno.land/std@0.104.0/http/cookie.ts"
+import { Server, ServerRequest, Response } from "https://deno.land/std@0.104.0/http/server.ts"
+import { Cookie, getCookies, setCookie, deleteCookie } from "https://deno.land/std@0.104.0/http/cookie.ts"
 import { 
     acceptWebSocket,
     isWebSocketCloseEvent,
@@ -14,7 +14,124 @@ import {
     WebSocket,
 } from "https://deno.land/std@0.104.0/ws/mod.ts"
 import { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
-import { Route } from "./Router.ts"
+import { Route, Routes } from "./Router.ts"
+import { htmlCompile } from "./HtmlCompiler.ts"
+
+/**
+ * 起動構成
+ */
+export interface StartupConfig {
+    hostname?: string;
+    port?: string;
+}
+
+/**
+ * Serverのresponse関連の機能をまとめたクラス。
+ */
+export class SystemResponse {
+
+    /** requestを格納する変数 */
+    #request: ServerRequest;
+
+    /** presetを格納する変数 */
+    #preset: { [key: string]: any; };
+
+    /** レスポンスオブジェクト */
+    response: Response;
+
+    /** 強制ダウンロードかどうか（初期値はfalse） */
+    isForceDownload: boolean;
+
+    constructor(request: ServerRequest) {
+        this.#request = request;
+
+        this.response = {
+            status: 500,
+            headers: new Headers(),
+            body: "500 Internal Server Error"
+        }
+
+        this.#preset = {};
+
+        this.isForceDownload = false;
+    }
+
+    /**
+     * Responseオブジェクトにテキストを設定する。
+     * @param text クライアントに返す文字列。
+     * @param status ステータスコード（デフォルトは200）。
+     * @param statusText ステータステキスト。
+     */
+    setText(text: String, status: Number = 200, statusText: String | null = null): void {
+        this.response.text = htmlCompile(text, this.#preset);
+        this.response.status = status;
+        if(statusText != null) this.response.statusText = statusText;
+        else if(this.response.statusText != undefined) delete this.response.statusText;
+        this.response.headers.set('Content-Type', 'text/plain');
+    }
+
+    /**
+     * Responseオブジェクトにファイルを設定する。
+     * @param filePath クライアントに返すファイルのパス。
+     * @param status ステータスコード（デフォルトは200）。
+     * @param statusText ステータステキスト。
+     */
+    async setFile(filePath: String, status: Number = 200, statusText: String | null = null): Promise<void> {
+        const file = await Deno.open(filePath);
+        let file_data: string;
+        try {
+            file_data = await Deno.readAll(file);
+            this.setText(file_data, status, statusText);
+            const extensions: false | string = lookup(filePath);
+            if(extensions) this.response.headers.set('Content-Type', extensions);
+        } catch {
+            console.log(`\n[ error ]\n
+            The "${filePath}" file could not be read.\n
+            "${filePath}"ファイルが読み取れませんでした。\n`);
+            this.setText("500 Internal Server Error", 500);
+        }
+    }
+
+    /**
+     * セットしたファイルや文字列に変数が埋め込まれていた場合に、参照されるオブジェクトを定義する。
+     * @param object 参照される変数を格納したオブジェクト。
+     */
+    preset(object: { [key: string]: any; }): void {
+        this.#preset = object;
+    }
+
+    /**
+     * Cookieのセットを行う。
+     * @param cookie 
+     */
+    setCookie(cookie: Cookie): void {
+        setCookie(this.response, cookie);
+    }
+
+    /**
+     * Cookieの削除を行う。
+     * @param name 削除するCookie名。
+     */
+    deleteCookie(
+        name: string,
+        attributes?: { path?: string; domain?: string }
+    ): void {
+        this.setCookie({
+            name: name,
+            value: "",
+            expires: new Date(0),
+            ...attributes,
+        });
+    }
+
+    /**
+     * ServerRequestのrespondを実行する。
+     */
+    respond(): void {
+        if(this.isForceDownload) this.response.headers.set('Content-Type', 'application/octet-stream');
+        this.#request.respond(this.response);
+    }
+}
 
 
 export class System {
@@ -26,13 +143,13 @@ export class System {
     #wsHandler: Function;
 
     /** 起動構成を保持する変数 */
-    //#startupConfig: StartupConfig;
+    #startupConfig: StartupConfig;
 
     /** 開発者が追加したモジュールを保持する */
     #modules: any[];
 
     /** Routeオブジェクトの配列を保持する */
-    #routes: Route[];
+    #routes: Routes;
 
     constructor(...modules: any[]) {
         this.#modules = modules;
@@ -42,20 +159,13 @@ export class System {
     /**
      * サーバーへのリクエストを処理するルートを追加する。
      * @param pathOrRoute 文字列の場合はそれをPATHとしたRouteを作成し追加、Routeの場合はそのまま追加する。
-     * @returns 作成したRouteオブジェクトを返す。urlに重複があった場合はnullを返す。
+     * @returns 作成したRouteオブジェクトを返す。
      */
-    createRoute(pathOrRoute: string | Route): Route | null {
+    createRoute(pathOrRoute: string | Route): Route {
 
         const route = (typeof pathOrRoute == "string")? new Route(pathOrRoute) : pathOrRoute;
 
-        const duplicateUrl: string[] = this.#routes.map( (route: Route) => route.URL() ).flat().filter( (url: string[]) => route.URL().includes(url) );
-        if( duplicateUrl.length ) {
-            console.log(`\n[ warning ]\n
-            Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.\n
-            指定されたURLのうち、${duplicateUrl.join(', ')} が重複しています。\n`);
-            return null;
-        }
-        this.#routes.push(route);
+        this.#routes.put(route);
 
         return route;
     }
@@ -69,7 +179,7 @@ export class System {
 
         const routeList: { [key: string]: Route; } = {};
         for(let pathOrRoute of pathsOrRoutes) {
-            const route: Route | null = this.createRoute(pathOrRoute);
+            const route: Route = this.createRoute(pathOrRoute);
             if(route) routeList[route.PATH()] = route;
         }
 
