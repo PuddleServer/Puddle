@@ -5,7 +5,7 @@
  * @Date   2021-08-31
  */
 
-import { Server, ServerRequest, Response } from "https://deno.land / std@0.104.0 / http / server.ts"
+import { Server, ServerRequest, Response } from "https://deno.land/std@0.104.0/http/server.ts"
 import { Cookie, getCookies, setCookie, deleteCookie } from "https://deno.land/std@0.104.0/http/cookie.ts"
 import { 
     acceptWebSocket,
