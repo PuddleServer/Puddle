@@ -2,7 +2,7 @@
  * ルーティングを行うクラスファイル。
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-08-27
+ * @Date   2021-08-30
  */
 export class Route {
 
@@ -48,6 +48,8 @@ export class Route {
      * @param urls 許可するリクエストURL(可変長引数)。
      * @returns 引数がない場合はURLを、ある場合はthisを返す。
      */
+    URL(): string[];
+    URL(...urls: string[]): Route;
     URL(...urls: string[]): string[] | Route {
 
         if(!urls.length) return this.#URL;
@@ -62,6 +64,8 @@ export class Route {
      * @param process 処理内容を記述した関数。
      * @returns 引数がない場合はGETを、ある場合はthisを返す。
      */
+    GET(): Function;
+    GET(process: Function): Route;
     GET(process?: Function): Function | Route {
 
         if(!process) return this.#GET;
@@ -76,6 +80,8 @@ export class Route {
      * @param process 処理内容を記述した関数。
      * @returns 引数がない場合はPUTを、ある場合はthisを返す。
      */
+    PUT(): Function;
+    PUT(process: Function): Route;
     PUT(process?: Function): Function | Route {
 
         if(!process) return this.#PUT;
@@ -90,6 +96,8 @@ export class Route {
      * @param process 処理内容を記述した関数。
      * @returns 引数がない場合はPOSTを、ある場合はthisを返す。
      */
+    POST(): Function;
+    POST(process: Function): Route;
     POST(process?: Function): Function | Route {
 
         if(!process) return this.#POST;
@@ -104,6 +112,8 @@ export class Route {
      * @param process 処理内容を記述した関数。
      * @returns 引数がない場合はDELETEを、ある場合はthisを返す。
      */
+    DELETE(): Function;
+    DELETE(process: Function): Route;
     DELETE(process?: Function): Function | Route {
 
         if(!process) return this.#DELETE;
@@ -135,4 +145,74 @@ export class Route {
     clone(): Route {
         return new Route(this.#PATH, this.#URL, this.#GET, this.#PUT, this.#POST, this.#DELETE);
     }
+}
+
+/**
+ * 複数のRouteオブジェクトを保持するクラス。
+ */
+export class Routes {
+
+    constructor(...routes: Route[]){
+        routes.forEach(route=> this.put(route) );
+    }
+
+    /**
+     * 保持しているRouteオブジェクトのPATHの配列。
+     * @returns RouteオブジェクトのPATHの配列。
+     */
+    paths(): string[] {
+        return Object.keys(this).map(path=>path);
+    }
+
+    /**
+     * 保持しているRouteの数。
+     * @returns 要素数。
+     */
+    size(): number {
+        return this.paths().length;
+    }
+
+    /**
+     * Routeオブジェクトを追加する。
+     * @param routes 追加するRouteオブジェクト
+     */
+    put(...routes: Route[]): void {
+        for(let route of routes) {
+            if(!this.#checkUrl(route)) return;
+            const path = route.PATH();
+            this[path] = route;
+        }
+    }
+
+    /**
+     * 指定したPathを持つRouteを外す。
+     * @param paths パス(可変長引数)。
+     * @returns 外されたRoute。
+     */
+    remove(...paths: string[]): Route[] {
+        const routes = [];
+        paths.forEach( path => {
+            routes.push(this[path]);
+            delete this[path];
+        });
+        return routes;
+    }
+
+    /**
+     * RouteのURLに重複がないかをチェックする。
+     * @param route チェック対象のRouteオブジェクト。
+     * @returns 重複がなければtrueを返す。
+     */
+    #checkUrl(route: Route): boolean {
+        
+        const duplicateUrl: string[] = this.paths().filter( (url: string) => route.URL().includes(url) );
+        if( duplicateUrl.length ) {
+            console.log(`\n[ warning ]\n
+            Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.\n
+            指定されたURLのうち、${duplicateUrl.join(', ')} が重複しています。\n`);
+            return false;
+        }
+        return true;
+    }
+
 }

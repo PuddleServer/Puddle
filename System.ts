@@ -14,7 +14,7 @@ import {
     WebSocket,
 } from "https://deno.land/std@0.104.0/ws/mod.ts"
 import { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
-import { Route } from "./Router.ts"
+import { Route, Routes } from "./Router.ts"
 
 
 export class System {
@@ -32,7 +32,7 @@ export class System {
     #modules: any[];
 
     /** Routeオブジェクトの配列を保持する */
-    #routes: Route[];
+    #routes: Routes;
 
     constructor(...modules: any[]) {
         this.#modules = modules;
@@ -42,20 +42,13 @@ export class System {
     /**
      * サーバーへのリクエストを処理するルートを追加する。
      * @param pathOrRoute 文字列の場合はそれをPATHとしたRouteを作成し追加、Routeの場合はそのまま追加する。
-     * @returns 作成したRouteオブジェクトを返す。urlに重複があった場合はnullを返す。
+     * @returns 作成したRouteオブジェクトを返す。
      */
-    createRoute(pathOrRoute: string | Route): Route | null {
+    createRoute(pathOrRoute: string | Route): Route {
 
         const route = (typeof pathOrRoute == "string")? new Route(pathOrRoute) : pathOrRoute;
 
-        const duplicateUrl: string[] = this.#routes.map( (route: Route) => route.URL() ).flat().filter( (url: string[]) => route.URL().includes(url) );
-        if( duplicateUrl.length ) {
-            console.log(`\n[ warning ]\n
-            Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.\n
-            指定されたURLのうち、${duplicateUrl.join(', ')} が重複しています。\n`);
-            return null;
-        }
-        this.#routes.push(route);
+        this.#routes.put(route);
 
         return route;
     }
@@ -69,7 +62,7 @@ export class System {
 
         const routeList: { [key: string]: Route; } = {};
         for(let pathOrRoute of pathsOrRoutes) {
-            const route: Route | null = this.createRoute(pathOrRoute);
+            const route: Route = this.createRoute(pathOrRoute);
             if(route) routeList[route.PATH()] = route;
         }
 
