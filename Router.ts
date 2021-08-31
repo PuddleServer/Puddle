@@ -155,6 +155,8 @@ export class Route {
  */
 export class Routes {
 
+    [key: string]: Route | Function;
+
     constructor(...routes: Route[]){
         routes.forEach(route=> this.put(route) );
     }
@@ -188,17 +190,14 @@ export class Routes {
     }
 
     /**
-     * 指定したPathを持つRouteを外す。
+     * 指定したPathを持つRouteを削除する。
      * @param paths パス(可変長引数)。
      * @returns 外されたRoute。
      */
-    remove(...paths: string[]): Route[] {
-        const routes = [];
+    delete(...paths: string[]): void {
         paths.forEach( path => {
-            routes.push(this[path]);
             delete this[path];
         });
-        return routes;
     }
 
     /**
