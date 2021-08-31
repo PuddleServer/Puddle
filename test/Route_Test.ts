@@ -16,8 +16,8 @@ import { Route }            from "../Router.ts";
   }
 
 // Routeオブジェクトに必要なもの
-const path: String   = "/index.html";
-const urls: String[] = ["/", "/top", "/Top", "/トップ"];
+const path: string   = "/index.html";
+const urls: string[] = ["/", "/top", "/Top", "/トップ"];
 const get: Function = function() { return "GET!";    }
 const put: Function = function() { return "PUT!";    }
 const pos: Function = function() { return "POST!";   }
@@ -29,7 +29,7 @@ const del: Function = function() { return "DELETE!"; }
 Deno.test({
     name: "Route生成テスト",
     fn(): void {
-        let urls1: String[] = deepCopy(urls);
+        let urls1: string[] = deepCopy(urls);
         let route: Route = new Route(path, urls1, get, put, pos, del);
         route = new Route(path);
         
