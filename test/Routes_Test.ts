@@ -29,7 +29,12 @@ Deno.test({
 Deno.test({
     name: "pathsテスト",
     fn(): void {
-        // write here
+        const route1:  Route = new Route("/index.html");
+        const route2:  Route = new Route("/about.html");
+
+        const routes: Routes = new Routes(route1, route2);
+
+        assertEquals(["/index.html", "/about.html"], routes.paths());
     },
 });
 
@@ -39,7 +44,20 @@ Deno.test({
 Deno.test({
     name: "sizeテスト",
     fn(): void {
-        // write here
+        const route1:   Route = new Route("/index.html");
+        const route2:   Route = new Route("/about.html");
+        const route3:   Route = new Route("/contact.html");
+        const route4:   Route = new Route("/other.html");
+
+        const routes1: Routes = new Routes(route1);
+        const routes2: Routes = new Routes(route1, route2);
+        const routes3: Routes = new Routes(route1, route2, route3);
+        const routes4: Routes = new Routes(route1, route2, route3, route4);
+
+        assertEquals(1, routes1.size());
+        assertEquals(2, routes2.size());
+        assertEquals(3, routes3.size());
+        assertEquals(4, routes4.size());
     },
 });
 
@@ -49,7 +67,14 @@ Deno.test({
 Deno.test({
     name: "putテスト",
     fn(): void {
-        // write here
+        const route1:  Route = new Route("/index.html");
+        const route2:  Route = new Route("/about.html");
+
+        const routes: Routes = new Routes(route1);
+
+        routes.put(route2);
+        
+        assertEquals(["/index.html", "/about.html"], routes.paths())
     },
 });
 
@@ -59,6 +84,16 @@ Deno.test({
 Deno.test({
     name: "deleteテスト",
     fn(): void {
-        // write here
+        const route1:   Route = new Route("/index.html");
+        const route2:   Route = new Route("/about.html");
+        const route3:   Route = new Route("/contact.html");
+        const route4:   Route = new Route("/other.html");
+
+        const routes: Routes = new Routes(route1, route2, route3, route4);
+
+        routes.delete("/qwerty"); // 意味なし
+        routes.delete("/about.html");
+
+        assertEquals(["/index.html", "/contact.html", "/other.html"], routes.paths())
     },
 });
