@@ -14,11 +14,51 @@ import { Route, Routes } from "../Router.ts";
 Deno.test({
     name: "生成テスト",
     fn(): void {
-        const route: Route = new Route("/index.html");
+        const route:   Route  = new Route("/index.html");
 
         const routes1: Routes = new Routes();
         const routes2: Routes = new Routes(route);
         const routes3: Routes = new Routes(route, route);
 
+    },
+});
+
+/**
+ * pathsテスト
+ */
+Deno.test({
+    name: "pathsテスト",
+    fn(): void {
+        // write here
+    },
+});
+
+/**
+ * sizeテスト
+ */
+Deno.test({
+    name: "sizeテスト",
+    fn(): void {
+        // write here
+    },
+});
+
+/**
+ * putテスト
+ */
+Deno.test({
+    name: "putテスト",
+    fn(): void {
+        // write here
+    },
+});
+
+/**
+ * deleteテスト
+ */
+Deno.test({
+    name: "deleteテスト",
+    fn(): void {
+        // write here
     },
 });
