@@ -2,7 +2,7 @@
  * Router.ts Routeクラスのテストファイル
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-08-30
+ * @Date   2021-09-04
  */
 
 import { assertEquals }     from "https://deno.land/std@0.88.0/testing/asserts.ts";
@@ -11,9 +11,9 @@ import { Route }            from "../Router.ts";
 /**
  * ディープコピー関数
  */
- const deepCopy: any = (_object: any) => {
+const deepCopy: any = (_object: any) => {
     return JSON.parse(JSON.stringify(_object));
-  }
+}
 
 // Routeオブジェクトに必要なもの
 const path: string   = "/index.html";
@@ -50,13 +50,13 @@ Deno.test({
         const route6: Route = new Route(path, deepCopy(urls), get, put, del, del);
         const route7: Route = new Route(path, deepCopy(urls), get, put, pos, get);
 
-        assertEquals(true, route.equals(route));
-        assertEquals(false, route.equals(route2));
-        assertEquals(false, route.equals(route3));
-        assertEquals(false, route.equals(route4));
-        assertEquals(false, route.equals(route5));
-        assertEquals(false, route.equals(route6));
-        assertEquals(false, route.equals(route7));
+        assertEquals(true,  route.equals(route),  "同一オジェクトに変更があります");
+        assertEquals(false, route.equals(route2), "変更されたpathの比較に異常があります．");
+        assertEquals(false, route.equals(route3), "変更されたurlの比較に異常があります．");
+        assertEquals(false, route.equals(route4), "変更されたgetの比較に異常があります．");
+        assertEquals(false, route.equals(route5), "変更されたputの比較に異常があります．");
+        assertEquals(false, route.equals(route6), "変更されたpostの比較に異常があります．");
+        assertEquals(false, route.equals(route7), "変更されたdeleteの比較に異常があります．");
 
     },
 });
@@ -69,7 +69,7 @@ Deno.test({
     fn(): void {
         const route: Route = new Route(path, deepCopy(urls), get, put, pos, del);
 
-        assertEquals(path, route.PATH());
+        assertEquals(path, route.PATH(), "取得したpathに不正な変更があります．");
     },
 });
 
@@ -84,10 +84,10 @@ Deno.test({
         
         // 引数無しの時は#URLが返る
         console.log(urls, route_after.URL(), route_before.URL())
-        assertEquals([ "/", "/top", "/Top", "/トップ", "/index.html" ], route_after.URL());
+        assertEquals([ "/", "/top", "/Top", "/トップ", "/index.html" ], route_after.URL(), "取得したurlに不正な変更があります．");
         // アリの時はthisが返る
-        assertEquals(true, route_before.equals(route_after.URL("/", "/top", "/Top", "/トップ", "/index.html")));
-        assertEquals(false, route_before.equals(route_after.URL("/", "/top", "/Top", "/トップ")));
+        assertEquals(true, route_before.equals(route_after.URL("/", "/top", "/Top", "/トップ", "/index.html")), "オブジェクトを取得できていないか，取得したurlに不正な変更があります．");
+        assertEquals(false, route_before.equals(route_after.URL("/", "/top", "/Top", "/トップ")), "オブジェクトを取得できていないか，取得したurlに不正な変更があります．");
 
     },
 });
@@ -95,59 +95,59 @@ Deno.test({
 /**
  * GET取得テスト
  */
- Deno.test({
+Deno.test({
     name: "GET取得テスト",
     fn(): void {
         const route: Route = new Route(path, urls, get, put, pos, del);
 
         // 引数無しの時は#GETが返る
-        assertEquals(get, route.GET());
+        assertEquals(get, route.GET(), "取得したgetに不正な変更があります．");
         // アリの時はthisが返る
-        assertEquals(true, route.equals(route.GET(get)));
+        assertEquals(true, route.equals(route.GET(get)), "オブジェクトを取得できていないか，取得したgetに不正な変更があります．");
     },
 });
 
 /**
  * PUT取得テスト
  */
- Deno.test({
+Deno.test({
     name: "PUT取得テスト",
     fn(): void {
         const route: Route = new Route(path, urls, get, put, pos, del);
 
         // 引数無しの時は#PUTが返る
-        assertEquals(put, route.PUT());
+        assertEquals(put, route.PUT(), "取得したputに不正な変更があります．");
         // アリの時はthisが返る
-        assertEquals(true, route.equals(route.PUT(put)));
+        assertEquals(true, route.equals(route.PUT(put)), "オブジェクトを取得できていないか，取得したputに不正な変更があります．");
     },
 });
 
 /**
  * POST取得テスト
  */
- Deno.test({
+Deno.test({
     name: "POST取得テスト",
     fn(): void {
         const route: Route = new Route(path, urls, get, put, pos, del);
 
         // 引数無しの時は#POSTが返る
-        assertEquals(pos, route.POST());
+        assertEquals(pos, route.POST(), "取得したpostに不正な変更があります．");
         // アリの時はthisが返る
-        assertEquals(true, route.equals(route.POST(pos)));
+        assertEquals(true, route.equals(route.POST(pos)), "オブジェクトを取得できていないか，取得したpostに不正な変更があります．");
     },
 });
 
 /**
  * DELETE取得テスト
  */
- Deno.test({
+Deno.test({
     name: "DELETE取得テスト",
     fn(): void {
         const route: Route = new Route(path, urls, get, put, pos, del);
 
         // 引数無しの時は#DELETEが返る
-        assertEquals(del, route.DELETE());
+        assertEquals(del, route.DELETE(), "取得したdeleteに不正な変更があります．");
         // アリの時はthisが返る
-        assertEquals(true, route.equals(route.DELETE(del)));
+        assertEquals(true, route.equals(route.DELETE(del)), "オブジェクトを取得できていないか，取得したdeleteに不正な変更があります．");
     },
 });
