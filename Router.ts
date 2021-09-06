@@ -4,6 +4,9 @@
  * @author AO2324(AO2324-00)
  * @Date   2021-08-30
  */
+
+import { ServerRequest } from "deno.land/std@0.104.0/http/server.ts"
+
 export class Route {
 
     static URLs: string[] = [];
@@ -28,7 +31,8 @@ export class Route {
 
     isWebSocket: boolean;
 
-    constructor(PATH: string, URL?: string[] | null, GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null, isWebSocket?: boolean | null) {
+    constructor(PATH: string, URL?: string[]);
+    constructor(PATH: string, URL?: string[] | null, GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null) {
         this.#PATH = PATH;
         this.#URL = URL || [];
         if(!this.#URL.includes(this.#PATH)) this.#URL.push(this.#PATH);
@@ -37,9 +41,7 @@ export class Route {
         this.#PUT = PUT || function(){console.log("PUT")};// || default_PUT;
         this.#POST = POST || function(){console.log("POST")};// || default_POST;
         this.#DELETE = DELETE || function(){console.log("DELETE")};// || default_DELETE;
-        this.isWebSocket = Boolean(isWebSocket);
 
-        
     }
 
     /**
@@ -69,11 +71,14 @@ export class Route {
     /**
      * GETの取得、設定を行う。
      * @param process 処理内容を記述した関数。
+     * @param isWebSocket WebSocketの処理かどうか。
      * @returns 引数がない場合はGETを、ある場合はthisを返す。
      */
     GET(): Function;
-    GET(process: Function): Route;
-    GET(process?: Function): Function | Route {
+    GET(process: Function, isWebSocket?: boolean): Route;
+    GET(process?: Function, isWebSocket?: boolean): Function | Route {
+        
+        if(isWebSocket) this.isWebSocket = isWebSocket;
 
         if(!process) return this.#GET;
 
@@ -89,7 +94,7 @@ export class Route {
      */
     PUT(): Function;
     PUT(process: Function): Route;
-    PUT(process?: Function): Function | Route {
+    PUT(process?: Function, isWebSocket?: false): Function | Route {
 
         if(!process) return this.#PUT;
 
@@ -105,7 +110,7 @@ export class Route {
      */
     POST(): Function;
     POST(process: Function): Route;
-    POST(process?: Function): Function | Route {
+    POST(process?: Function, isWebSocket?: false): Function | Route {
 
         if(!process) return this.#POST;
 
@@ -121,7 +126,7 @@ export class Route {
      */
     DELETE(): Function;
     DELETE(process: Function): Route;
-    DELETE(process?: Function): Function | Route {
+    DELETE(process?: Function, isWebSocket?: false): Function | Route {
 
         if(!process) return this.#DELETE;
 
@@ -140,7 +145,7 @@ export class Route {
         const uniqueUrlArray: string[] = url.filter( u => !Route.URLs.includes(u) );
         if( uniqueUrlArray.length != url.length ) {
             const duplicateUrl = url.filter( u => !uniqueUrlArray.includes(u) );
-            console.log(`\n[ warning ]\n
+            throw new Error(`\n[ warning ]\n
             Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.\n
             指定されたURLのうち、${duplicateUrl.join(', ')} が重複しています。\n`);
         }
@@ -148,18 +153,29 @@ export class Route {
         return uniqueUrlArray;
     }
 
-    /**
-     * Routeオブジェクト動詞を比較する。
-     * @param route 比較対象のRouteオブジェクト。
-     * @returns 同じオブジェクトであればtrueを、そうでなければfalseを返す。
-     */
-    equals(route: any): boolean {
-        const Path: boolean = this.#PATH == route.PATH();
-        const Url: boolean = this.#URL.toString() == route.URL().toString();
-        const Get: boolean = this.#GET.toString() == route.GET().toString();
-        const Put: boolean = this.#PUT.toString() == route.PUT().toString();
-        const Post: boolean = this.#POST.toString() == route.POST().toString();
-        const Delete: boolean = this.#DELETE.toString() == route.DELETE().toString();
-        return Path && Url && Get && Put && Post && Delete;
+}
+
+/**
+ * requestとRoute配列を照合して、リクエストのあったRouteを返す。
+ * @param request サーバーリクエスト。
+ * @param routes 参照するRoute配列。
+ * @returns ハンドラー関数, WebSocketの処理かどうか。
+ */
+export function rooting(request: ServerRequest, routes: Route[]): Function | undefined {
+    const requestRoute: Route[] = routes.filter(route => route.URL().includes(request.url));
+    const route: Route | undefined = (requestRoute.length) ? requestRoute[0] : undefined;
+    if(!route) return undefined;
+    switch (request.method) {
+        case "GET":
+            return route.GET;
+        case "PUT":
+            return route.PUT;
+        case "POST":
+            return route.POST;
+        case "DELETE":
+            return route.DELETE;
+
+        default:
+            return undefined;
     }
 }
