@@ -31,7 +31,6 @@ export class Route {
 
     isWebSocket: boolean;
 
-    constructor(PATH: string, URL?: string[]);
     constructor(PATH: string, URL?: string[] | null, GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null) {
         this.#PATH = PATH;
         this.#URL = URL || [];
@@ -42,6 +41,7 @@ export class Route {
         this.#POST = POST || function(){console.log("POST")};// || default_POST;
         this.#DELETE = DELETE || function(){console.log("DELETE")};// || default_DELETE;
 
+        this.isWebSocket = false;
     }
 
     /**
