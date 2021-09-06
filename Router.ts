@@ -140,7 +140,7 @@ export class Route {
      * @param url チェックするURL配列。
      * @returns 重複を取り除いたURL配列。
      */
-    #getUniqueUrlArray(url: string[]): string[] {
+    private getUniqueUrlArray(url: string[]): string[] {
         
         const uniqueUrlArray: string[] = url.filter( u => !Route.URLs.includes(u) );
         if( uniqueUrlArray.length != url.length ) {
