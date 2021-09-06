@@ -36,7 +36,7 @@ export class Route {
         this.#PATH = PATH;
         this.#URL = URL || [];
         if(!this.#URL.includes(this.#PATH)) this.#URL.push(this.#PATH);
-        this.#URL = this.#getUniqueUrlArray(this.#URL);
+        this.#URL = this.getUniqueUrlArray(this.#URL);
         this.#GET = GET || function(){console.log("GET")};// || default_get;
         this.#PUT = PUT || function(){console.log("PUT")};// || default_PUT;
         this.#POST = POST || function(){console.log("POST")};// || default_POST;
@@ -140,7 +140,7 @@ export class Route {
      * @param url チェックするURL配列。
      * @returns 重複を取り除いたURL配列。
      */
-    #getUniqueUrlArray(url: string[]): string[] {
+    private getUniqueUrlArray(url: string[]): string[] {
         
         const uniqueUrlArray: string[] = url.filter( u => !Route.URLs.includes(u) );
         if( uniqueUrlArray.length != url.length ) {
