@@ -123,3 +123,18 @@ Deno.test({
         assertEquals(true, route.equals(route.DELETE(del)), "オブジェクトを取得できていないか，取得したdeleteに不正な変更があります．");
     },
 });
+
+/**
+ * getUniqueUrlArrayテスト
+ */
+Deno.test({
+    name: "getUniqueUrlArrayテスト",
+    fn(): void {
+        const route1: Route = new Route(path, ["/UNIQUEtest1", "/UNIQUEtest2"], get, put, pos, del);
+        assertEquals(["/UNIQUEtest1", "/UNIQUEtest2", "/index.html"], route1.URL());
+        
+        const route2: Route = new Route(path, ["/UNIQUEtest1", "/UNIQUEtest3"], get, put, pos, del);
+        assertEquals(["/UNIQUEtest3", "/index.html"], route2.URL());
+
+    },
+});
