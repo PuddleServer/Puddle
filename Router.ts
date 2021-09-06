@@ -6,6 +6,8 @@
  */
 export class Route {
 
+    static URLs: string[] = [];
+
     /** サーバーへのリクエストの名前 */
     #PATH: string;
 
@@ -28,7 +30,7 @@ export class Route {
 
     constructor(PATH: string, URL?: string[] | null, GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null, isWebSocket?: boolean | null) {
         this.#PATH = PATH;
-        this.#URL = URL || [];
+        this.#URL = (URL)? this.#getUniqueUrlArray(URL) : [];
         this.#GET = GET || function(){console.log("GET")};// || default_get;
         this.#PUT = PUT || function(){console.log("PUT")};// || default_PUT;
         this.#POST = POST || function(){console.log("POST")};// || default_POST;
@@ -127,6 +129,23 @@ export class Route {
     }
 
     /**
+     * RouteのURLに重複がないかをチェックし、重複を削除したURL配列を返す。
+     * @param url チェックするURL配列。
+     * @returns 重複を取り除いたURL配列。
+     */
+    #getUniqueUrlArray(url: string[]): string[] {
+        
+        const uniqueUrlArray: string[] = url.filter( u => !Route.URLs.includes(u) );
+        if( uniqueUrlArray.length != url.length ) {
+            const duplicateUrl = url.filter( u => !uniqueUrlArray.includes(u) );
+            console.log(`\n[ warning ]\n
+            Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.\n
+            指定されたURLのうち、${duplicateUrl.join(', ')} が重複しています。\n`);
+        }
+        return uniqueUrlArray;
+    }
+
+    /**
      * Routeオブジェクト動詞を比較する。
      * @param route 比較対象のRouteオブジェクト。
      * @returns 同じオブジェクトであればtrueを、そうでなければfalseを返す。
@@ -148,73 +167,4 @@ export class Route {
     clone(): Route {
         return new Route(this.#PATH, this.#URL, this.#GET, this.#PUT, this.#POST, this.#DELETE);
     }
-}
-
-/**
- * 複数のRouteオブジェクトを保持するクラス。
- */
-export class Routes {
-
-    [key: string]: Route | Function;
-
-    constructor(...routes: Route[]){
-        routes.forEach(route=> this.put(route) );
-    }
-
-    /**
-     * 保持しているRouteオブジェクトのPATHの配列。
-     * @returns RouteオブジェクトのPATHの配列。
-     */
-    paths(): string[] {
-        return Object.keys(this).map(path=>path);
-    }
-
-    /**
-     * 保持しているRouteの数。
-     * @returns 要素数。
-     */
-    size(): number {
-        return this.paths().length;
-    }
-
-    /**
-     * Routeオブジェクトを追加する。
-     * @param routes 追加するRouteオブジェクト
-     */
-    put(...routes: Route[]): void {
-        for(let route of routes) {
-            if(!this.#checkUrl(route)) return;
-            const path = route.PATH();
-            this[path] = route;
-        }
-    }
-
-    /**
-     * 指定したPathを持つRouteを削除する。
-     * @param paths パス(可変長引数)。
-     * @returns 外されたRoute。
-     */
-    delete(...paths: string[]): void {
-        paths.forEach( path => {
-            delete this[path];
-        });
-    }
-
-    /**
-     * RouteのURLに重複がないかをチェックする。
-     * @param route チェック対象のRouteオブジェクト。
-     * @returns 重複がなければtrueを返す。
-     */
-    #checkUrl(route: Route): boolean {
-        
-        const duplicateUrl: string[] = this.paths().filter( (url: string) => route.URL().includes(url) );
-        if( duplicateUrl.length ) {
-            console.log(`\n[ warning ]\n
-            Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.\n
-            指定されたURLのうち、${duplicateUrl.join(', ')} が重複しています。\n`);
-            return false;
-        }
-        return true;
-    }
-
 }
