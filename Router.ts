@@ -142,6 +142,7 @@ export class Route {
             Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.\n
             指定されたURLのうち、${duplicateUrl.join(', ')} が重複しています。\n`);
         }
+        Route.URLs = Route.URLs.concat(uniqueUrlArray);
         return uniqueUrlArray;
     }
 
