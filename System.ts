@@ -2,7 +2,7 @@
  * 実行クラス
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-08-31
+ * @Date   2021-09-06
  */
 
 import { Server, ServerRequest, Response } from "https://deno.land/std@0.104.0/http/server.ts"
@@ -14,7 +14,7 @@ import {
     WebSocket,
 } from "https://deno.land/std@0.104.0/ws/mod.ts"
 import { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
-import { Route, Routes } from "./Router.ts"
+import { Route } from "./Router.ts"
 import { htmlCompile } from "./HtmlCompiler.ts"
 
 /**
@@ -149,7 +149,7 @@ export class System {
     #modules: any[];
 
     /** Routeオブジェクトの配列を保持する */
-    #routes: Routes;
+    #routes: Route[];
 
     constructor(...modules: any[]) {
         this.#modules = modules;
@@ -165,7 +165,7 @@ export class System {
 
         const route = (typeof pathOrRoute == "string")? new Route(pathOrRoute) : pathOrRoute;
 
-        this.#routes.put(route);
+        this.#routes.push(route);
 
         return route;
     }
