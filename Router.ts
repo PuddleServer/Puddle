@@ -30,14 +30,16 @@ export class Route {
 
     constructor(PATH: string, URL?: string[] | null, GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null, isWebSocket?: boolean | null) {
         this.#PATH = PATH;
-        this.#URL = (URL)? this.#getUniqueUrlArray(URL) : [];
+        this.#URL = URL || [];
+        if(!this.#URL.includes(this.#PATH)) this.#URL.push(this.#PATH);
+        this.#URL = this.#getUniqueUrlArray(this.#URL);
         this.#GET = GET || function(){console.log("GET")};// || default_get;
         this.#PUT = PUT || function(){console.log("PUT")};// || default_PUT;
         this.#POST = POST || function(){console.log("POST")};// || default_POST;
         this.#DELETE = DELETE || function(){console.log("DELETE")};// || default_DELETE;
         this.isWebSocket = Boolean(isWebSocket);
 
-        if(!this.#URL.includes(this.#PATH)) this.#URL.push(this.#PATH);
+        
     }
 
     /**
@@ -159,13 +161,5 @@ export class Route {
         const Post: boolean = this.#POST.toString() == route.POST().toString();
         const Delete: boolean = this.#DELETE.toString() == route.DELETE().toString();
         return Path && Url && Get && Put && Post && Delete;
-    }
-
-    /**
-     * 自身をディープコピーする。
-     * @returns 自身と同じパラメータを持つRouteオブジェクトを返す。
-     */
-    clone(): Route {
-        return new Route(this.#PATH, this.#URL, this.#GET, this.#PUT, this.#POST, this.#DELETE);
     }
 }
