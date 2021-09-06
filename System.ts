@@ -153,7 +153,7 @@ export class System {
 
     constructor(...modules: any[]) {
         this.#modules = modules;
-        this.#routes = [];
+        this.#routes = new Routes();
     }
 
     /**
