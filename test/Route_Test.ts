@@ -29,35 +29,10 @@ const del: Function = function() { return "DELETE!"; }
 Deno.test({
     name: "Route生成テスト",
     fn(): void {
-        let urls1: string[] = deepCopy(urls);
-        let route: Route = new Route(path, urls1, get, put, pos, del);
-        route = new Route(path);
+        let urls1: string[] = ["/NEWtest", "/NEWtest2"];
+        const route1: Route = new Route(path, urls1, get, put, pos, del);
+        const route2: Route = new Route(path);
         
-    },
-});
-
-/**
- * equalsテスト
- */
-Deno.test({
-    name: "equalsテスト",
-    fn(): void {
-        const route: Route = new Route(path, deepCopy(urls), get, put, pos, del);
-        const route2: Route = new Route("/route2.html", deepCopy(urls), get, put, pos, del);
-        const route3: Route = new Route(path, ["/route3"], get, put, pos, del);
-        const route4: Route = new Route(path, deepCopy(urls), put, put, pos, del);
-        const route5: Route = new Route(path, deepCopy(urls), get, pos, pos, del);
-        const route6: Route = new Route(path, deepCopy(urls), get, put, del, del);
-        const route7: Route = new Route(path, deepCopy(urls), get, put, pos, get);
-
-        assertEquals(true,  route.equals(route),  "同一オジェクトに変更があります");
-        assertEquals(false, route.equals(route2), "変更されたpathの比較に異常があります．");
-        assertEquals(false, route.equals(route3), "変更されたurlの比較に異常があります．");
-        assertEquals(false, route.equals(route4), "変更されたgetの比較に異常があります．");
-        assertEquals(false, route.equals(route5), "変更されたputの比較に異常があります．");
-        assertEquals(false, route.equals(route6), "変更されたpostの比較に異常があります．");
-        assertEquals(false, route.equals(route7), "変更されたdeleteの比較に異常があります．");
-
     },
 });
 
@@ -67,7 +42,7 @@ Deno.test({
 Deno.test({
     name: "PATH取得テスト",
     fn(): void {
-        const route: Route = new Route(path, deepCopy(urls), get, put, pos, del);
+        const route: Route = new Route(path);
 
         assertEquals(path, route.PATH(), "取得したpathに不正な変更があります．");
     },
@@ -79,15 +54,12 @@ Deno.test({
 Deno.test({
     name: "URL取得テスト",
     fn(): void {
-        let route_after: Route = new Route(path, deepCopy(urls), get, put, pos, del);
-        let route_before: Route = route_after.clone();
+        let route_after: Route = new Route(path, urls, get, put, pos, del);
         
         // 引数無しの時は#URLが返る
-        console.log(urls, route_after.URL(), route_before.URL())
-        assertEquals([ "/", "/top", "/Top", "/トップ", "/index.html" ], route_after.URL(), "取得したurlに不正な変更があります．");
+        assertEquals(["/", "/top", "/Top", "/トップ", "/index.html"], route_after.URL(), "取得したurlに不正な変更があります．");
         // アリの時はthisが返る
-        assertEquals(true, route_before.equals(route_after.URL("/", "/top", "/Top", "/トップ", "/index.html")), "オブジェクトを取得できていないか，取得したurlに不正な変更があります．");
-        assertEquals(false, route_before.equals(route_after.URL("/", "/top", "/Top", "/トップ")), "オブジェクトを取得できていないか，取得したurlに不正な変更があります．");
+        assertEquals(["/URLtest"], route_after.URL("/URLtest").URL(), "オブジェクトを取得できていないか，取得したurlに不正な変更があります．");
 
     },
 });
@@ -98,7 +70,7 @@ Deno.test({
 Deno.test({
     name: "GET取得テスト",
     fn(): void {
-        const route: Route = new Route(path, urls, get, put, pos, del);
+        const route: Route = new Route(path, ["/GETtest"], get, put, pos, del);
 
         // 引数無しの時は#GETが返る
         assertEquals(get, route.GET(), "取得したgetに不正な変更があります．");
@@ -113,7 +85,7 @@ Deno.test({
 Deno.test({
     name: "PUT取得テスト",
     fn(): void {
-        const route: Route = new Route(path, urls, get, put, pos, del);
+        const route: Route = new Route(path, ["/PUTtest"], get, put, pos, del);
 
         // 引数無しの時は#PUTが返る
         assertEquals(put, route.PUT(), "取得したputに不正な変更があります．");
@@ -128,7 +100,7 @@ Deno.test({
 Deno.test({
     name: "POST取得テスト",
     fn(): void {
-        const route: Route = new Route(path, urls, get, put, pos, del);
+        const route: Route = new Route(path, ["/POSTtest"], get, put, pos, del);
 
         // 引数無しの時は#POSTが返る
         assertEquals(pos, route.POST(), "取得したpostに不正な変更があります．");
@@ -143,7 +115,7 @@ Deno.test({
 Deno.test({
     name: "DELETE取得テスト",
     fn(): void {
-        const route: Route = new Route(path, urls, get, put, pos, del);
+        const route: Route = new Route(path, ["/DELETEtest"], get, put, pos, del);
 
         // 引数無しの時は#DELETEが返る
         assertEquals(del, route.DELETE(), "取得したdeleteに不正な変更があります．");
