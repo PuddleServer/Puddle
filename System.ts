@@ -148,12 +148,8 @@ export class System {
     /** 開発者が追加したモジュールを保持する */
     #modules: any[];
 
-    /** Routeオブジェクトの配列を保持する */
-    #routes: Route[];
-
     constructor(...modules: any[]) {
         this.#modules = modules;
-        this.#routes = [];
     }
 
     /**
@@ -164,8 +160,6 @@ export class System {
     createRoute(pathOrRoute: string | Route): Route {
 
         const route = (typeof pathOrRoute == "string")? new Route(pathOrRoute) : pathOrRoute;
-
-        this.#routes.push(route);
 
         return route;
     }
@@ -193,9 +187,9 @@ export class System {
      */
     Route(path: Route): Route | undefined {
 
-        const route: Route[] = this.#routes.filter( (route: Route) => route.PATH() == path );
+        const route: Route[] = Route.list.filter( (route: Route) => route.PATH() == path );
 
-        return ( !route.length )? undefined : route;
+        return route[0];
     }
 
     //async listen(wsHandler: Function): Promise<StartupConfig>
