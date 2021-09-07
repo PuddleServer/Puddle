@@ -181,6 +181,22 @@ export class System {
     }
 
     /**
+     * 指定したrouteを削除する。
+     * @param path パス（可変長引数）。
+     */
+    deleteRoute(...path: string[]): void {
+        this.deleteRoutes(path);
+    }
+
+    /**
+     * 指定したrouteを削除する。
+     * @param path パス配列。
+     */
+    deleteRoutes(paths: string[]): void {
+        Route.list = Route.list.filter(route=>!paths.includes(route.PATH()));
+    }
+
+    /**
      * 指定したpathが設定されたRouteオブジェクトを返す。
      * @param path RouteオブジェクトのPATH
      * @returns 指定されたRouteオブジェクト。
