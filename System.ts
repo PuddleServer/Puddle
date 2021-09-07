@@ -208,7 +208,7 @@ export class System {
         return route[0];
     }
 
-    async listen(wsHandler: Function): Promise<StartupConfig> {
+    async listen(): Promise<StartupConfig> {
         const startupConfig: StartupConfig = {
             hostname: "localhost",
             port: "8080",
