@@ -184,22 +184,21 @@ export class Route {
 /**
  * requestとRoute配列を照合して、リクエストのあったRouteを返す。
  * @param request サーバーリクエスト。
- * @param routes 参照するRoute配列。
  * @returns ハンドラー関数, WebSocketの処理かどうか。
  */
-export function rooting(request: ServerRequest, routes: Route[]): Function | undefined {
-    const requestRoute: Route[] = routes.filter(route => route.URL().includes(request.url));
+export function rooting(request: ServerRequest): [Function, boolean] | undefined {
+    const requestRoute: Route[] = Route.list.filter(route => route.URL().includes(request.url));
     const route: Route | undefined = (requestRoute.length) ? requestRoute[0] : undefined;
     if(!route) return undefined;
     switch (request.method) {
         case "GET":
-            return route.GET;
+            return [route.GET, route.isWebSocket];
         case "PUT":
-            return route.PUT;
+            return [route.PUT, false];
         case "POST":
-            return route.POST;
+            return [route.POST, false];
         case "DELETE":
-            return route.DELETE;
+            return [route.DELETE, false];
 
         default:
             return undefined;
