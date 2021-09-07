@@ -5,7 +5,7 @@
  * @Date   2021-09-06
  */
 
-import { Server, ServerRequest, Response } from "https://deno.land/std@0.104.0/http/server.ts"
+import { serve, Server, ServerRequest, Response } from "https://deno.land/std@0.104.0/http/server.ts"
 import { Cookie, getCookies, setCookie, deleteCookie } from "https://deno.land/std@0.104.0/http/cookie.ts"
 import { 
     acceptWebSocket,
@@ -208,7 +208,19 @@ export class System {
         return route[0];
     }
 
-    //async listen(wsHandler: Function): Promise<StartupConfig>
+    async listen(wsHandler: Function): Promise<StartupConfig> {
+        const startupConfig: StartupConfig = {
+            hostname: "localhost",
+            port: "8080",
+        }
+        const server = serve({hostname: startupConfig.hostname, port: startupConfig.port});
+
+        for await (const request of server) {
+            //handler(request);
+        }
+
+        return new Promise(resolve=>resolve(startupConfig));
+    }
 
     //async close(): void
 }
