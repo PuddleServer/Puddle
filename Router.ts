@@ -5,7 +5,7 @@
  * @Date   2021-09-07
  */
 
-import { ServerRequest } from "https://deno.land/std@0.104.0/http/server.ts"
+import { ServerRequest } from "./mod.ts"
 
 export class Route {
 

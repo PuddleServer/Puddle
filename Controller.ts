@@ -4,7 +4,7 @@
  * @author AO2324(AO2324-00)
  * @Date   2021-09-07
  */
-import { ServerRequest } from "https://deno.land/std@0.104.0/http/server.ts"
+import { ServerRequest } from "./mod.ts"
 
 export function control(request: ServerRequest, process: Function, isWebSocket: boolean): void {
     if(isWebSocket) {
