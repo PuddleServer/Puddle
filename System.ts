@@ -2,10 +2,10 @@
  * 実行クラス
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-08-31
+ * @Date   2021-09-06
  */
 
-import { Server, ServerRequest, Response } from "https://deno.land/std@0.104.0/http/server.ts"
+import { serve, Server, ServerRequest, Response } from "https://deno.land/std@0.104.0/http/server.ts"
 import { Cookie, getCookies, setCookie, deleteCookie } from "https://deno.land/std@0.104.0/http/cookie.ts"
 import { 
     acceptWebSocket,
@@ -14,7 +14,7 @@ import {
     WebSocket,
 } from "https://deno.land/std@0.104.0/ws/mod.ts"
 import { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
-import { Route, Routes } from "./Router.ts"
+import { Route, rooting } from "./Router.ts"
 import { htmlCompile } from "./HtmlCompiler.ts"
 
 /**
@@ -148,12 +148,8 @@ export class System {
     /** 開発者が追加したモジュールを保持する */
     #modules: any[];
 
-    /** Routeオブジェクトの配列を保持する */
-    #routes: Routes;
-
     constructor(...modules: any[]) {
         this.#modules = modules;
-        this.#routes = [];
     }
 
     /**
@@ -164,8 +160,6 @@ export class System {
     createRoute(pathOrRoute: string | Route): Route {
 
         const route = (typeof pathOrRoute == "string")? new Route(pathOrRoute) : pathOrRoute;
-
-        this.#routes.put(route);
 
         return route;
     }
@@ -187,18 +181,48 @@ export class System {
     }
 
     /**
+     * 指定したrouteを削除する。
+     * @param path パス（可変長引数）。
+     */
+    deleteRoute(...path: string[]): void {
+        this.deleteRoutes(path);
+    }
+
+    /**
+     * 指定したrouteを削除する。
+     * @param path パス配列。
+     */
+    deleteRoutes(paths: string[]): void {
+        Route.list = Route.list.filter(route=>!paths.includes(route.PATH()));
+    }
+
+    /**
      * 指定したpathが設定されたRouteオブジェクトを返す。
      * @param path RouteオブジェクトのPATH
      * @returns 指定されたRouteオブジェクト。
      */
     Route(path: Route): Route | undefined {
 
-        const route: Route[] = this.#routes.filter( (route: Route) => route.PATH() == path );
+        const route: Route[] = Route.list.filter( (route: Route) => route.PATH() == path );
 
-        return ( !route.length )? undefined : route;
+        return route[0];
     }
 
-    //async listen(wsHandler: Function): Promise<StartupConfig>
+    async listen(): Promise<StartupConfig> {
+        const startupConfig: StartupConfig = {
+            hostname: "localhost",
+            port: "8080",
+        }
+        const server = serve({hostname: startupConfig.hostname, port: startupConfig.port});
+
+        for await (const request of server) {
+            //handler(request);
+            const [route, isWebSocket]: [Route, boolean] | undefined = rooting(request);
+            
+        }
+
+        return new Promise(resolve=>resolve(startupConfig));
+    }
 
     //async close(): void
 }
