@@ -148,6 +148,7 @@ export class System {
     /** 開発者が追加したモジュールを保持する */
     #modules: any[];
 
+
     constructor(...modules: any[]) {
         this.#modules = modules;
     }
