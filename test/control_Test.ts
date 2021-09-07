@@ -11,7 +11,7 @@ import { control }          from "../Controller.ts";
 /**
  * controlテスト
  */
- Deno.test({
+Deno.test({
     name: "controlテスト",
     fn(): void {
 
