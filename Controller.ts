@@ -6,7 +6,7 @@
  */
 import { ServerRequest } from "https://deno.land/std@0.104.0/http/server.ts"
 
-export function controll(request: ServerRequest, process: Function, isWebSocket: boolean): void {
+export function control(request: ServerRequest, process: Function, isWebSocket: boolean): void {
     if(isWebSocket) {
         controller(request, process);
     } else {
