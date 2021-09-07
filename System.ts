@@ -2,20 +2,17 @@
  * 実行クラス
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-06
+ * @Date   2021-09-07
  */
 
-import { serve, Server, ServerRequest, Response } from "https://deno.land/std@0.104.0/http/server.ts"
-import { Cookie, getCookies, setCookie, deleteCookie } from "https://deno.land/std@0.104.0/http/cookie.ts"
-import { 
-    acceptWebSocket,
-    isWebSocketCloseEvent,
-    isWebSocketPingEvent,
-    WebSocket,
-} from "https://deno.land/std@0.104.0/ws/mod.ts"
-import { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
-import { Route, rooting } from "./Router.ts"
-import { htmlCompile } from "./HtmlCompiler.ts"
+import {
+    serve, Server, ServerRequest, Response,
+    Cookie, getCookies, setCookie, deleteCookie,
+    acceptWebSocket, isWebSocketCloseEvent, isWebSocketPingEvent, WebSocket,
+    lookup,
+    Route, rooting,
+    htmlCompile
+} from "./mod.ts"
 
 /**
  * 起動構成
