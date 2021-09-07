@@ -14,7 +14,7 @@ import {
     WebSocket,
 } from "https://deno.land/std@0.104.0/ws/mod.ts"
 import { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
-import { Route } from "./Router.ts"
+import { Route, rooting } from "./Router.ts"
 import { htmlCompile } from "./HtmlCompiler.ts"
 
 /**
@@ -217,6 +217,8 @@ export class System {
 
         for await (const request of server) {
             //handler(request);
+            const [route, isWebSocket]: [Route, boolean] | undefined = rooting(request);
+            
         }
 
         return new Promise(resolve=>resolve(startupConfig));
