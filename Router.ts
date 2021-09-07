@@ -38,8 +38,9 @@ export class Route {
             "${PATH}"というパスは既に使用されています。\n`);
         }
         this.#PATH = PATH;
+        this.#URL = [];
         URL.push(this.#PATH);
-        this.URL(...URL);
+        this.URL.apply(this, URL);
         this.#GET = GET || function(){console.log("GET")};// || default_get;
         this.#PUT = PUT || function(){console.log("PUT")};// || default_PUT;
         this.#POST = POST || function(){console.log("POST")};// || default_POST;
