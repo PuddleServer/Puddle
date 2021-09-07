@@ -166,7 +166,7 @@ export class Route {
      * @param path パス。
      * @returns 真偽値。
      */
-    static isThePathInUse(path: string) {
+    static isThePathInUse(path: string): boolean {
         return Route.list.map(route=>route.PATH()).flat().includes(path);
     }
 
@@ -175,7 +175,7 @@ export class Route {
      * @param urls URL配列。
      * @returns 真偽値。
      */
-    static isTheUrlAlreadyInUse(...urls: string[]) {
+    static isTheUrlAlreadyInUse(...urls: string[]): boolean {
         return Boolean(urls.filter( u => Route.list.map(route=>route.URL()).flat().includes(u) ).length);
     }
 
