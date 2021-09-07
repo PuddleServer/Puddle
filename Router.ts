@@ -2,14 +2,14 @@
  * ルーティングを行うクラスファイル。
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-08-30
+ * @Date   2021-09-07
  */
 
-import { ServerRequest } from "deno.land/std@0.104.0/http/server.ts"
+import { ServerRequest } from "https://deno.land/std@0.104.0/http/server.ts"
 
 export class Route {
 
-    static URLs: string[] = [];
+    static list: Route[] = [];
 
     /** サーバーへのリクエストの名前 */
     #PATH: string;
@@ -31,17 +31,22 @@ export class Route {
 
     isWebSocket: boolean;
 
-    constructor(PATH: string, URL?: string[] | null, GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null) {
+    constructor(PATH: string, URL: string[] = [], GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null) {
+        if(Route.isThePathInUse(PATH)) {
+            throw new Error(`\n[ Error ]\n
+            The path "${PATH}" is already in use.\n
+            "${PATH}"というパスは既に使用されています。\n`);
+        }
         this.#PATH = PATH;
-        this.#URL = URL || [];
-        if(!this.#URL.includes(this.#PATH)) this.#URL.push(this.#PATH);
-        this.#URL = this.getUniqueUrlArray(this.#URL);
+        URL.push(this.#PATH);
+        this.URL(...URL);
         this.#GET = GET || function(){console.log("GET")};// || default_get;
         this.#PUT = PUT || function(){console.log("PUT")};// || default_PUT;
         this.#POST = POST || function(){console.log("POST")};// || default_POST;
         this.#DELETE = DELETE || function(){console.log("DELETE")};// || default_DELETE;
 
         this.isWebSocket = false;
+        Route.list.push(this);
     }
 
     /**
@@ -63,7 +68,10 @@ export class Route {
 
         if(!urls.length) return this.#URL;
 
-        this.#URL = urls;
+        urls.filter(function (url, i, self) {
+            return self.indexOf(url) === i;
+        });
+        this.#URL = this.getUniqueUrlArray(urls);
         return this;
 
     }
@@ -137,20 +145,37 @@ export class Route {
 
     /**
      * RouteのURLに重複がないかをチェックし、重複を削除したURL配列を返す。
-     * @param url チェックするURL配列。
+     * @param urls チェックするURL配列
      * @returns 重複を取り除いたURL配列。
      */
-    private getUniqueUrlArray(url: string[]): string[] {
+    private getUniqueUrlArray(urls: string[]): string[] {
         
-        const uniqueUrlArray: string[] = url.filter( u => !Route.URLs.includes(u) );
-        if( uniqueUrlArray.length != url.length ) {
-            const duplicateUrl = url.filter( u => !uniqueUrlArray.includes(u) );
-            throw new Error(`\n[ warning ]\n
+        const uniqueUrlArray: string[] = urls.filter( u => !Route.list.map(route=>route.URL()).flat().includes(u) );
+        if( uniqueUrlArray.length != urls.length ) {
+            const duplicateUrl = urls.filter( u => !uniqueUrlArray.includes(u) );
+            console.log(`\n[ warning ]\n
             Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.\n
             指定されたURLのうち、${duplicateUrl.join(', ')} が重複しています。\n`);
         }
-        Route.URLs = Route.URLs.concat(uniqueUrlArray);
         return uniqueUrlArray;
+    }
+
+    /**
+     * 指定されたパスが使用済みかどうか。
+     * @param path パス。
+     * @returns 真偽値。
+     */
+    static isThePathInUse(path: string) {
+        return Route.list.map(route=>route.PATH()).flat().includes(path);
+    }
+
+    /**
+     * 指定されたURLが使用済みかどうか。
+     * @param urls URL配列。
+     * @returns 真偽値。
+     */
+    static isTheUrlAlreadyInUse(...urls) {
+        return Boolean(urls.filter( u => Route.list.map(route=>route.URL()).flat().includes(u) ).length);
     }
 
 }
