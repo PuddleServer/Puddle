@@ -175,7 +175,7 @@ export class Route {
      * @param urls URL配列。
      * @returns 真偽値。
      */
-    static isTheUrlAlreadyInUse(...urls) {
+    static isTheUrlAlreadyInUse(...urls: string[]) {
         return Boolean(urls.filter( u => Route.list.map(route=>route.URL()).flat().includes(u) ).length);
     }
 
