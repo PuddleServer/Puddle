@@ -2,9 +2,14 @@
  * ルーティングを行うクラスファイル。
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-08-30
+ * @Date   2021-09-07
  */
+
+import { ServerRequest } from "https://deno.land/std@0.104.0/http/server.ts"
+
 export class Route {
+
+    static list: Route[] = [];
 
     /** サーバーへのリクエストの名前 */
     #PATH: string;
@@ -26,16 +31,23 @@ export class Route {
 
     isWebSocket: boolean;
 
-    constructor(PATH: string, URL?: string[] | null, GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null, isWebSocket?: boolean | null) {
+    constructor(PATH: string, URL: string[] = [], GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null) {
+        if(Route.isThePathInUse(PATH)) {
+            throw new Error(`\n[ Error ]\n
+            The path "${PATH}" is already in use.\n
+            "${PATH}"というパスは既に使用されています。\n`);
+        }
         this.#PATH = PATH;
-        this.#URL = URL || [];
-        this.#GET = GET;// || default_get;
-        this.#PUT = PUT;// || default_PUT;
-        this.#POST = POST;// || default_POST;
-        this.#DELETE = DELETE;// || default_DELETE;
-        this.isWebSocket = Boolean(isWebSocket);
+        this.#URL = [];
+        URL.push(this.#PATH);
+        this.URL.apply(this, URL);
+        this.#GET = GET || function(){console.log("GET")};// || default_get;
+        this.#PUT = PUT || function(){console.log("PUT")};// || default_PUT;
+        this.#POST = POST || function(){console.log("POST")};// || default_POST;
+        this.#DELETE = DELETE || function(){console.log("DELETE")};// || default_DELETE;
 
-        if(!this.#URL.includes(this.#PATH)) this.#URL.push(this.#PATH);
+        this.isWebSocket = false;
+        Route.list.push(this);
     }
 
     /**
@@ -57,7 +69,10 @@ export class Route {
 
         if(!urls.length) return this.#URL;
 
-        this.#URL = urls;
+        urls.filter(function (url, i, self) {
+            return self.indexOf(url) === i;
+        });
+        this.#URL = this.getUniqueUrlArray(urls);
         return this;
 
     }
@@ -65,11 +80,14 @@ export class Route {
     /**
      * GETの取得、設定を行う。
      * @param process 処理内容を記述した関数。
+     * @param isWebSocket WebSocketの処理かどうか。
      * @returns 引数がない場合はGETを、ある場合はthisを返す。
      */
     GET(): Function;
-    GET(process: Function): Route;
-    GET(process?: Function): Function | Route {
+    GET(process: Function, isWebSocket?: boolean): Route;
+    GET(process?: Function, isWebSocket?: boolean): Function | Route {
+        
+        if(isWebSocket) this.isWebSocket = isWebSocket;
 
         if(!process) return this.#GET;
 
@@ -85,7 +103,7 @@ export class Route {
      */
     PUT(): Function;
     PUT(process: Function): Route;
-    PUT(process?: Function): Function | Route {
+    PUT(process?: Function, isWebSocket?: false): Function | Route {
 
         if(!process) return this.#PUT;
 
@@ -101,7 +119,7 @@ export class Route {
      */
     POST(): Function;
     POST(process: Function): Route;
-    POST(process?: Function): Function | Route {
+    POST(process?: Function, isWebSocket?: false): Function | Route {
 
         if(!process) return this.#POST;
 
@@ -117,7 +135,7 @@ export class Route {
      */
     DELETE(): Function;
     DELETE(process: Function): Route;
-    DELETE(process?: Function): Function | Route {
+    DELETE(process?: Function, isWebSocket?: false): Function | Route {
 
         if(!process) return this.#DELETE;
 
@@ -127,95 +145,62 @@ export class Route {
     }
 
     /**
-     * Routeオブジェクト動詞を比較する。
-     * @param route 比較対象のRouteオブジェクト。
-     * @returns 同じオブジェクトであればtrueを、そうでなければfalseを返す。
+     * RouteのURLに重複がないかをチェックし、重複を削除したURL配列を返す。
+     * @param urls チェックするURL配列
+     * @returns 重複を取り除いたURL配列。
      */
-    equals(route: any): boolean {
-        const Path: boolean = this.#PATH == route.PATH();
-        const Url: boolean = this.#URL.toString() == route.URL().toString();
-        const Get: boolean = this.#GET.toString() == route.GET().toString();
-        const Put: boolean = this.#PUT.toString() == route.PUT().toString();
-        const Post: boolean = this.#POST.toString() == route.POST().toString();
-        const Delete: boolean = this.#DELETE.toString() == route.DELETE().toString();
-        return Path && Url && Get && Put && Post && Delete;
-    }
-
-    /**
-     * 自身をディープコピーする。
-     * @returns 自身と同じパラメータを持つRouteオブジェクトを返す。
-     */
-    clone(): Route {
-        return new Route(this.#PATH, this.#URL, this.#GET, this.#PUT, this.#POST, this.#DELETE);
-    }
-}
-
-/**
- * 複数のRouteオブジェクトを保持するクラス。
- */
-export class Routes {
-
-    constructor(...routes: Route[]){
-        routes.forEach(route=> this.put(route) );
-    }
-
-    /**
-     * 保持しているRouteオブジェクトのPATHの配列。
-     * @returns RouteオブジェクトのPATHの配列。
-     */
-    paths(): string[] {
-        return Object.keys(this).map(path=>path);
-    }
-
-    /**
-     * 保持しているRouteの数。
-     * @returns 要素数。
-     */
-    size(): number {
-        return this.paths().length;
-    }
-
-    /**
-     * Routeオブジェクトを追加する。
-     * @param routes 追加するRouteオブジェクト
-     */
-    put(...routes: Route[]): void {
-        for(let route of routes) {
-            if(!this.#checkUrl(route)) return;
-            const path = route.PATH();
-            this[path] = route;
-        }
-    }
-
-    /**
-     * 指定したPathを持つRouteを外す。
-     * @param paths パス(可変長引数)。
-     * @returns 外されたRoute。
-     */
-    remove(...paths: string[]): Route[] {
-        const routes = [];
-        paths.forEach( path => {
-            routes.push(this[path]);
-            delete this[path];
-        });
-        return routes;
-    }
-
-    /**
-     * RouteのURLに重複がないかをチェックする。
-     * @param route チェック対象のRouteオブジェクト。
-     * @returns 重複がなければtrueを返す。
-     */
-    #checkUrl(route: Route): boolean {
+    private getUniqueUrlArray(urls: string[]): string[] {
         
-        const duplicateUrl: string[] = this.paths().filter( (url: string) => route.URL().includes(url) );
-        if( duplicateUrl.length ) {
+        const uniqueUrlArray: string[] = urls.filter( u => !Route.list.map(route=>route.URL()).flat().includes(u) );
+        if( uniqueUrlArray.length != urls.length ) {
+            const duplicateUrl = urls.filter( u => !uniqueUrlArray.includes(u) );
             console.log(`\n[ warning ]\n
             Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.\n
             指定されたURLのうち、${duplicateUrl.join(', ')} が重複しています。\n`);
-            return false;
         }
-        return true;
+        return uniqueUrlArray;
     }
 
+    /**
+     * 指定されたパスが使用済みかどうか。
+     * @param path パス。
+     * @returns 真偽値。
+     */
+    static isThePathInUse(path: string): boolean {
+        return Route.list.map(route=>route.PATH()).flat().includes(path);
+    }
+
+    /**
+     * 指定されたURLが使用済みかどうか。
+     * @param urls URL配列。
+     * @returns 真偽値。
+     */
+    static isTheUrlAlreadyInUse(...urls: string[]): boolean {
+        return Boolean(urls.filter( u => Route.list.map(route=>route.URL()).flat().includes(u) ).length);
+    }
+
+}
+
+/**
+ * requestとRoute配列を照合して、リクエストのあったRouteを返す。
+ * @param request サーバーリクエスト。
+ * @returns ハンドラー関数, WebSocketの処理かどうか。
+ */
+export function rooting(request: ServerRequest): [Function, boolean] | undefined {
+    const requestRoute: Route[] = Route.list.filter(route => route.URL().includes(request.url));
+    const route: Route | undefined = (requestRoute.length) ? requestRoute[0] : undefined;
+    if(!route) return undefined;
+    switch (request.method) {
+        case "GET":
+            return [route.GET, route.isWebSocket];
+        case "PUT":
+            return [route.PUT, false];
+        case "POST":
+            return [route.POST, false];
+        case "DELETE":
+            return [route.DELETE, false];
+
+        default:
+            return undefined;
+    }
 }
