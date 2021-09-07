@@ -8,12 +8,6 @@
 import { assertEquals }     from "https://deno.land/std@0.88.0/testing/asserts.ts";
 import { Route }            from "../Router.ts";
 
-/**
- * ディープコピー関数
- */
-const deepCopy: any = (_object: any) => {
-    return JSON.parse(JSON.stringify(_object));
-}
 
 // Routeオブジェクトに必要なもの
 const path: string   = "/index.html";
@@ -75,7 +69,7 @@ Deno.test({
         // 引数無しの時は#GETが返る
         assertEquals(get, route.GET(), "取得したgetに不正な変更があります．");
         // アリの時はthisが返る
-        assertEquals(true, route.equals(route.GET(get)), "オブジェクトを取得できていないか，取得したgetに不正な変更があります．");
+        assertEquals(get, route.GET(get).GET(), "オブジェクトを取得できていないか，取得したgetに不正な変更があります．");
     },
 });
 
@@ -90,7 +84,7 @@ Deno.test({
         // 引数無しの時は#PUTが返る
         assertEquals(put, route.PUT(), "取得したputに不正な変更があります．");
         // アリの時はthisが返る
-        assertEquals(true, route.equals(route.PUT(put)), "オブジェクトを取得できていないか，取得したputに不正な変更があります．");
+        assertEquals(put, route.PUT(put).PUT(), "オブジェクトを取得できていないか，取得したputに不正な変更があります．");
     },
 });
 
@@ -105,7 +99,7 @@ Deno.test({
         // 引数無しの時は#POSTが返る
         assertEquals(pos, route.POST(), "取得したpostに不正な変更があります．");
         // アリの時はthisが返る
-        assertEquals(true, route.equals(route.POST(pos)), "オブジェクトを取得できていないか，取得したpostに不正な変更があります．");
+        assertEquals(pos, route.POST(pos).POST(), "オブジェクトを取得できていないか，取得したpostに不正な変更があります．");
     },
 });
 
@@ -120,7 +114,7 @@ Deno.test({
         // 引数無しの時は#DELETEが返る
         assertEquals(del, route.DELETE(), "取得したdeleteに不正な変更があります．");
         // アリの時はthisが返る
-        assertEquals(true, route.equals(route.DELETE(del)), "オブジェクトを取得できていないか，取得したdeleteに不正な変更があります．");
+        assertEquals(del, route.DELETE(del).DELETE(), "オブジェクトを取得できていないか，取得したdeleteに不正な変更があります．");
     },
 });
 
