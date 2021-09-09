@@ -246,6 +246,7 @@ export class System {
             hostname: "localhost",
             port: 8080,
         }
+        System.close();
         System.server = serve({hostname: startupConfig.hostname, port: startupConfig.port || 8080});
 
         for await (const request of System.server) {
@@ -257,5 +258,7 @@ export class System {
         return new Promise(resolve=>resolve(startupConfig));
     }
 
-    //async close(): void
+    static close(): void {
+        if(System.server) System.server.close();
+    }
 }
