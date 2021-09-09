@@ -148,17 +148,40 @@ export class System {
     /** 開発者が追加したモジュールを保持する */
     static modules: { [key: string]: any; } = {};
 
+    /**
+     * モジュールを取得する。
+     * @param key モジュール名。
+     */
     static getModule(key: string) {
         System.modules[key];
     }
 
+    /**
+     * モジュールを追加する。
+     * @param key モジュール名。
+     * @param module モジュール本体。
+     */
     static setModule(key: string, module: any) {
         System.modules[key] = module;
     }
 
+    /**
+     * モジュールを追加する。
+     * @param modules モジュールの連想配列。
+     */
     static setModules(modules: { [key: string]: any; }) {
         for(let key in modules) {
             System.setModule(key, modules[key]);
+        }
+    }
+
+    /**
+     * モジュールを削除する。
+     * @param key モジュール名(可変長引数)。
+     */
+    static deleteModule(...key: string[]) {
+        for(let k of key) {
+            delete System.modules[k];
         }
     }
 
