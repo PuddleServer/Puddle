@@ -10,7 +10,7 @@ import {
     Cookie, getCookies, setCookie, deleteCookie,
     acceptWebSocket, isWebSocketCloseEvent, isWebSocketPingEvent, WebSocket,
     lookup,
-    Route, rooting,
+    Route, rooting, control
     htmlCompile
 } from "./mod.ts"
 
@@ -257,7 +257,7 @@ export class System {
         for await (const request of System.server) {
             //handler(request);
             const route: Route | undefined = rooting(request);
-            
+            if(route) control(request, route);
         }
 
         return new Promise(resolve=>resolve(startupConfig));
