@@ -11,7 +11,7 @@
  * @param params html内で呼び出される変数名をキーとした連想配列。
  * @returns 変数に代入を行った後のhtmlテキスト。
  */
-export function htmlCompile(html: String, params: { [key: string]: ( String | Number ); }): String {
+export function htmlCompile(html: string, params: { [key: string]: ( string | Number ); }): string {
     for(let param in params) {
         const regExp: RegExp = new RegExp(`{{\\s*${param}\\s*}}`,`g`);
         html = html.replace(regExp, String(params[param]));
