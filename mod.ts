@@ -11,7 +11,8 @@ export type { Cookie } from "https://deno.land/std@0.104.0/http/cookie.ts"
 export {
     acceptWebSocket,
     isWebSocketCloseEvent,
-    isWebSocketPingEvent
+    isWebSocketPingEvent,
+    acceptable
 } from "https://deno.land/std@0.104.0/ws/mod.ts"
 export type { WebSocket } from "https://deno.land/std@0.104.0/ws/mod.ts"
 export { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
