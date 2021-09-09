@@ -85,7 +85,7 @@ export class SystemResponse {
             if(!this.response.headers) this.response.headers = new Headers();
             if(extensions) this.response.headers.set('Content-Type', extensions);
         } catch {
-            console.log(`\n[ error ]\n
+            console.log(`\n[ warning ]\n
             The "${filePath}" file could not be read.\n
             "${filePath}"ファイルが読み取れませんでした。\n`);
             this.setText("500 Internal Server Error", 500);
