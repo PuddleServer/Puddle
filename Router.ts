@@ -2,7 +2,7 @@
  * ルーティングを行うクラスファイル。
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-07
+ * @Date   2021-09-09
  */
 
 import { ServerRequest } from "./mod.ts"
@@ -184,23 +184,11 @@ export class Route {
 /**
  * requestとRoute配列を照合して、リクエストのあったRouteを返す。
  * @param request サーバーリクエスト。
- * @returns ハンドラー関数, WebSocketの処理かどうか。
+ * @returns Routeオブジェクト
  */
-export function rooting(request: ServerRequest): [Function, boolean] | undefined {
-    const requestRoute: Route[] = Route.list.filter(route => route.URL().includes(request.url));
-    const route: Route | undefined = (requestRoute.length) ? requestRoute[0] : undefined;
-    if(!route) return undefined;
-    switch (request.method) {
-        case "GET":
-            return [route.GET, route.isWebSocket];
-        case "PUT":
-            return [route.PUT, false];
-        case "POST":
-            return [route.POST, false];
-        case "DELETE":
-            return [route.DELETE, false];
+export function rooting(request: ServerRequest): Route | undefined {
 
-        default:
-            return undefined;
-    }
+    const requestRoute: Route[] = Route.list.filter(route => route.URL().includes(request.url));
+    return (requestRoute.length) ? requestRoute[0] : undefined;
+
 }

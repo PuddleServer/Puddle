@@ -2,16 +2,12 @@
  * Response処理を行うクラス。
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-07
+ * @Date   2021-09-09
  */
-import { ServerRequest } from "./mod.ts"
+import { ServerRequest, Route } from "./mod.ts"
 
-export function control(request: ServerRequest, process: Function, isWebSocket: boolean): void {
-    if(isWebSocket) {
-        controller(request, process);
-    } else {
-        webSocketController(request, process);
-    }
+export function control(request: ServerRequest, route: Route): void {
+
 }
 
 function controller(request: ServerRequest, process: Function) {
