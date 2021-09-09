@@ -189,6 +189,6 @@ export class Route {
 export function rooting(request: ServerRequest): Route | undefined {
 
     const requestRoute: Route[] = Route.list.filter(route => route.URL().includes(request.url));
-    return (requestRoute.length) ? requestRoute[0] : undefined;
+    return requestRoute[0];
 
 }
