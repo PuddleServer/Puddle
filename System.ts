@@ -10,7 +10,7 @@ import {
     Cookie, getCookies, setCookie, deleteCookie,
     acceptWebSocket, isWebSocketCloseEvent, isWebSocketPingEvent, WebSocket,
     lookup,
-    Route, rooting, control
+    Route, rooting, control,
     htmlCompile
 } from "./mod.ts"
 
