@@ -16,4 +16,4 @@ export { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
 
 export { StartupConfig, SystemResponse, System } from "./System.ts"
 export { Route, rooting } from "./Router.ts"
-export { htmlCompile } from "./HtmlCompiler"
+export { htmlCompile } from "./HtmlCompiler.ts"
