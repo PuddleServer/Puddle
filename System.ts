@@ -152,8 +152,8 @@ export class System {
      * モジュールを取得する。
      * @param key モジュール名。
      */
-    static getModule(key: string) {
-        System.modules[key];
+    static getModule(key: string): any {
+        return System.modules[key];
     }
 
     /**
@@ -161,7 +161,7 @@ export class System {
      * @param key モジュール名。
      * @param module モジュール本体。
      */
-    static setModule(key: string, module: any) {
+    static setModule(key: string, module: any): void {
         System.modules[key] = module;
     }
 
@@ -169,7 +169,7 @@ export class System {
      * モジュールを追加する。
      * @param modules モジュールの連想配列。
      */
-    static setModules(modules: { [key: string]: any; }) {
+    static setModules(modules: { [key: string]: any; }): void {
         for(let key in modules) {
             System.setModule(key, modules[key]);
         }
@@ -234,11 +234,16 @@ export class System {
      * @param path RouteオブジェクトのPATH
      * @returns 指定されたRouteオブジェクト。
      */
-    static Route(path: string): Route | undefined {
+    static Route(path: string): Route {
 
-        const route: Route[] = Route.list.filter( (route: Route) => route.PATH() == path );
-
-        return route[0];
+        const routes: Route[] = Route.list.filter( (route: Route) => route.PATH() == path );
+        if(routes.length) return routes[0];
+        else {
+            console.log(`\n[ warning ]\n
+            There is no Route with the PATH "${path}".\n
+            パスが"${path}"のRouteはありません。\n`);
+            return System.createRoute(path);
+        }
     }
 
     static async listen(): Promise<StartupConfig> {
