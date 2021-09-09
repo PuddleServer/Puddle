@@ -5,7 +5,7 @@
  * @Date   2021-09-09
  */
 
-import { ServerRequest } from "./mod.ts"
+import { ServerRequest, default_get, default_error_404, default_error_502 } from "./mod.ts"
 
 export class Route {
 
@@ -41,10 +41,10 @@ export class Route {
         this.#URL = [];
         URL.push(this.#PATH);
         this.URL.apply(this, URL);
-        this.#GET = GET || function(){console.log("GET")};// || default_get;
-        this.#PUT = PUT || function(){console.log("PUT")};// || default_PUT;
-        this.#POST = POST || function(){console.log("POST")};// || default_POST;
-        this.#DELETE = DELETE || function(){console.log("DELETE")};// || default_DELETE;
+        this.#GET = GET || default_get;
+        this.#PUT = PUT || default_error_502;
+        this.#POST = POST || default_error_502;
+        this.#DELETE = DELETE || default_error_502;
 
         this.isWebSocket = false;
         Route.list.push(this);

@@ -41,7 +41,7 @@ export function control(request: ServerRequest, route: Route): void {
  * @param process 実行する処理。
  */
 function controller(request: ServerRequest, process: Function) {
-    process(request, new SystemResponse(request), System.modules);
+    process(request, new SystemResponse(request));
 }
 
 /**
@@ -51,12 +51,12 @@ function controller(request: ServerRequest, process: Function) {
  */
 async function webSocketController(request: ServerRequest, process: Function) {
     if (acceptable(request)) {
-        const webSocket: WebSocket = await acceptWebSocket({
+        const webSocket = await acceptWebSocket({
             conn: request.conn,
             bufReader: request.r,
             bufWriter: request.w,
             headers: request.headers,
         });
-        process(webSocket, System.modules);
+        process(webSocket);
     }
 }

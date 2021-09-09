@@ -22,3 +22,5 @@ export type { StartupConfig } from "./System.ts"
 export { Route, rooting } from "./Router.ts"
 export { control } from "./Controller.ts"
 export { htmlCompile } from "./HtmlCompiler.ts"
+
+export { default_get, default_error, default_error_404, default_error_502 } from "./default/default_controller.ts"
