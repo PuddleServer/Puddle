@@ -19,7 +19,7 @@ import {
  */
 export interface StartupConfig {
     hostname?: string;
-    port?: string;
+    port?: number;
 }
 
 /**
@@ -59,11 +59,12 @@ export class SystemResponse {
      * @param status ステータスコード（デフォルトは200）。
      * @param statusText ステータステキスト。
      */
-    setText(text: String, status: Number = 200, statusText: String | null = null): void {
-        this.response.text = htmlCompile(text, this.#preset);
+    setText(text: string, status: number = 200, statusText: string | null = null): void {
+        this.response.body = htmlCompile(text, this.#preset);
         this.response.status = status;
         if(statusText != null) this.response.statusText = statusText;
         else if(this.response.statusText != undefined) delete this.response.statusText;
+        if(!this.response.headers) this.response.headers = new Headers();
         this.response.headers.set('Content-Type', 'text/plain');
     }
 
@@ -73,13 +74,15 @@ export class SystemResponse {
      * @param status ステータスコード（デフォルトは200）。
      * @param statusText ステータステキスト。
      */
-    async setFile(filePath: String, status: Number = 200, statusText: String | null = null): Promise<void> {
+    async setFile(filePath: string, status: number = 200, statusText: string | null = null): Promise<void> {
         const file = await Deno.open(filePath);
         let file_data: string;
         try {
-            file_data = await Deno.readAll(file);
+            const decoder = new TextDecoder('utf-8');
+            file_data = decoder.decode(await Deno.readAll(file));
             this.setText(file_data, status, statusText);
             const extensions: false | string = lookup(filePath);
+            if(!this.response.headers) this.response.headers = new Headers();
             if(extensions) this.response.headers.set('Content-Type', extensions);
         } catch {
             console.log(`\n[ error ]\n
@@ -125,7 +128,10 @@ export class SystemResponse {
      * ServerRequestのrespondを実行する。
      */
     respond(): void {
-        if(this.isForceDownload) this.response.headers.set('Content-Type', 'application/octet-stream');
+        if(this.isForceDownload) {
+            if(!this.response.headers) this.response.headers = new Headers();
+            this.response.headers.set('Content-Type', 'application/octet-stream');
+        }
         this.#request.respond(this.response);
     }
 }
@@ -134,20 +140,19 @@ export class SystemResponse {
 export class System {
 
     /** サーバーを保持する変数 */
-    #server: Server;
-
-    /** WebSocketの処理 */
-    #wsHandler: Function;
+    #server: Server | null;
 
     /** 起動構成を保持する変数 */
-    #startupConfig: StartupConfig;
+    #startupConfig: StartupConfig | null;
 
     /** 開発者が追加したモジュールを保持する */
     #modules: any[];
 
 
     constructor(...modules: any[]) {
+        this.#server = null;
         this.#modules = modules;
+        this.#startupConfig = null;
     }
 
     /**
@@ -199,7 +204,7 @@ export class System {
      * @param path RouteオブジェクトのPATH
      * @returns 指定されたRouteオブジェクト。
      */
-    Route(path: Route): Route | undefined {
+    Route(path: string): Route | undefined {
 
         const route: Route[] = Route.list.filter( (route: Route) => route.PATH() == path );
 
@@ -209,13 +214,13 @@ export class System {
     async listen(): Promise<StartupConfig> {
         const startupConfig: StartupConfig = {
             hostname: "localhost",
-            port: "8080",
+            port: 8080,
         }
-        const server = serve({hostname: startupConfig.hostname, port: startupConfig.port});
+        const server = serve({hostname: startupConfig.hostname, port: startupConfig.port || 8080});
 
         for await (const request of server) {
             //handler(request);
-            const [route, isWebSocket]: [Route, boolean] | undefined = rooting(request);
+            //const [process, isWebSocket]: [Function, boolean] | undefined = rooting(request);
             
         }
 
