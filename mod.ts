@@ -2,7 +2,7 @@
  * inportをまとめたファイル。
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-07
+ * @Date   2021-09-09
  */
 export { serve, Server, ServerRequest } from "https://deno.land/std@0.104.0/http/server.ts"
 export type { Response } from "https://deno.land/std@0.104.0/http/server.ts"

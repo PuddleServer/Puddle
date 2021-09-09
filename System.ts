@@ -2,7 +2,7 @@
  * 実行クラス
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-07
+ * @Date   2021-09-09
  */
 
 import {
@@ -140,19 +140,49 @@ export class SystemResponse {
 export class System {
 
     /** サーバーを保持する変数 */
-    #server: Server | null;
+    static server: Server;
 
     /** 起動構成を保持する変数 */
-    #startupConfig: StartupConfig | null;
+    static startupConfig: StartupConfig;
 
     /** 開発者が追加したモジュールを保持する */
-    #modules: any[];
+    static modules: { [key: string]: any; } = {};
 
+    /**
+     * モジュールを取得する。
+     * @param key モジュール名。
+     */
+    static getModule(key: string) {
+        System.modules[key];
+    }
 
-    constructor(...modules: any[]) {
-        this.#server = null;
-        this.#modules = modules;
-        this.#startupConfig = null;
+    /**
+     * モジュールを追加する。
+     * @param key モジュール名。
+     * @param module モジュール本体。
+     */
+    static setModule(key: string, module: any) {
+        System.modules[key] = module;
+    }
+
+    /**
+     * モジュールを追加する。
+     * @param modules モジュールの連想配列。
+     */
+    static setModules(modules: { [key: string]: any; }) {
+        for(let key in modules) {
+            System.setModule(key, modules[key]);
+        }
+    }
+
+    /**
+     * モジュールを削除する。
+     * @param key モジュール名(可変長引数)。
+     */
+    static deleteModule(...key: string[]) {
+        for(let k of key) {
+            delete System.modules[k];
+        }
     }
 
     /**
@@ -160,7 +190,7 @@ export class System {
      * @param pathOrRoute 文字列の場合はそれをPATHとしたRouteを作成し追加、Routeの場合はそのまま追加する。
      * @returns 作成したRouteオブジェクトを返す。
      */
-    createRoute(pathOrRoute: string | Route): Route {
+    static createRoute(pathOrRoute: string | Route): Route {
 
         const route = (typeof pathOrRoute == "string")? new Route(pathOrRoute) : pathOrRoute;
 
@@ -172,11 +202,11 @@ export class System {
      * @param pathsOrRoutes アクセス先のパス、もしくはRouteオブジェクトの配列。
      * @returns Routeオブジェクト。
      */
-    createRoutes(...pathsOrRoutes: (string | Route)[]): Promise<{ [key: string]: Route; }> {
+    static createRoutes(...pathsOrRoutes: (string | Route)[]): Promise<{ [key: string]: Route; }> {
 
         const routeList: { [key: string]: Route; } = {};
         for(let pathOrRoute of pathsOrRoutes) {
-            const route: Route = this.createRoute(pathOrRoute);
+            const route: Route = System.createRoute(pathOrRoute);
             if(route) routeList[route.PATH()] = route;
         }
 
@@ -187,15 +217,15 @@ export class System {
      * 指定したrouteを削除する。
      * @param path パス（可変長引数）。
      */
-    deleteRoute(...path: string[]): void {
-        this.deleteRoutes(path);
+    static deleteRoute(...path: string[]): void {
+        System.deleteRoutes(path);
     }
 
     /**
      * 指定したrouteを削除する。
      * @param path パス配列。
      */
-    deleteRoutes(paths: string[]): void {
+    static deleteRoutes(paths: string[]): void {
         Route.list = Route.list.filter(route=>!paths.includes(route.PATH()));
     }
 
@@ -204,23 +234,23 @@ export class System {
      * @param path RouteオブジェクトのPATH
      * @returns 指定されたRouteオブジェクト。
      */
-    Route(path: string): Route | undefined {
+    static Route(path: string): Route | undefined {
 
         const route: Route[] = Route.list.filter( (route: Route) => route.PATH() == path );
 
         return route[0];
     }
 
-    async listen(): Promise<StartupConfig> {
+    static async listen(): Promise<StartupConfig> {
         const startupConfig: StartupConfig = {
             hostname: "localhost",
             port: 8080,
         }
-        const server = serve({hostname: startupConfig.hostname, port: startupConfig.port || 8080});
+        System.server = serve({hostname: startupConfig.hostname, port: startupConfig.port || 8080});
 
-        for await (const request of server) {
+        for await (const request of System.server) {
             //handler(request);
-            //const [process, isWebSocket]: [Function, boolean] | undefined = rooting(request);
+            const route: Route | undefined = rooting(request);
             
         }
 
