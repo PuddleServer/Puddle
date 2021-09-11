@@ -86,11 +86,10 @@ export class Route {
     GET(): Function;
     GET(process: Function, isWebSocket?: boolean): Route;
     GET(process?: Function, isWebSocket?: boolean): Function | Route {
-        
-        if(isWebSocket) this.isWebSocket = isWebSocket;
 
         if(!process) return this.#GET;
 
+        this.isWebSocket = Boolean(isWebSocket);
         this.#GET = process;
         return this;
 

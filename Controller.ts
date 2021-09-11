@@ -18,16 +18,16 @@ export function control(request: ServerRequest, route: Route): void {
     switch (request.method) {
         case "GET":
             if(route.isWebSocket) webSocketController(request, route.GET);
-            else controller(request, route.GET);
+            else controller(request, route.GET());
             break;
         case "PUT":
-            controller(request, route.PUT);
+            controller(request, route.PUT());
             break;
         case "POST":
-            controller(request, route.POST);
+            controller(request, route.POST());
             break;
         case "DELETE":
-            controller(request, route.DELETE);
+            controller(request, route.DELETE());
             break;
 
         default:
