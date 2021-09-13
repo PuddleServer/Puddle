@@ -1,7 +1,8 @@
-import { ServerRequest, SystemResponse, System } from "../mod.ts"
+import { ServerRequest, SystemResponse, System, Route } from "../mod.ts"
 
 export async function default_get(request: ServerRequest, response: SystemResponse) {
-    await response.setFile(`./assets${request.url.split(/\?/)[0]}`);
+    const route: Route[] = Route.list.filter(route=>route.URL().includes(request.url.split(/\?/)[0]));
+    await response.setFile(`./assets${route[0].PATH()}`);
     response.respond();
 }
 

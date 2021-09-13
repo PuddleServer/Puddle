@@ -256,6 +256,7 @@ export class System {
 
         for await (const request of System.server) {
             //handler(request);
+            request.url = decodeURIComponent(request.url);
             const route: Route | undefined = rooting(request);
             if(route) control(request, route);
         }
