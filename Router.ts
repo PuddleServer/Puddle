@@ -5,11 +5,15 @@
  * @Date   2021-09-09
  */
 
-import { ServerRequest, default_get, default_error_404, default_error_502 } from "./mod.ts"
+import { ServerRequest, default_get, default_error } from "./mod.ts"
 
 export class Route {
 
     static list: Route[] = [];
+
+    static "502" = new Route("502", [], default_error(502, `Server error.<br>サーバーエラー。`));
+
+    static "404" = new Route("404", [], default_error(404, `Not found.<br>見つかりません。`));
 
     /** サーバーへのリクエストの名前 */
     #PATH: string;
@@ -41,10 +45,11 @@ export class Route {
         this.#URL = [];
         URL.push(this.#PATH);
         this.URL.apply(this, URL);
-        this.#GET = GET || default_get;
-        this.#PUT = PUT || default_error_502;
-        this.#POST = POST || default_error_502;
-        this.#DELETE = DELETE || default_error_502;
+        this.#GET = GET || default_get();
+        const process_502: Function = (this.#PATH == "502")? this.#GET : Route["502"].GET();
+        this.#PUT = PUT || process_502;
+        this.#POST = POST || process_502;
+        this.#DELETE = DELETE || process_502;
 
         this.isWebSocket = false;
         Route.list.push(this);
@@ -178,16 +183,30 @@ export class Route {
         return Boolean(urls.filter( u => Route.list.map(route=>route.URL()).flat().includes(u) ).length);
     }
 
-}
+    /**
+     * 指定したpathが設定されたRouteオブジェクトを返す。
+     * @param path RouteオブジェクトのPATH
+     * @returns 指定されたRouteオブジェクト。
+     */
+    static getRouteByPath(path: string): Route {
+        const routes: Route[] = Route.list.filter( (route: Route) => route.PATH() == path );
+        if(routes.length) return routes[0];
+        else {
+            console.log(`\n[ warning ]\n
+            There is no Route with the PATH "${path}".\n
+            パスが"${path}"のRouteはありません。\n`);
+            return new Route(path);
+        }
+    }
 
-/**
- * requestとRoute配列を照合して、リクエストのあったRouteを返す。
- * @param request サーバーリクエスト。
- * @returns Routeオブジェクト
- */
-export function rooting(request: ServerRequest): Route | undefined {
-
-    const requestRoute: Route[] = Route.list.filter(route => route.URL().includes(request.url));
-    return requestRoute[0];
+    /**
+     * 指定したurlを含むRouteを返す。
+     * @param url URL
+     * @returns Routeオブジェクト
+     */
+    static getRouteByUrl(url: string): Route | undefined {
+        const routes: Route[] = Route.list.filter(route => route.URL().includes(url));
+        return routes[0];
+    }
 
 }

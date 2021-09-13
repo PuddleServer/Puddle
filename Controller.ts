@@ -31,6 +31,7 @@ export function control(request: ServerRequest, route: Route): void {
             break;
 
         default:
+            controller(request, Route["502"].GET());
             break;
     }
 }
