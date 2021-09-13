@@ -10,7 +10,7 @@ import {
     Cookie, getCookies, setCookie, deleteCookie,
     acceptWebSocket, isWebSocketCloseEvent, isWebSocketPingEvent, WebSocket,
     lookup,
-    Route, rooting, control,
+    Route, control, default_error,
     htmlCompile
 } from "./mod.ts"
 
@@ -36,15 +36,18 @@ export class SystemResponse {
     /** レスポンスオブジェクト */
     response: Response;
 
+    headers: Headers;
+
     /** 強制ダウンロードかどうか（初期値はfalse） */
     isForceDownload: boolean;
 
     constructor(request: ServerRequest) {
         this.#request = request;
 
+        this.headers = new Headers();
         this.response = {
             status: 500,
-            headers: new Headers(),
+            headers: undefined,
             body: "500 Internal Server Error"
         }
 
@@ -64,8 +67,7 @@ export class SystemResponse {
         this.response.status = status;
         if(statusText != null) this.response.statusText = statusText;
         else if(this.response.statusText != undefined) delete this.response.statusText;
-        if(!this.response.headers) this.response.headers = new Headers();
-        this.response.headers.set('Content-Type', 'text/plain');
+        this.headers.set('Content-Type', 'text/plain');
     }
 
     /**
@@ -82,8 +84,7 @@ export class SystemResponse {
             file_data = decoder.decode(await Deno.readAll(file));
             this.setText(file_data, status, statusText);
             const extensions: false | string = lookup(filePath);
-            if(!this.response.headers) this.response.headers = new Headers();
-            if(extensions) this.response.headers.set('Content-Type', extensions);
+            if(extensions) this.headers.set('Content-Type', extensions);
         } catch {
             console.log(`\n[ warning ]\n
             The "${filePath}" file could not be read.\n
@@ -129,9 +130,9 @@ export class SystemResponse {
      */
     respond(): void {
         if(this.isForceDownload) {
-            if(!this.response.headers) this.response.headers = new Headers();
-            this.response.headers.set('Content-Type', 'application/octet-stream');
+            this.headers.set('Content-Type', 'application/octet-stream');
         }
+        this.response.headers = this.headers;
         this.#request.respond(this.response);
     }
 }
@@ -235,30 +236,22 @@ export class System {
      * @returns 指定されたRouteオブジェクト。
      */
     static Route(path: string): Route {
-
-        const routes: Route[] = Route.list.filter( (route: Route) => route.PATH() == path );
-        if(routes.length) return routes[0];
-        else {
-            console.log(`\n[ warning ]\n
-            There is no Route with the PATH "${path}".\n
-            パスが"${path}"のRouteはありません。\n`);
-            return System.createRoute(path);
-        }
+        return Route.getRouteByPath(path);
     }
 
-    static async listen(): Promise<StartupConfig> {
+    static async listen(startFunction?: Function): Promise<StartupConfig> {
         const startupConfig: StartupConfig = {
             hostname: "localhost",
             port: 8080,
         }
         System.close();
         System.server = serve({hostname: startupConfig.hostname, port: startupConfig.port || 8080});
-
+        if(startFunction) startFunction(startupConfig);
         for await (const request of System.server) {
             //handler(request);
             request.url = decodeURIComponent(request.url);
-            const route: Route | undefined = rooting(request);
-            if(route) control(request, route);
+            const route: Route = Route.getRouteByUrl(request.url) || Route["404"];
+            control(request, route);
         }
 
         return new Promise(resolve=>resolve(startupConfig));
