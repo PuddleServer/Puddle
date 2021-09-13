@@ -137,6 +137,50 @@ export class SystemResponse {
     }
 }
 
+/**
+ * URLを扱いやすくするクラス。
+ */
+export class URL {
+    #url: [string, string|undefined];
+
+    constructor(url: string) {
+        const index: number = url.indexOf('?');
+        if(index < 0) this.#url = [url, undefined];
+        else this.#url = [url.slice(0, index), url.slice(index+1)];
+    }
+
+    toString(): string {
+        return this.#url.join('?');
+    }
+
+    get path(): string {
+        return this.#url[0];
+    }
+
+    get search(): string | undefined {
+        return this.#url[1];
+    }
+
+    get query(): { [key: string]: string; } | undefined {
+        if(!this.#url[1]) return undefined;
+        const query: string[][] = this.#url[1].split('&').map(v=>(v.includes('='))?v.split('='):[v,v]);
+        const params: { [key: string]: string; } = {};
+        for(let q of query) {
+            if(!(q[0] && q[1])) continue;
+            params[q[0]] = q[1];
+        }
+        return params;
+    }
+}
+
+/**
+ * URLオブジェクトを返すクラス。
+ * @param url 元となるurl
+ * @returns URLオブジェクト。
+ */
+export function url(url: string) {
+    return new URL(url);
+}
 
 export class System {
 
@@ -250,7 +294,8 @@ export class System {
         for await (const request of System.server) {
             //handler(request);
             request.url = decodeURIComponent(request.url);
-            const route: Route = Route.getRouteByUrl(request.url) || Route["404"];
+            console.log(url(request.url).query)
+            const route: Route = Route.getRouteByUrl(url(request.url).path) || Route["404"];
             control(request, route);
         }
 
