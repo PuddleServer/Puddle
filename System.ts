@@ -178,7 +178,7 @@ export class URL {
  * @param url 元となるurl
  * @returns URLオブジェクト。
  */
-export function purseUrl(url: string) {
+export function parseUrl(url: string) {
     return new URL(url);
 }
 
@@ -294,7 +294,7 @@ export class System {
         for await (const request of System.server) {
             //handler(request);
             request.url = decodeURIComponent(request.url);
-            const route: Route = Route.getRouteByUrl(purseUrl(request.url).path) || Route["404"];
+            const route: Route = Route.getRouteByUrl(parseUrl(request.url).path) || Route["404"];
             control(request, route);
         }
 
