@@ -17,7 +17,7 @@ export {
 export type { WebSocket } from "https://deno.land/std@0.104.0/ws/mod.ts"
 export { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
 
-export { SystemResponse, System, url, URL } from "./System.ts"
+export { SystemResponse, System, purseUrl, URL } from "./System.ts"
 export type { StartupConfig } from "./System.ts"
 export { Route } from "./Router.ts"
 export { control } from "./Controller.ts"
