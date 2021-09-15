@@ -1,4 +1,4 @@
-import { ServerRequest, SystemResponse, System, Route, purseUrl } from "../mod.ts"
+import { ServerRequest, SystemResponse, System, Route, parseUrl } from "../mod.ts"
 
 export function redirect(url: string): Function {
     return function(request: ServerRequest, response: SystemResponse): void {
@@ -15,7 +15,7 @@ export function redirect(url: string): Function {
 
 export function default_get(): Function {
     return async function default_get(request: ServerRequest, response: SystemResponse): Promise<void> {
-        const route: Route[] = Route.list.filter(route=>route.URL().includes(purseUrl(request.url).path));
+        const route: Route[] = Route.list.filter(route=>route.URL().includes(parseUrl(request.url).path));
         console.log(`>> ${request.method} request to "${route[0].PATH()}".`);
         await response.setFile(route[0].PATH());
         response.respond();
