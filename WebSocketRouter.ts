@@ -4,7 +4,7 @@
  * @author AO2324(AO2324-00)
  * @Date   2021-09-16
  */
-import { default_onmessage }  from "./mod.ts"
+import { WebSocket, default_onmessage, default_onopen }  from "./mod.ts"
 
 /**
  * WebSocket通信のハンドリングを行うクラス
@@ -20,10 +20,10 @@ export class WebSocketRoute {
     /** クライアントからメッセージを受け付けた時に呼ばれる処理 */
     #onmessage: Function;
 
-    constructor(onmessage?: Function, onopen?: Function, onclose?: Function) {
-        this.#onopen = onopen || function(){};
-        this.#onclose = onclose || function(){};
-        this.#onmessage = onmessage || default_onmessage;
+    constructor(event?: { [key:string]: Function; }) {
+        this.#onopen = event?.onopen || default_onopen;
+        this.#onclose = event?.onclose || function(){};
+        this.#onmessage = event?.onmessage || default_onmessage;
     }
 
     /**
@@ -86,7 +86,7 @@ export class WebSocketClient {
         this.#id = WebSocketClient.lastInsertedId++;
         this.#tags = tags || [];
         this.#author = author;
-        WebSocketClient.list[this.#id];
+        WebSocketClient.list[this.#id] = this;;
     }
 
     /** クライアントIDのゲッター */
@@ -105,7 +105,7 @@ export class WebSocketClient {
     }
 
     /** クライアントと紐づけられたタグのセッター */
-    setTags(...tags): void {
+    setTags(...tags: string[]): void {
         this.#tags = tags;
     }
 
@@ -124,7 +124,7 @@ export class WebSocketClient {
      * @param message 送信するテキスト
      * @param tags タグを指定した場合、それをすべて含むクライアントにのみ送信する。
      */
-    send(message: string, ...tags): void {
+    send(message: string, ...tags: string[]): void {
         const members: WebSocketClient[] = this.getMembers(...tags);
         members.forEach(member=>member.author.send(message));
     }

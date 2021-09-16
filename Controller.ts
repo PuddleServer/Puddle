@@ -52,14 +52,14 @@ function controller(request: ServerRequest, process: Function) {
  */
 async function webSocketController(request: ServerRequest, wsRoute: WebSocketRoute) {
     if (acceptable(request)) {
-        const webSocket = await acceptWebSocket({
+        const webSocket: WebSocket = await acceptWebSocket({
             conn: request.conn,
             bufReader: request.r,
             bufWriter: request.w,
             headers: request.headers,
         });
-        const client = new WebSocketClient(request, webSocket);
-        wsRoute.onopen()(client);
+        const client: WebSocketClient = new WebSocketClient(webSocket);
+        wsRoute.onopen()(request, client);
         for await (const message of webSocket) {
             if (typeof message === "string") {
                 wsRoute.onmessage()(request, client, message);

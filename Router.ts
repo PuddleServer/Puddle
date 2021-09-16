@@ -177,8 +177,8 @@ export class Route {
      * WebSocket通信の場合に呼び出されるメソッド
      * @returns WebSocketRouteを返す
      */
-    WebSocket(): WebSocketRoute {
-        if(!this.#wsRoute) this.#wsRoute = new WebSocketRoute();
+    WebSocket(event?: { [key:string]: Function; }): WebSocketRoute {
+        if(!this.#wsRoute) this.#wsRoute = new WebSocketRoute(event);
         return this.#wsRoute;
     }
 
