@@ -33,9 +33,12 @@ export class Route {
     /** DELETEリクエスト時の処理まとめた関数 */
     #DELETE: Function;
 
+    /** PATCHリクエスト時の処理まとめた関数 */
+    #PATCH: Function;
+
     #wsRoute: WebSocketRoute | undefined;
 
-    constructor(PATH: string, URL: string[] = [], GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null) {
+    constructor(PATH: string, URL: string[] = [], GET?: Function | null, POST?: Function | null, PUT?: Function | null, DELETE?: Function | null, PATCH?: Function | null) {
         if(Route.isThePathInUse(PATH)) {
             throw new Error(`\n[ Error ]\n
             The path "${PATH}" is already in use.\n
@@ -50,6 +53,7 @@ export class Route {
         this.#PUT = PUT || process_502;
         this.#POST = POST || process_502;
         this.#DELETE = DELETE || process_502;
+        this.#PATCH = PATCH || process_502;
 
         this.#wsRoute = undefined;
         Route.list.push(this);
@@ -142,6 +146,22 @@ export class Route {
         if(!process) return this.#DELETE;
 
         this.#DELETE = process;
+        return this;
+
+    }
+
+    /**
+     * PATCHの取得、設定を行う。
+     * @param process 処理内容を記述した関数。
+     * @returns 引数がない場合はPATCHを、ある場合はthisを返す。
+     */
+    PATCH(): Function;
+    PATCH(process: Function): Route;
+    PATCH(process?: Function): Function | Route {
+
+        if(!process) return this.#PATCH;
+
+        this.#PATCH = process;
         return this;
 
     }
