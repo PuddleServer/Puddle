@@ -2,10 +2,10 @@
  * ルーティングを行うクラスファイル。
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-09
+ * @Date   2021-09-16
  */
 
-import { ServerRequest, default_get, default_error } from "./mod.ts"
+import { WebSocketRoute, ServerRequest, default_get, default_error } from "./mod.ts"
 
 export class Route {
 
@@ -33,9 +33,12 @@ export class Route {
     /** DELETEリクエスト時の処理まとめた関数 */
     #DELETE: Function;
 
-    isWebSocket: boolean;
+    /** PATCHリクエスト時の処理まとめた関数 */
+    #PATCH: Function;
 
-    constructor(PATH: string, URL: string[] = [], GET?: Function | null, PUT?: Function | null, POST?: Function | null, DELETE?: Function | null) {
+    #wsRoute: WebSocketRoute | undefined;
+
+    constructor(PATH: string, URL: string[] = [], GET?: Function | null, POST?: Function | null, PUT?: Function | null, DELETE?: Function | null, PATCH?: Function | null) {
         if(Route.isThePathInUse(PATH)) {
             throw new Error(`\n[ Error ]\n
             The path "${PATH}" is already in use.\n
@@ -50,8 +53,9 @@ export class Route {
         this.#PUT = PUT || process_502;
         this.#POST = POST || process_502;
         this.#DELETE = DELETE || process_502;
+        this.#PATCH = PATCH || process_502;
 
-        this.isWebSocket = false;
+        this.#wsRoute = undefined;
         Route.list.push(this);
     }
 
@@ -85,16 +89,14 @@ export class Route {
     /**
      * GETの取得、設定を行う。
      * @param process 処理内容を記述した関数。
-     * @param isWebSocket WebSocketの処理かどうか。
      * @returns 引数がない場合はGETを、ある場合はthisを返す。
      */
     GET(): Function;
-    GET(process: Function, isWebSocket?: boolean): Route;
-    GET(process?: Function, isWebSocket?: boolean): Function | Route {
+    GET(process: Function): Route;
+    GET(process?: Function): Function | Route {
 
         if(!process) return this.#GET;
 
-        this.isWebSocket = Boolean(isWebSocket);
         this.#GET = process;
         return this;
 
@@ -107,7 +109,7 @@ export class Route {
      */
     PUT(): Function;
     PUT(process: Function): Route;
-    PUT(process?: Function, isWebSocket?: false): Function | Route {
+    PUT(process?: Function): Function | Route {
 
         if(!process) return this.#PUT;
 
@@ -123,7 +125,7 @@ export class Route {
      */
     POST(): Function;
     POST(process: Function): Route;
-    POST(process?: Function, isWebSocket?: false): Function | Route {
+    POST(process?: Function): Function | Route {
 
         if(!process) return this.#POST;
 
@@ -139,13 +141,45 @@ export class Route {
      */
     DELETE(): Function;
     DELETE(process: Function): Route;
-    DELETE(process?: Function, isWebSocket?: false): Function | Route {
+    DELETE(process?: Function): Function | Route {
 
         if(!process) return this.#DELETE;
 
         this.#DELETE = process;
         return this;
 
+    }
+
+    /**
+     * PATCHの取得、設定を行う。
+     * @param process 処理内容を記述した関数。
+     * @returns 引数がない場合はPATCHを、ある場合はthisを返す。
+     */
+    PATCH(): Function;
+    PATCH(process: Function): Route;
+    PATCH(process?: Function): Function | Route {
+
+        if(!process) return this.#PATCH;
+
+        this.#PATCH = process;
+        return this;
+
+    }
+
+    /**
+     * WebSocket通信かどうか
+     */
+    get isWebSocket() {
+        return Boolean(this.#wsRoute);
+    }
+
+    /**
+     * WebSocket通信の場合に呼び出されるメソッド
+     * @returns WebSocketRouteを返す
+     */
+    WebSocket(event?: { [key:string]: Function; }): WebSocketRoute {
+        if(!this.#wsRoute) this.#wsRoute = new WebSocketRoute(event);
+        return this.#wsRoute;
     }
 
     /**

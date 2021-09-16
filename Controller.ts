@@ -5,7 +5,7 @@
  * @Date   2021-09-09
  */
 import {
-    System, ServerRequest, SystemResponse, Route,
+    System, ServerRequest, SystemResponse, Route, WebSocketRoute, WebSocketClient,
     acceptWebSocket, isWebSocketCloseEvent, isWebSocketPingEvent, WebSocket, acceptable
 } from "./mod.ts"
 
@@ -17,7 +17,7 @@ import {
 export function control(request: ServerRequest, route: Route): void {
     switch (request.method) {
         case "GET":
-            if(route.isWebSocket) webSocketController(request, route.GET);
+            if(route.isWebSocket) webSocketController(request, route.WebSocket());
             else controller(request, route.GET());
             break;
         case "PUT":
@@ -50,14 +50,25 @@ function controller(request: ServerRequest, process: Function) {
  * @param request リクエストオブジェクト。
  * @param process 実行する処理。
  */
-async function webSocketController(request: ServerRequest, process: Function) {
+async function webSocketController(request: ServerRequest, wsRoute: WebSocketRoute) {
     if (acceptable(request)) {
-        const webSocket = await acceptWebSocket({
+        const webSocket: WebSocket = await acceptWebSocket({
             conn: request.conn,
             bufReader: request.r,
             bufWriter: request.w,
             headers: request.headers,
         });
-        process(webSocket);
+        const client: WebSocketClient = new WebSocketClient(webSocket);
+        wsRoute.onopen()(request, client);
+        for await (const message of webSocket) {
+            if (typeof message === "string") {
+                wsRoute.onmessage()(request, client, message);
+            } else if (isWebSocketCloseEvent(message)) {
+                wsRoute.onclose()(request, client);
+                delete WebSocketClient.list[client.id];
+                break;
+            }
+        }
+    
     }
 }

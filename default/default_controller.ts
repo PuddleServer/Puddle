@@ -1,4 +1,10 @@
-import { ServerRequest, SystemResponse, System, Route, parseUrl } from "../mod.ts"
+/**
+ * サーバーの初期設定時の処理
+ * @author Daruo(KINGVOXY)
+ * @author AO2324(AO2324-00)
+ * @Date   2021-09-16
+ */
+import { ServerRequest, SystemResponse, System, Route, parseUrl, WebSocketClient } from "../mod.ts"
 
 export function redirect(url: string): Function {
     return function(request: ServerRequest, response: SystemResponse): void {
@@ -9,7 +15,7 @@ export function redirect(url: string): Function {
                 location: url,
             }),
         }
-        response.respond();
+        response.send();
     }
 }
 
@@ -18,7 +24,7 @@ export function default_get(): Function {
         const route: Route[] = Route.list.filter(route=>route.URL().includes(parseUrl(request.url).path));
         console.log(`>> ${request.method} request to "${route[0].PATH()}".`);
         await response.setFile(route[0].PATH());
-        response.respond();
+        response.send();
     }
 }
 
@@ -42,6 +48,14 @@ export function default_error(status: number, description: string): Function {
         `;
         await response.setText(html, status, description);
         response.headers.set('Content-Type', 'text/html');
-        response.respond();
+        response.send();
     }
+}
+
+export function default_onopen(request: ServerRequest, client: WebSocketClient): void {
+    console.log(`>> WebSocket opened with "${request.url}". Connections ${client.getMembers().length}`);
+}
+
+export function default_onmessage(request: ServerRequest, client: WebSocketClient, message: string): void {
+    client.send(message);
 }
