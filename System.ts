@@ -2,7 +2,7 @@
  * 実行クラス
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-09
+ * @Date   2021-09-16
  */
 
 import {
@@ -47,7 +47,7 @@ export class SystemResponse {
         this.headers = new Headers();
         this.response = {
             status: 500,
-            headers: undefined,
+            headers: this.headers,
             body: "500 Internal Server Error"
         }
 
@@ -128,7 +128,7 @@ export class SystemResponse {
     /**
      * ServerRequestのrespondを実行する。
      */
-    respond(): void {
+    send(): void {
         if(this.isForceDownload) {
             this.headers.set('Content-Type', 'application/octet-stream');
         }

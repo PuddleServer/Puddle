@@ -19,6 +19,7 @@ export { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts"
 
 export * from "./System.ts"
 export * from "./Router.ts"
+export * from "./WebSocketRouter.ts"
 export * from "./Controller.ts"
 export * from "./HtmlCompiler.ts"
 
