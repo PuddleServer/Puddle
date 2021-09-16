@@ -6,7 +6,7 @@
  */
 
 import {
-    serve, Server, ServerRequest, Response,
+    serve, Server, HTTPOptions, HTTPSOptions, _parseAddrFromStr, ServerRequest, Response,
     Cookie, getCookies, setCookie, deleteCookie,
     acceptWebSocket, isWebSocketCloseEvent, isWebSocketPingEvent, WebSocket,
     lookup,
@@ -283,13 +283,19 @@ export class System {
         return Route.getRouteByPath(path);
     }
 
-    static async listen(startFunction?: Function): Promise<StartupConfig> {
+    static async listen(addr: number | string | HTTPOptions, startFunction?: Function): Promise<StartupConfig> {
+        if (typeof addr === "string") {
+            // あとでファイルパスからの読み込みに変更
+            addr = _parseAddrFromStr(addr);
+        } else if(typeof addr === "number") {
+            addr = {port: addr};
+        }
         const startupConfig: StartupConfig = {
-            hostname: "localhost",
-            port: 8080,
+            hostname: addr.hostname || "localhost",
+            port: addr.port,
         }
         System.close();
-        System.server = serve({hostname: startupConfig.hostname, port: startupConfig.port || 8080});
+        System.server = serve(addr);
         if(startFunction) startFunction(startupConfig);
         for await (const request of System.server) {
             //handler(request);

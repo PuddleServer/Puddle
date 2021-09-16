@@ -4,8 +4,8 @@
  * @author AO2324(AO2324-00)
  * @Date   2021-09-09
  */
-export { serve, Server, ServerRequest } from "https://deno.land/std@0.106.0/http/server.ts"
-export type { Response } from "https://deno.land/std@0.106.0/http/server.ts"
+export { serve, Server, ServerRequest, _parseAddrFromStr } from "https://deno.land/std@0.106.0/http/server.ts"
+export type { Response , HTTPOptions, HTTPSOptions} from "https://deno.land/std@0.106.0/http/server.ts"
 export { getCookies, setCookie, deleteCookie } from "https://deno.land/std@0.106.0/http/cookie.ts"
 export type { Cookie } from "https://deno.land/std@0.106.0/http/cookie.ts"
 export {
