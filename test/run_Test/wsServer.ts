@@ -1,7 +1,7 @@
-import { System, StartupConfig } from "../../System.ts"
+import { System, Config } from "../../System.ts"
 
 System.createRoute("./assets/webSocket.html").URL("/", "/トップ");
 System.createRoute("/ws").WebSocket();
-System.listen((conf: StartupConfig)=>{
+System.listen(8080, (conf: Config)=>{
     console.log(`The server running on http://${conf.hostname}:${conf.port}`);
 });
