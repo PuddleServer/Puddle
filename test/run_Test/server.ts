@@ -1,6 +1,6 @@
-import { System, StartupConfig } from "../../System.ts"
+import { System, Config } from "../../System.ts"
 
 System.createRoute("./assets/index.html").URL("/", "/トップ");
-System.listen(8080, (conf: StartupConfig)=>{
-    console.log(`The server running on http://${conf.hostname}:${conf.port}`);
+System.listen("./.env", (conf: Config)=>{
+    console.log(`The server running on http://${conf.SERVER.HOSTNAME}:${conf.SERVER.PORT}`);
 });
