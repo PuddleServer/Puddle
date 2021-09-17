@@ -79,6 +79,8 @@ export class WebSocketClient {
     #id: number;
 
     #tags: string[];
+
+    #attribute: Map<string, any>;
     
     #author: WebSocket;
 
@@ -107,6 +109,16 @@ export class WebSocketClient {
     /** クライアントと紐づけられたタグのセッター */
     setTags(...tags: string[]): void {
         this.#tags = tags;
+    }
+
+    /** 属性の取得 */
+    getAttribute(key: string): any {
+        return this.#attribute.get(key);
+    }
+
+    /** 属性の設定 */
+    setAttribute(key: string, value: any): Map<string, any> {
+        return this.#attribute.set(key, value);
     }
 
     /** 
