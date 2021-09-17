@@ -132,12 +132,22 @@ export class WebSocketClient {
     }
 
     /**
-     * メッセージをクライアント全員に送信するメソッド
+     * メッセージをクライアント全員に送信する
      * @param message 送信するテキスト
      * @param tags タグを指定した場合、それをすべて含むクライアントにのみ送信する。
      */
     send(message: string, ...tags: string[]): void {
         const members: WebSocketClient[] = this.getMembers(...tags);
+        members.forEach(member=>member.author.send(message));
+    }
+
+    /**
+     * メッセージを自分以外のクライアント全員に送信する
+     * @param message 送信するテキスト
+     * @param tags タグを指定した場合、それをすべて含むクライアントにのみ送信する。
+     */
+    sendOtherClients(message: string, ...tags: string[]): void {
+        const members: WebSocketClient[] = this.getMembers(...tags).filter(client=>client.id!=this.id);
         members.forEach(member=>member.author.send(message));
     }
 
