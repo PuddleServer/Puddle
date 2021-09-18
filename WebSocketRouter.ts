@@ -156,7 +156,7 @@ export class WebSocketClient {
      * @param members 指定した場合は配列に含まれるクライアントに送信する。
      */
     send(message: string, members?: WebSocketClient[]): void {
-        if(!members) members = this.#author;
+        if(!members) members = [this];
         members.forEach(member=>member.author.send(message));
     }
 
