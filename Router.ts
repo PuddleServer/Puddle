@@ -5,7 +5,7 @@
  * @Date   2021-09-16
  */
 
-import { WebSocketRoute, ServerRequest, default_get, default_error } from "./mod.ts"
+import { WebSocketRoute, default_get, default_error } from "./mod.ts"
 
 export class Route {
 
