@@ -5,8 +5,8 @@
  * @Date   2021-09-09
  */
 import {
-    System, ServerRequest, SystemResponse, Route, WebSocketRoute, WebSocketClient,
-    acceptWebSocket, isWebSocketCloseEvent, isWebSocketPingEvent, WebSocket, acceptable
+    ServerRequest, SystemResponse, Route, WebSocketRoute, WebSocketClient,
+    acceptWebSocket, isWebSocketCloseEvent, WebSocket, acceptable
 } from "./mod.ts"
 
 /**

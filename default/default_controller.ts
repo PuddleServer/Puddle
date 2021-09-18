@@ -8,13 +8,8 @@ import { ServerRequest, SystemResponse, System, Route, parseUrl, WebSocketClient
 
 export function redirect(url: string): Function {
     return function(request: ServerRequest, response: SystemResponse): void {
-        response.response =
-        {
-            status: 302,
-            headers: new Headers({
-                location: url,
-            }),
-        }
+        response.status = 302;
+        response.headers.set("Location", url);
         response.send();
     }
 }

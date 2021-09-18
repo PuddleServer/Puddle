@@ -5,8 +5,8 @@
  * @Date   2021-09-17
  */
 import {
-    _parseAddrFromStr, ServerRequest, Response,
-    Cookie, setCookie, deleteCookie,
+    ServerRequest, Response,
+    Cookie, setCookie,
     lookup,
     htmlCompile
 } from "./mod.ts"

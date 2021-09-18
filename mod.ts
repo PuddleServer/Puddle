@@ -4,14 +4,13 @@
  * @author AO2324(AO2324-00)
  * @Date   2021-09-17
  */
-export { serve, serveTLS, Server, ServerRequest, _parseAddrFromStr } from "https://deno.land/std@0.106.0/http/server.ts"
+export { serve, serveTLS, Server, ServerRequest } from "https://deno.land/std@0.106.0/http/server.ts"
 export type { Response , HTTPOptions, HTTPSOptions} from "https://deno.land/std@0.106.0/http/server.ts"
-export { getCookies, setCookie, deleteCookie } from "https://deno.land/std@0.106.0/http/cookie.ts"
+export { getCookies, setCookie } from "https://deno.land/std@0.106.0/http/cookie.ts"
 export type { Cookie } from "https://deno.land/std@0.106.0/http/cookie.ts"
 export {
     acceptWebSocket,
     isWebSocketCloseEvent,
-    isWebSocketPingEvent,
     acceptable
 } from "https://deno.land/std@0.106.0/ws/mod.ts"
 export type { WebSocket } from "https://deno.land/std@0.106.0/ws/mod.ts"
