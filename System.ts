@@ -2,11 +2,12 @@
  * 実行クラス
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-16
+ * @Date   2021-09-17
  */
 
 import {
-    serve, Server, ServerRequest, Response,
+    serve, serveTLS, Server, HTTPOptions, HTTPSOptions, _parseAddrFromStr, ServerRequest, Response, SystemResponse,
+    ConfigReader,
     Cookie, getCookies, setCookie, deleteCookie,
     acceptWebSocket, isWebSocketCloseEvent, isWebSocketPingEvent, WebSocket,
     lookup,
@@ -14,128 +15,7 @@ import {
     htmlCompile
 } from "./mod.ts"
 
-/**
- * 起動構成
- */
-export interface StartupConfig {
-    hostname?: string;
-    port?: number;
-}
-
-/**
- * Serverのresponse関連の機能をまとめたクラス。
- */
-export class SystemResponse {
-
-    /** requestを格納する変数 */
-    #request: ServerRequest;
-
-    /** presetを格納する変数 */
-    #preset: { [key: string]: any; };
-
-    /** レスポンスオブジェクト */
-    response: Response;
-
-    headers: Headers;
-
-    /** 強制ダウンロードかどうか（初期値はfalse） */
-    isForceDownload: boolean;
-
-    constructor(request: ServerRequest) {
-        this.#request = request;
-
-        this.headers = new Headers();
-        this.response = {
-            status: 500,
-            headers: this.headers,
-            body: "500 Internal Server Error"
-        }
-
-        this.#preset = {};
-
-        this.isForceDownload = false;
-    }
-
-    /**
-     * Responseオブジェクトにテキストを設定する。
-     * @param text クライアントに返す文字列。
-     * @param status ステータスコード（デフォルトは200）。
-     * @param statusText ステータステキスト。
-     */
-    setText(text: string, status: number = 200, statusText: string | null = null): void {
-        this.response.body = htmlCompile(text, this.#preset);
-        this.response.status = status;
-        if(statusText != null) this.response.statusText = statusText;
-        else if(this.response.statusText != undefined) delete this.response.statusText;
-        this.headers.set('Content-Type', 'text/plain');
-    }
-
-    /**
-     * Responseオブジェクトにファイルを設定する。
-     * @param filePath クライアントに返すファイルのパス。
-     * @param status ステータスコード（デフォルトは200）。
-     * @param statusText ステータステキスト。
-     */
-    async setFile(filePath: string, status: number = 200, statusText: string | null = null): Promise<void> {
-        const file = await Deno.open(filePath);
-        let file_data: string;
-        try {
-            const decoder = new TextDecoder('utf-8');
-            file_data = decoder.decode(await Deno.readAll(file));
-            this.setText(file_data, status, statusText);
-            const extensions: false | string = lookup(filePath);
-            if(extensions) this.headers.set('Content-Type', extensions);
-        } catch {
-            console.log(`\n[ warning ]\n
-            The "${filePath}" file could not be read.\n
-            "${filePath}"ファイルが読み取れませんでした。\n`);
-            this.setText("500 Internal Server Error", 500);
-        }
-    }
-
-    /**
-     * セットしたファイルや文字列に変数が埋め込まれていた場合に、参照されるオブジェクトを定義する。
-     * @param object 参照される変数を格納したオブジェクト。
-     */
-    preset(object: { [key: string]: any; }): void {
-        this.#preset = object;
-    }
-
-    /**
-     * Cookieのセットを行う。
-     * @param cookie 
-     */
-    setCookie(cookie: Cookie): void {
-        setCookie(this.response, cookie);
-    }
-
-    /**
-     * Cookieの削除を行う。
-     * @param name 削除するCookie名。
-     */
-    deleteCookie(
-        name: string,
-        attributes?: { path?: string; domain?: string }
-    ): void {
-        this.setCookie({
-            name: name,
-            value: "",
-            expires: new Date(0),
-            ...attributes,
-        });
-    }
-
-    /**
-     * ServerRequestのrespondを実行する。
-     */
-    send(): void {
-        if(this.isForceDownload) {
-            this.headers.set('Content-Type', 'application/octet-stream');
-        }
-        this.response.headers = this.headers;
-        this.#request.respond(this.response);
-    }
-}
+export type Config = {[key:string]: any; };
 
 /**
  * URLを扱いやすくするクラス。
@@ -186,9 +66,6 @@ export class System {
 
     /** サーバーを保持する変数 */
     static server: Server;
-
-    /** 起動構成を保持する変数 */
-    static startupConfig: StartupConfig;
 
     /** 開発者が追加したモジュールを保持する */
     static modules: { [key: string]: any; } = {};
@@ -245,17 +122,15 @@ export class System {
     /**
      * サーバーへのリクエストを処理するルートを複数同時に作成する。
      * @param pathsOrRoutes アクセス先のパス、もしくはRouteオブジェクトの配列。
-     * @returns Routeオブジェクト。
+     * @returns Route配列
      */
-    static createRoutes(...pathsOrRoutes: (string | Route)[]): Promise<{ [key: string]: Route; }> {
+    static createRoutes(...pathsOrRoutes: (string | Route)[]): Promise<Route[]> {
 
-        const routeList: { [key: string]: Route; } = {};
         for(let pathOrRoute of pathsOrRoutes) {
             const route: Route = System.createRoute(pathOrRoute);
-            if(route) routeList[route.PATH()] = route;
         }
 
-        return new Promise((resolve) => resolve(routeList));
+        return new Promise((resolve) => resolve(Route.list));
     }
 
     /**
@@ -283,22 +158,44 @@ export class System {
         return Route.getRouteByPath(path);
     }
 
-    static async listen(startFunction?: Function): Promise<StartupConfig> {
-        const startupConfig: StartupConfig = {
-            hostname: "localhost",
-            port: 8080,
-        }
+    static async listen(option: number | string | HTTPOptions, startFunction?: Function): Promise<void> {
+        const httpOptions: HTTPOptions = {hostname: "localhost", port: 8080};
+        if (typeof option === "string") {
+            const conf: Config = await ConfigReader.read(option);
+            httpOptions.hostname = conf.HOSTNAME || conf.hostname || conf.SERVER.HOSTNAME || conf.SERVER.hostname || conf.server.HOSTNAME || conf.server.hostname;
+            httpOptions.port = conf.PORT || conf.port || conf.SERVER.PORT || conf.SERVER.port || conf.server.PORT || conf.server.port;
+            if(startFunction) startFunction(conf);
+        } else if(typeof option === "number") {
+            httpOptions.hostname = "localhost";
+            httpOptions.port = option;
+            if(startFunction) startFunction(httpOptions);
+        } else if(startFunction) startFunction(httpOptions);
         System.close();
-        System.server = serve({hostname: startupConfig.hostname, port: startupConfig.port || 8080});
-        if(startFunction) startFunction(startupConfig);
+        System.server = serve(httpOptions);
         for await (const request of System.server) {
-            //handler(request);
             request.url = decodeURIComponent(request.url);
             const route: Route = Route.getRouteByUrl(parseUrl(request.url).path) || Route["404"];
             control(request, route);
         }
+    }
 
-        return new Promise(resolve=>resolve(startupConfig));
+    static async listenTLS(option: string | HTTPSOptions, startFunction?: Function): Promise<void> {
+        const httpsOptions: HTTPSOptions = {hostname: "localhost", port: 8080, certFile: "", keyFile: ""};
+        if (typeof option === "string") {
+            const conf: Config = await ConfigReader.read(option);
+            httpsOptions.hostname = conf.HOSTNAME || conf.hostname || conf.SERVER.HOSTNAME || conf.SERVER.hostname || conf.server.HOSTNAME || conf.server.hostname;
+            httpsOptions.port = conf.PORT || conf.port || conf.SERVER.PORT || conf.SERVER.port || conf.server.PORT || conf.server.port;
+            httpsOptions.certFile = conf.CERTFILE || conf.certFile || conf.certfile || conf.SERVER.CERTFILE || conf.SERVER.certFile || conf.SERVER.certfile || conf.server.CERTFILE || conf.server.certFile || conf.server.certfile;
+            httpsOptions.keyFile = conf.KEYFILE || conf.keyFile || conf.keyfile || conf.SERVER.KEYFILE || conf.SERVER.keyFile || conf.SERVER.keyfile || conf.server.KEYFILE || conf.server.keyFile || conf.server.keyfile;
+            if(startFunction) startFunction(conf);
+        }  else if(startFunction) startFunction(httpsOptions);
+        System.close();
+        System.server = serveTLS(httpsOptions);
+        for await (const request of System.server) {
+            request.url = decodeURIComponent(request.url);
+            const route: Route = Route.getRouteByUrl(parseUrl(request.url).path) || Route["404"];
+            control(request, route);
+        }
     }
 
     static close(): void {
