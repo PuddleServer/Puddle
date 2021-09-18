@@ -57,6 +57,16 @@ export function parseUrl(url: string) {
     return new URL(url);
 }
 
+export interface RouteOption {
+    PATH: string;
+    URL?: string[];
+    GET?: Function;
+    POST?: Function;
+    PUT?: Function;
+    DELETE?: Function;
+    PATCH?: Function;
+}
+
 export class System {
 
     /** サーバーを保持する変数 */
@@ -119,10 +129,19 @@ export class System {
      * @param pathsOrRoutes アクセス先のパス、もしくはRouteオブジェクトの配列。
      * @returns Route配列
      */
-    static createRoutes(...pathsOrRoutes: (string | Route)[]): Promise<Route[]> {
+    static createRoutes(...pathsOrRoutes: (string | RouteOption)[]): Promise<Route[]> {
 
         for(let pathOrRoute of pathsOrRoutes) {
-            const route: Route = System.createRoute(pathOrRoute);
+            if(typeof pathOrRoute == "string") System.createRoute(pathOrRoute);
+            else new Route(
+                pathOrRoute.PATH,
+                pathOrRoute.URL || [],
+                pathOrRoute.GET || null,
+                pathOrRoute.POST || null,
+                pathOrRoute.PUT || null,
+                pathOrRoute.DELETE || null,
+                pathOrRoute.PATCH || null
+            );
         }
 
         return new Promise((resolve) => resolve(Route.list));
