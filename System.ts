@@ -6,13 +6,8 @@
  */
 
 import {
-    serve, serveTLS, Server, HTTPOptions, HTTPSOptions, _parseAddrFromStr, ServerRequest, Response, SystemResponse,
-    ConfigReader,
-    Cookie, getCookies, setCookie, deleteCookie,
-    acceptWebSocket, isWebSocketCloseEvent, isWebSocketPingEvent, WebSocket,
-    lookup,
-    Route, control, default_error,
-    htmlCompile
+    serve, serveTLS, Server, HTTPOptions, HTTPSOptions,
+    Route, control, ConfigReader,
 } from "./mod.ts"
 
 export type Config = {[key:string]: any; };
