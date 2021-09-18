@@ -53,7 +53,7 @@ export function default_error(status: number, description: string): Function {
 }
 
 export function default_onopen(request: ServerRequest, client: WebSocketClient): void {
-    console.log(`>> WebSocket opened with "${request.url}". Connections ${client.getAllMembers().length}`);
+    console.log(`>> WebSocket opened with "${request.url}". Connections ${client.getAllClients().length}`);
 }
 
 export function default_onmessage(request: ServerRequest, client: WebSocketClient, message: string): void {
