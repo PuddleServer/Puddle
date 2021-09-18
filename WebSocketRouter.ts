@@ -79,12 +79,15 @@ export class WebSocketClient {
     #id: number;
 
     #tags: string[];
+
+    #attribute: Map<string, any>;
     
     #author: WebSocket;
 
     constructor(author: WebSocket, tags?: string[]) {
         this.#id = WebSocketClient.lastInsertedId++;
         this.#tags = tags || [];
+        this.#attribute = new Map<string, any>();
         this.#author = author;
         WebSocketClient.list[this.#id] = this;;
     }
@@ -109,24 +112,62 @@ export class WebSocketClient {
         this.#tags = tags;
     }
 
+    /** 属性の取得 */
+    getAttribute(key: string): any {
+        return this.#attribute.get(key);
+    }
+
+    /** 属性の設定 */
+    setAttribute(key: string, value: any): Map<string, any> {
+        return this.#attribute.set(key, value);
+    }
+
+    /**
+     * WebSocketClientのゲッター
+     * @param id クライアントID
+     * @returns WebSocketClient
+     */
+    getMemberById(id: number): WebSocketClient {
+        return WebSocketClient.list[id];
+    }
+
+    /**
+     * WebSocketClientのゲッター
+     * @returns 全てのクライアント
+     */
+    getAllMembers(): WebSocketClient[] {
+        return Object.values(WebSocketClient.list);
+    }
+
     /** 
      * WebSocketClientのゲッター
-     * （引数にタグを指定すると、指定したすべてのタグを持っているWebSocketClientを返す
+     * @param tags 指定したすべてのタグを持っているWebSocketClientを返す
+     * @returns WebSocketClient配列
      */
-    getMembers(...tags: string[]): WebSocketClient[] {
+    getMembersByTagName(...tags: string[]): WebSocketClient[] {
         const allMembers: WebSocketClient[] = Object.values(WebSocketClient.list);
         if(!tags.length) return allMembers;
         return allMembers.filter(member=>tags.every(el=>member.getTags().includes(el)));
     }
 
     /**
-     * メッセージをクライアント全員に送信するメソッド
+     * メッセージを自分に送信する。
      * @param message 送信するテキスト
-     * @param tags タグを指定した場合、それをすべて含むクライアントにのみ送信する。
+     * @param members 指定した場合は配列に含まれるクライアントに送信する。
      */
-    send(message: string, ...tags: string[]): void {
-        const members: WebSocketClient[] = this.getMembers(...tags);
+    send(message: string, members?: WebSocketClient[]): void {
+        if(!members) members = [this];
         members.forEach(member=>member.author.send(message));
+    }
+
+    /**
+     * メッセージを全員に送信する。
+     * @param message 送信するテキスト
+     * @param isNotMyself 自分自身を含むかどうか
+     */
+    sendAll(message: string, isNotMyself?: boolean): void {
+        const members: WebSocketClient[] = (isNotMyself)? this.getAllMembers().filter(client=>client.id!=this.#id) : this.getAllMembers();
+        members.forEach(member=>member.send(message));
     }
 
 }
