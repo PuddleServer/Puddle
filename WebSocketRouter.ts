@@ -127,7 +127,7 @@ export class WebSocketClient {
      * @param id クライアントID
      * @returns WebSocketClient
      */
-    getMemberById(id: number): WebSocketClient {
+    getClientById(id: number): WebSocketClient {
         return WebSocketClient.list[id];
     }
 
@@ -135,7 +135,7 @@ export class WebSocketClient {
      * WebSocketClientのゲッター
      * @returns 全てのクライアント
      */
-    getAllMembers(): WebSocketClient[] {
+    getAllClients(): WebSocketClient[] {
         return Object.values(WebSocketClient.list);
     }
 
@@ -144,20 +144,20 @@ export class WebSocketClient {
      * @param tags 指定したすべてのタグを持っているWebSocketClientを返す
      * @returns WebSocketClient配列
      */
-    getMembersByTagName(...tags: string[]): WebSocketClient[] {
-        const allMembers: WebSocketClient[] = Object.values(WebSocketClient.list);
-        if(!tags.length) return allMembers;
-        return allMembers.filter(member=>tags.every(el=>member.getTags().includes(el)));
+    getClientsByTagName(...tags: string[]): WebSocketClient[] {
+        const allClients: WebSocketClient[] = Object.values(WebSocketClient.list);
+        if(!tags.length) return allClients;
+        return allClients.filter(client=>tags.every(el=>client.getTags().includes(el)));
     }
 
     /**
      * メッセージを自分に送信する。
      * @param message 送信するテキスト
-     * @param members 指定した場合は配列に含まれるクライアントに送信する。
+     * @param clients 指定した場合は配列に含まれるクライアントに送信する。
      */
-    send(message: string, members?: WebSocketClient[]): void {
-        if(!members) members = [this];
-        members.forEach(member=>member.author.send(message));
+    send(message: string, clients?: WebSocketClient[]): void {
+        if(!clients) clients = [this];
+        clients.forEach(client=>client.author.send(message));
     }
 
     /**
@@ -166,8 +166,8 @@ export class WebSocketClient {
      * @param isNotMyself 自分自身を含むかどうか
      */
     sendAll(message: string, isNotMyself?: boolean): void {
-        const members: WebSocketClient[] = (isNotMyself)? this.getAllMembers().filter(client=>client.id!=this.#id) : this.getAllMembers();
-        members.forEach(member=>member.send(message));
+        const clients: WebSocketClient[] = (isNotMyself)? this.getAllClients().filter(client=>client.id!=this.#id) : this.getAllClients();
+        clients.forEach(client=>client.send(message));
     }
 
 }
