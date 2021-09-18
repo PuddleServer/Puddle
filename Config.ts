@@ -21,7 +21,7 @@ export class ConfigReader {
     static decodeEnv(file_data: string): Config {
         const result: object = {};
         const data: string[][] = file_data.replace(/\s+#.*(?=\r?\n?)/g, "").split(/\r?\n/).map(data=>{
-            if(data[0] == '#') return [];
+            if(!data || data[0] == '#') return [];
             const index: number = data.indexOf("=");
             return [data.slice(0, index), data.slice(index+1)];
         }).filter(v=>v.length == 2);
