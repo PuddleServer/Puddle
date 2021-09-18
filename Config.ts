@@ -20,12 +20,13 @@ export class ConfigReader {
 
     static decodeEnv(file_data: string): Config {
         const result: object = {};
-        const data: string[][] = file_data.split(/\r?\n/).map(data=>{
+        const data: string[][] = file_data.replace(/\s+#.*(?=\r?\n?)/g, "").split(/\r?\n/).map(data=>{
+            if(data[0] == '#') return [];
             const index: number = data.indexOf("=");
             return [data.slice(0, index), data.slice(index+1)];
-        });
+        }).filter(v=>v.length == 2);
         for(let column of data) {
-            const key: string[] = column[0].split(/\./g);
+            const key: string[] = column[0].split(/\.|_/g);
             let value: any = result;
             for(let i in key) {
                 if(!value[key[i]]) value[key[i]] = {};

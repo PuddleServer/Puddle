@@ -87,6 +87,7 @@ export class WebSocketClient {
     constructor(author: WebSocket, tags?: string[]) {
         this.#id = WebSocketClient.lastInsertedId++;
         this.#tags = tags || [];
+        this.#attribute = new Map<string, any>();
         this.#author = author;
         WebSocketClient.list[this.#id] = this;;
     }
