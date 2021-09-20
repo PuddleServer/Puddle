@@ -118,12 +118,14 @@ export class SystemResponse {
     /**
      * ServerRequestのrespondを実行する。
      */
-    send(): void {
+    send(response?: string | Response): void {
         if(this.isForceDownload) {
             this.headers.set('Content-Type', 'application/octet-stream');
         }
         this.response.status = this.status;
         this.response.body = this.body;
+        if(typeof response == "string") this.setText(response);
+        else if(response) this.response = response;
         this.#request.respond(this.response);
     }
 }
