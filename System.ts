@@ -19,6 +19,7 @@ export class URL {
     #url: [string, string|undefined];
 
     constructor(url: string) {
+        url = decodeURIComponent(url);
         const index: number = url.indexOf('?');
         if(index < 0) this.#url = [url, undefined];
         else this.#url = [url.slice(0, index), url.slice(index+1)];
@@ -71,6 +72,12 @@ export class System {
 
     /** サーバーを保持する変数 */
     static server: Server;
+
+    static url: URL;
+
+    static getUrl(): URL {
+        return System.url;
+    }
 
     /** 開発者が追加したモジュールを保持する */
     static modules: { [key: string]: any; } = {};
@@ -187,8 +194,8 @@ export class System {
         System.close();
         System.server = serve(httpOptions);
         for await (const request of System.server) {
-            request.url = decodeURIComponent(request.url);
-            const route: Route = Route.getRouteByUrl(parseUrl(request.url).path) || Route["404"];
+            System.url = parseUrl(request.url);
+            const route: Route = Route.getRouteByUrl(System.url.path) || Route["404"];
             control(request, route);
         }
     }
