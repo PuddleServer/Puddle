@@ -124,9 +124,17 @@ export class System {
      * @param pathOrRoute 文字列の場合はそれをPATHとしたRouteを作成し追加、Routeの場合はそのまま追加する。
      * @returns 作成したRouteオブジェクトを返す。
      */
-    static createRoute(pathOrRoute: string | Route): Route {
+    static createRoute(pathOrRoute: string | RouteOption): Route {
 
-        const route = (typeof pathOrRoute == "string")? new Route(pathOrRoute) : pathOrRoute;
+        const route = (typeof pathOrRoute == "string")? new Route(pathOrRoute) : new Route(
+            pathOrRoute.PATH,
+            pathOrRoute.URL || [],
+            pathOrRoute.GET || null,
+            pathOrRoute.POST || null,
+            pathOrRoute.PUT || null,
+            pathOrRoute.DELETE || null,
+            pathOrRoute.PATCH || null
+        );
 
         return route;
     }
