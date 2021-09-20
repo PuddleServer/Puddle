@@ -50,6 +50,7 @@ export class Route {
         this.URL.apply(this, URL);
         this.#GET = GET || default_get();
         const process_502: Function = (this.#PATH == "502")? this.#GET : Route["502"].GET();
+        if(POST || PUT || DELETE || PATCH) this.#GET = process_502;
         this.#PUT = PUT || process_502;
         this.#POST = POST || process_502;
         this.#DELETE = DELETE || process_502;
