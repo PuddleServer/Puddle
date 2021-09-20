@@ -19,6 +19,7 @@ export class URL {
     #url: [string, string|undefined];
 
     constructor(url: string) {
+        url = decodeURIComponent(url);
         const index: number = url.indexOf('?');
         if(index < 0) this.#url = [url, undefined];
         else this.#url = [url.slice(0, index), url.slice(index+1)];
@@ -57,10 +58,26 @@ export function parseUrl(url: string) {
     return new URL(url);
 }
 
+export interface RouteOption {
+    PATH: string;
+    URL?: string[];
+    GET?: Function;
+    POST?: Function;
+    PUT?: Function;
+    DELETE?: Function;
+    PATCH?: Function;
+}
+
 export class System {
 
     /** サーバーを保持する変数 */
     static server: Server;
+
+    static url: URL;
+
+    static getUrl(): URL {
+        return System.url;
+    }
 
     /** 開発者が追加したモジュールを保持する */
     static modules: { [key: string]: any; } = {};
@@ -119,13 +136,22 @@ export class System {
      * @param pathsOrRoutes アクセス先のパス、もしくはRouteオブジェクトの配列。
      * @returns Route配列
      */
-    static createRoutes(...pathsOrRoutes: (string | Route)[]): Promise<Route[]> {
+    static createRoutes(...pathsOrRoutes: (string | RouteOption)[]): Route[] {
 
         for(let pathOrRoute of pathsOrRoutes) {
-            const route: Route = System.createRoute(pathOrRoute);
+            if(typeof pathOrRoute == "string") System.createRoute(pathOrRoute);
+            else new Route(
+                pathOrRoute.PATH,
+                pathOrRoute.URL || [],
+                pathOrRoute.GET || null,
+                pathOrRoute.POST || null,
+                pathOrRoute.PUT || null,
+                pathOrRoute.DELETE || null,
+                pathOrRoute.PATCH || null
+            );
         }
 
-        return new Promise((resolve) => resolve(Route.list));
+        return Route.list;
     }
 
     /**
@@ -168,8 +194,8 @@ export class System {
         System.close();
         System.server = serve(httpOptions);
         for await (const request of System.server) {
-            request.url = decodeURIComponent(request.url);
-            const route: Route = Route.getRouteByUrl(parseUrl(request.url).path) || Route["404"];
+            System.url = parseUrl(request.url);
+            const route: Route = Route.getRouteByUrl(System.url.path) || Route["404"];
             control(request, route);
         }
     }
