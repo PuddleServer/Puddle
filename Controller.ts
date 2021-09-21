@@ -5,8 +5,8 @@
  * @Date   2021-09-09
  */
 import {
-    ServerRequest, SystemResponse, Route, WebSocketRoute, WebSocketClient,
-    acceptWebSocket, isWebSocketCloseEvent, WebSocket, acceptable
+    System, RequestLog, ServerRequest, SystemResponse, Route, WebSocketRoute, WebSocketClient,
+    acceptWebSocket, isWebSocketCloseEvent, WebSocket, acceptable, parseUrl
 } from "./mod.ts"
 
 /**
@@ -15,6 +15,12 @@ import {
  * @param route Routeオブジェクト。
  */
 export function control(request: ServerRequest, route: Route): void {
+    System.record(new RequestLog(
+        route.PATH(),
+        request.method,
+        parseUrl(request.url).search?parseUrl(request.url).toString():parseUrl(request.url).path,
+        request.headers.get("Forwarded") || (request.conn.remoteAddr as Deno.NetAddr).hostname
+    ));
     switch (request.method) {
         case "GET":
             if(route.isWebSocket) webSocketController(request, route.WebSocket());

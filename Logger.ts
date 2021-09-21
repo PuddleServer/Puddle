@@ -61,16 +61,19 @@ export class Log {
 }
 
 export class RequestLog extends Log {
-    constructor(...data: string[]) {
-        super(...data);
-        super.fileName = "request.log";
-        super.header = ["Date", "Path", "Method", "URL", "Address"];
+    fileName = "request.log";
+    header = ["Date", "Path", "Method", "URL", "Address"];
+    constructor(Path: string, Method: string, URL: string, Address: string) {
+        super(Path, Method, URL, Address);
     }
 }
 
 export class ErrorLog extends Log {
     fileName: string = "error.log";
-    header: string[] = ["Date", "Type", "Message", "Position"];
+    header: string[] = ["Date", "Type", "Message"];
+    constructor(Type: "error" | "warning", Message: string) {
+        super(Type, Message);
+    }
 }
 
 export class Logger {

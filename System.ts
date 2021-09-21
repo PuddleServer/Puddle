@@ -7,7 +7,7 @@
 
 import {
     serve, serveTLS, Server, HTTPOptions, HTTPSOptions,
-    Route, control, ConfigReader,
+    Route, control, ConfigReader, Logger, Log
 } from "./mod.ts"
 
 export type Config = {[key:string]: any; };
@@ -72,6 +72,8 @@ export class System {
 
     /** サーバーを保持する変数 */
     static server: Server;
+
+    static logger: Logger;
 
     static url: URL;
 
@@ -189,16 +191,21 @@ export class System {
 
     static async listen(option: number | string | HTTPOptions, startFunction?: Function): Promise<void> {
         const httpOptions: HTTPOptions = {hostname: "localhost", port: 8080};
+        let logDirectoryPath: string = "./log";
         if (typeof option === "string") {
             const conf: Config = await ConfigReader.read(option);
             httpOptions.hostname = conf.HOSTNAME || conf.hostname || conf.SERVER.HOSTNAME || conf.SERVER.hostname || conf.server.HOSTNAME || conf.server.hostname;
             httpOptions.port = conf.PORT || conf.port || conf.SERVER.PORT || conf.SERVER.port || conf.server.PORT || conf.server.port;
+            logDirectoryPath = conf.LOG || conf.log || conf.SERVER.LOG || conf.SERVER.log || conf.server.LOG || conf.server.log || "./log";
             if(startFunction) startFunction(conf);
-        } else if(typeof option === "number") {
-            httpOptions.hostname = "localhost";
-            httpOptions.port = option;
+        } else {
+            if(typeof option === "number") {
+                httpOptions.hostname = "localhost";
+                httpOptions.port = option;
+            }
             if(startFunction) startFunction(httpOptions);
-        } else if(startFunction) startFunction(httpOptions);
+        }
+        System.logger = new Logger(logDirectoryPath);
         System.close();
         System.server = serve(httpOptions);
         for await (const request of System.server) {
@@ -210,14 +217,17 @@ export class System {
 
     static async listenTLS(option: string | HTTPSOptions, startFunction?: Function): Promise<void> {
         const httpsOptions: HTTPSOptions = {hostname: "localhost", port: 8080, certFile: "", keyFile: ""};
+        let logDirectoryPath: string = "./log";
         if (typeof option === "string") {
             const conf: Config = await ConfigReader.read(option);
             httpsOptions.hostname = conf.HOSTNAME || conf.hostname || conf.SERVER.HOSTNAME || conf.SERVER.hostname || conf.server.HOSTNAME || conf.server.hostname;
             httpsOptions.port = conf.PORT || conf.port || conf.SERVER.PORT || conf.SERVER.port || conf.server.PORT || conf.server.port;
             httpsOptions.certFile = conf.CERTFILE || conf.certFile || conf.certfile || conf.SERVER.CERTFILE || conf.SERVER.certFile || conf.SERVER.certfile || conf.server.CERTFILE || conf.server.certFile || conf.server.certfile;
             httpsOptions.keyFile = conf.KEYFILE || conf.keyFile || conf.keyfile || conf.SERVER.KEYFILE || conf.SERVER.keyFile || conf.SERVER.keyfile || conf.server.KEYFILE || conf.server.keyFile || conf.server.keyfile;
+            logDirectoryPath = conf.LOG || conf.log || conf.SERVER.LOG || conf.SERVER.log || conf.server.LOG || conf.server.log || "./log";
             if(startFunction) startFunction(conf);
         }  else if(startFunction) startFunction(httpsOptions);
+        System.logger = new Logger(logDirectoryPath);
         System.close();
         System.server = serveTLS(httpsOptions);
         for await (const request of System.server) {
@@ -229,5 +239,9 @@ export class System {
 
     static close(): void {
         if(System.server) System.server.close();
+    }
+
+    static record(log: Log): void {
+        System.logger.record(log);
     }
 }
