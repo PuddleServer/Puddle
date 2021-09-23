@@ -1,3 +1,9 @@
+/**
+ * runテスト用のファイル
+ * @author Daruo(KINGVOXY)
+ * @author AO2324(AO2324-00)
+ * @Date   2021-09-23
+ */
 import { 
     System, Config, default_get, 
     default_error, redirect, ServerRequest, 
