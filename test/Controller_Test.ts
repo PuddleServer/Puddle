@@ -29,7 +29,7 @@ async function runCommand(c: string):Promise<string> {
 
 const get    :string = await runCommand("curl localhost:8080/");
 const post   :string = await runCommand(`curl -X POST -H "Content-Type:application/json" -d {"Name":"deno_taro"} localhost:8080/post`);
-// const put    :string = await runCommand();
+const put    :string = await runCommand(`curl -X PUT -d 'color=green&location=japan' http://localhost:8080/put`);
 // const delete :string = await runCommand();
 // const patch  :string = await runCommand();
 
@@ -40,10 +40,16 @@ Deno.test({
     }
 });
 
-
 Deno.test({
     name: "postテスト",
     fn(): void {
         assertEquals("deno_taro", JSON.parse(post).Name, "postしたデータが不正であるか、正しい処理がされていません。")
+    }
+});
+
+Deno.test({
+    name: "putテスト",
+    fn(): void {
+        assertEquals({name: "apple", color: "green", location: "japan"}, JSON.parse(put.replace(/'/g,"")), "putしたデータが不正であるか、正しい処理がされていません。")
     }
 });
