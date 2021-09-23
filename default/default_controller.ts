@@ -16,9 +16,10 @@ export function redirect(url: string): Function {
 
 export function default_get(): Function {
     return async function default_get(request: ServerRequest, response: SystemResponse): Promise<void> {
-        const route: Route[] = Route.list.filter(route=>route.URL().includes(parseUrl(request.url).path));
-        console.log(`>> ${request.method} request to "${route[0].PATH()}".`);
-        await response.setFile(route[0].PATH());
+        const route: string | undefined = Route.getRouteByUrl(parseUrl(request.url).path)?.PATH();
+        console.log(`>> ${request.method} request to "${route}".`);
+        if(!route) return Route["404"].GET()(request, response);
+        await response.setFile(route);
         response.send();
     }
 }
