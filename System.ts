@@ -2,12 +2,12 @@
  * 実行クラス
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-17
+ * @Date   2021-09-23
  */
 
 import {
     serve, serveTLS, Server, HTTPOptions, HTTPSOptions,
-    Route, control, ConfigReader, Logger, Log
+    SystemRequest, Route, control, ConfigReader, Logger, Log
 } from "./mod.ts"
 
 export type Config = {[key:string]: any; };
@@ -74,12 +74,6 @@ export class System {
     static server: Server;
 
     static logger: Logger;
-
-    static url: URL;
-
-    static getUrl(): URL {
-        return System.url;
-    }
 
     /** 開発者が追加したモジュールを保持する */
     static modules: { [key: string]: any; } = {};
@@ -209,9 +203,9 @@ export class System {
         System.close();
         System.server = serve(httpOptions);
         for await (const request of System.server) {
-            System.url = parseUrl(request.url);
-            const route: Route = Route.getRouteByUrl(System.url.path) || Route["404"];
-            control(request, route);
+            const systemRequest: SystemRequest = new SystemRequest(request);
+            const route: Route = Route.getRouteByUrl(systemRequest.getURL().path) || Route["404"];
+            control(systemRequest, route);
         }
     }
 
@@ -231,9 +225,9 @@ export class System {
         System.close();
         System.server = serveTLS(httpsOptions);
         for await (const request of System.server) {
-            request.url = decodeURIComponent(request.url);
-            const route: Route = Route.getRouteByUrl(parseUrl(request.url).path) || Route["404"];
-            control(request, route);
+            const systemRequest: SystemRequest = new SystemRequest(request);
+            const route: Route = Route.getRouteByUrl(systemRequest.getURL().path) || Route["404"];
+            control(systemRequest, route);
         }
     }
 
