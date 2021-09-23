@@ -2,10 +2,10 @@
  * Response処理を行うクラス。
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-09
+ * @Date   2021-09-23
  */
 import {
-    System, RequestLog, ServerRequest, SystemResponse, Route, WebSocketRoute, WebSocketClient,
+    System, RequestLog, SystemRequest, SystemResponse, Route, WebSocketRoute, WebSocketClient,
     acceptWebSocket, isWebSocketCloseEvent, WebSocket, acceptable, parseUrl
 } from "./mod.ts"
 
@@ -14,7 +14,7 @@ import {
  * @param request リクエストオブジェクト。
  * @param route Routeオブジェクト。
  */
-export function control(request: ServerRequest, route: Route): void {
+export function control(request: SystemRequest, route: Route): void {
     System.record(new RequestLog(
         route.PATH(),
         request.method,
@@ -47,8 +47,8 @@ export function control(request: ServerRequest, route: Route): void {
  * @param request リクエストオブジェクト。
  * @param process 実行する処理。
  */
-function controller(request: ServerRequest, process: Function) {
-    process(request, new SystemResponse(request));
+function controller(request: SystemRequest, process: Function) {
+    process(request, new SystemResponse(request.request));
 }
 
 /**
@@ -56,12 +56,12 @@ function controller(request: ServerRequest, process: Function) {
  * @param request リクエストオブジェクト。
  * @param process 実行する処理。
  */
-async function webSocketController(request: ServerRequest, wsRoute: WebSocketRoute) {
+async function webSocketController(request: SystemRequest, wsRoute: WebSocketRoute) {
     if (acceptable(request)) {
         const webSocket: WebSocket = await acceptWebSocket({
             conn: request.conn,
-            bufReader: request.r,
-            bufWriter: request.w,
+            bufReader: request.request.r,
+            bufWriter: request.request.w,
             headers: request.headers,
         });
         const client: WebSocketClient = new WebSocketClient(webSocket);
