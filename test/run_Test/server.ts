@@ -6,7 +6,7 @@
  */
 import { 
     System, Config, default_get, 
-    default_error, redirect, ServerRequest, 
+    default_error, redirect, SystemRequest, 
     SystemResponse
 } from "../../mod.ts"
 
@@ -15,7 +15,7 @@ const defaultList: {[key: string]: string;} = {name: "apple", color: "red"}
 System.createRoute("./assets/index.html").URL("/", "/get");
 
 System.createRoute("./assets/post.html").URL("/post")
-.POST(async function (request: ServerRequest, response: SystemResponse) {
+.POST(async function (request: SystemRequest, response: SystemResponse) {
     const body = await request.body;
     const decoder = new TextDecoder('utf-8');
     const file_data = decoder.decode(await Deno.readAll(body));
@@ -25,7 +25,7 @@ System.createRoute("./assets/post.html").URL("/post")
 });
 
 System.createRoute("./assets/put.html").URL("/put")
-.PUT(async function (request: ServerRequest, response: SystemResponse) {
+.PUT(async function (request: SystemRequest, response: SystemResponse) {
     const body = await request.body;
     const decoder: TextDecoder = new TextDecoder('utf-8');
     const file_data: string = decoder.decode(await Deno.readAll(body));
