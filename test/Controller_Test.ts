@@ -53,3 +53,17 @@ Deno.test({
         assertEquals({name: "apple", color: "green", location: "japan"}, JSON.parse(put.replace(/'/g,"")), "putしたデータが不正であるか、正しい処理がされていません。")
     }
 });
+
+Deno.test({
+    name: "deleteテスト",
+    fn(): void {
+
+    }
+});
+
+Deno.test({
+    name: "patchテスト",
+    fn(): void {
+
+    }
+});
