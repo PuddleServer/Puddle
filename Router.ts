@@ -79,10 +79,11 @@ export class Route {
      * @returns 引数がない場合はURLを、ある場合はthisを返す。
      */
     URL(): string[];
+    URL(urls: string[]): Route;
     URL(...urls: string[]): Route;
-    URL(...urls: string[]): string[] | Route {
-
+    URL(...urls: string[]|string[][]): string[] | Route {
         if(!urls.length) return this.#URL;
+        urls = urls.flat();
 
         urls.filter(function (url, i, self) {
             return self.indexOf(url) === i;
