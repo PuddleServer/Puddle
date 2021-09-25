@@ -5,7 +5,7 @@
  * @Date   2021-09-24
  */
 
-import { createHash, WebSocketRoute, default_get, default_error } from "./mod.ts"
+import { createHash, WebSocketRoute, default_get, default_error, System, ErrorLog } from "./mod.ts"
 
 export class Route {
 
@@ -228,6 +228,7 @@ export class Route {
             console.log(`\n[ warning ]\n
             Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.\n
             指定されたURLのうち、${duplicateUrl.join(', ')} が重複しています。\n`);
+            System.record(new ErrorLog("warning", `Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.`));
         }
         return uniqueUrlArray;
     }
@@ -262,6 +263,7 @@ export class Route {
             console.log(`\n[ warning ]\n
             There is no Route with the PATH "${path}".\n
             パスが"${path}"のRouteはありません。\n`);
+            System.record(new ErrorLog("warning", `There is no Route with the PATH "${path}".`));
             return new Route(path);
         }
     }
