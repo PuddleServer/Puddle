@@ -128,4 +128,15 @@ export class SystemResponse {
         else if(response) this.response = response;
         this.#request.respond(this.response);
     }
+
+    /**
+     * リダイレクトさせる
+     * @param url リダイレクト先
+     */
+    redirect(url: string): void {
+        this.response.status = 302;
+        this.headers.set("Location", url);
+        this.response.body = "";
+        this.#request.respond(this.response);
+    }
 }
