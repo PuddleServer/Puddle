@@ -13,10 +13,12 @@ import { Logger, Log } from "../mod.ts";
 const fileName: string = "logger_test.log";
 
 // 前回のテストファイルの削除
-try {
-    await Deno.remove("./log/"+fileName);
-} catch (e) {
-    console.log("No such old log file.");
+async function rmLogFile(): Promise<void> {
+    try {
+        await Deno.remove("./log/"+fileName);
+    } catch (e) {
+        console.log("No such old log file.");
+    }
 }
 
 // ロガー
@@ -28,8 +30,9 @@ const logger: Logger = new Logger();
 Deno.test({
     name: "writeテスト",
     async fn(): Promise<void> {
+        await rmLogFile();
         await logger.write(fileName, "Test1\n").then(async()=>{
-            assertEquals("Test1\n", await Deno.readTextFile("./log/"+fileName));
+            assertEquals("Test1\n", await Deno.readTextFile("./log/"+fileName), "ファイルが指定のパスに存在していない可能性があります");
         });
     },
 });
@@ -40,7 +43,9 @@ Deno.test({
 Deno.test({
     name: "readテスト",
     async fn(): Promise<void> {
-        assertEquals("Test1\n", await logger.read(fileName));
+        await rmLogFile();
+        await logger.write(fileName, "Test2\n");
+        assertEquals("Test2\n", await logger.read(fileName), "ファイルが存在していないか、読み込み処理部分に不正箇所があります");
     },
 });
 
@@ -50,8 +55,10 @@ Deno.test({
 Deno.test({
     name: "insertテスト",
     async fn(): Promise<void> {
-        await logger.insert(fileName, "Test2\n");
-        assertEquals("Test1\nTest2\n", await logger.read(fileName));
+        await rmLogFile();
+        await logger.insert(fileName, "Test3\n");
+        await logger.insert(fileName, "Test4\n");
+        assertEquals("Test3\nTest4\n", await logger.read(fileName), "ファイルが存在していないか、処理部分に不正があります");
     },
 });
 
@@ -61,12 +68,12 @@ Deno.test({
 Deno.test({
     name: "recordテスト",
     async fn(): Promise<void> {
+        await rmLogFile();
         const log: Log = new Log("Data1", "Data2");
-        log.fileName = fileName
+        log.fileName = fileName;
 
         await logger.record(log);
         const res = await logger.read(fileName);
-        assertEquals(true, res.includes(",Data1,Data2"));
-        
+        assertEquals(true, res.includes(",Data1,Data2"), "ファイルが存在していないか、処理部分に不正があります");
     },
 });
