@@ -60,10 +60,13 @@ function authentication(request: SystemRequest, route: Route) {
         const tmp = v.split("=");
         auth[tmp[0]] = tmp.slice(1).join("=");
     });
-    const A1: string = route.AUTH() || "";
-    const A2 = createHash("md5").update(`${request.method}:${request.getURL().path}`).toString();
-    const res = createHash("md5").update( `${A1}:${auth?.nonce}:${auth?.nc}:${auth?.cnonce}:${auth?.qop}:${A2}` ).toString();
-    if(auth?.response == res) return;
+    const _A1: string[] = route.AUTH() || [];
+    const res: string[] = [];
+    for(let A1 of _A1) {
+        const A2 = createHash("md5").update(`${request.method}:${request.getURL().path}`).toString();
+        res.push(createHash("md5").update( `${A1}:${auth?.nonce}:${auth?.nc}:${auth?.cnonce}:${auth?.qop}:${A2}` ).toString());
+    }
+    if(res.includes(auth?.response)) return;
     response.status = 401;
     response.headers.set("WWW-Authenticate", `Digest realm="${route.PATH()}", nonce="${getRandomStr(60)}", algorithm=MD5, qop="auth"`);
     response.headers.set('Content-Type', 'text/html');
