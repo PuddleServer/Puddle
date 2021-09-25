@@ -2,10 +2,10 @@
  * ルーティングを行うクラスファイル。
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-16
+ * @Date   2021-09-24
  */
 
-import { WebSocketRoute, default_get, default_error } from "./mod.ts"
+import { createHash, WebSocketRoute, default_get, default_error } from "./mod.ts"
 
 export class Route {
 
@@ -14,6 +14,8 @@ export class Route {
     static "502" = new Route("502", [], default_error(502, `Server error.<br>サーバーエラー。`));
 
     static "404" = new Route("404", [], default_error(404, `Not found.<br>見つかりません。`));
+    
+    static "403" = new Route("403", ["/403"], default_error(403, `Forbidden.<br>認証が拒否されました。`));
 
     /** サーバーへのリクエストの名前 */
     #PATH: string;
@@ -36,6 +38,8 @@ export class Route {
     /** PATCHリクエスト時の処理まとめた関数 */
     #PATCH: Function;
 
+    #AUTH: string | undefined;
+
     #wsRoute: WebSocketRoute | undefined;
 
     constructor(PATH: string, URL: string[] = [], GET?: Function | null, POST?: Function | null, PUT?: Function | null, DELETE?: Function | null, PATCH?: Function | null) {
@@ -50,12 +54,13 @@ export class Route {
         this.URL.apply(this, URL);
         this.#GET = GET || default_get();
         const process_502: Function = (this.#PATH == "502")? this.#GET : Route["502"].GET();
-        if(POST || PUT || DELETE || PATCH) this.#GET = process_502;
+        if(GET==undefined) this.#GET = default_get();
+        else if(GET==null) this.#GET = process_502;
         this.#PUT = PUT || process_502;
         this.#POST = POST || process_502;
         this.#DELETE = DELETE || process_502;
         this.#PATCH = PATCH || process_502;
-
+        this.#AUTH = undefined;
         this.#wsRoute = undefined;
         Route.list.push(this);
     }
@@ -74,10 +79,11 @@ export class Route {
      * @returns 引数がない場合はURLを、ある場合はthisを返す。
      */
     URL(): string[];
+    URL(urls: string[]): Route;
     URL(...urls: string[]): Route;
-    URL(...urls: string[]): string[] | Route {
-
+    URL(...urls: string[]|string[][]): string[] | Route {
         if(!urls.length) return this.#URL;
+        urls = urls.flat();
 
         urls.filter(function (url, i, self) {
             return self.indexOf(url) === i;
@@ -165,6 +171,17 @@ export class Route {
         this.#PATCH = process;
         return this;
 
+    }
+
+    AUTH(): string | undefined;
+    AUTH(hash: string): Route;
+    AUTH(user: string, password: string): Route;
+    AUTH(param0?: string, param1?: string): string | undefined | Route {
+        if(param0) {
+            if(!param1) this.#AUTH = param0;
+            else this.#AUTH = createHash("md5").update(`${param0}:${this.#PATH}:${param1}`).toString();
+            return this;
+        } else if(!param1) return this.#AUTH;
     }
 
     /**

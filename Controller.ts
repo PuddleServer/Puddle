@@ -6,7 +6,7 @@
  */
 import {
     System, RequestLog, SystemRequest, SystemResponse, Route, WebSocketRoute, WebSocketClient,
-    acceptWebSocket, isWebSocketCloseEvent, WebSocket, acceptable, parseUrl
+    acceptWebSocket, isWebSocketCloseEvent, WebSocket, acceptable, parseUrl, createHash
 } from "./mod.ts"
 
 /**
@@ -21,6 +21,7 @@ export function control(request: SystemRequest, route: Route): void {
         parseUrl(request.url).search?parseUrl(request.url).toString():parseUrl(request.url).path,
         request.headers.get("Forwarded") || (request.conn.remoteAddr as Deno.NetAddr).hostname
     ));
+    if(route.AUTH()) authentication(request, route);
     switch (request.method) {
         case "GET":
             if(route.isWebSocket) webSocketController(request, route.WebSocket());
@@ -35,11 +36,39 @@ export function control(request: SystemRequest, route: Route): void {
         case "DELETE":
             controller(request, route.DELETE());
             break;
+        case "PATCH":
+            controller(request, route.PATCH());
+            break;
 
         default:
             controller(request, Route["502"].GET());
             break;
     }
+}
+
+function getRandomStr(length: number = 8): string{
+    const CHAR = "ABCDEFGHIJKLMNOPQRSTUabcdefghijklmnopqrstuvwxyz0123456789=.?!^|-_<>";
+    const result = [];
+    for(let i = 0; i < length; i++)result.push(CHAR[Math.floor(Math.random() * CHAR.length)]);
+    return result.join("");
+}
+
+function authentication(request: SystemRequest, route: Route) {
+    const response = new SystemResponse(request.request)
+    const auth: {[key:string]:string;} = {};
+    (request.headers.get("authorization")||"").replace("Digest ","").replace(/\"/g,"").split(/\,\s*/g).forEach(v=>{
+        const tmp = v.split("=");
+        auth[tmp[0]] = tmp.slice(1).join("=");
+    });
+    const A1: string = route.AUTH() || "";
+    const A2 = createHash("md5").update(`${request.method}:${request.getURL().path}`).toString();
+    const res = createHash("md5").update( `${A1}:${auth?.nonce}:${auth?.nc}:${auth?.cnonce}:${auth?.qop}:${A2}` ).toString();
+    if(auth?.response == res) return;
+    response.status = 401;
+    response.headers.set("WWW-Authenticate", `Digest realm="${route.PATH()}", nonce="${getRandomStr(60)}", algorithm=MD5, qop="auth"`);
+    response.headers.set('Content-Type', 'text/html');
+    response.body = `<body><script type="text/javascript">setTimeout(()=>location.pathname='/403', 0);</script></body>`;
+    response.send();
 }
 
 /**

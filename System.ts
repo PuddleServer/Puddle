@@ -140,7 +140,7 @@ export class System {
      * @param pathsOrRoutes アクセス先のパス、もしくはRouteオブジェクトの配列。
      * @returns Route配列
      */
-    static createRoutes(...pathsOrRoutes: (string | RouteOption)[]): Route[] {
+    static createRoutes(...pathsOrRoutes: (string | RouteOption)[]): System {
 
         for(let pathOrRoute of pathsOrRoutes) {
             if(typeof pathOrRoute == "string") System.createRoute(pathOrRoute);
@@ -155,7 +155,7 @@ export class System {
             );
         }
 
-        return Route.list;
+        return System;
     }
 
     /**
