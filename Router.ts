@@ -38,7 +38,7 @@ export class Route {
     /** PATCHリクエスト時の処理まとめた関数 */
     #PATCH: Function;
 
-    #AUTH: string | undefined;
+    #AUTH: string[] | undefined;
 
     #wsRoute: WebSocketRoute | undefined;
 
@@ -173,15 +173,30 @@ export class Route {
 
     }
 
-    AUTH(): string | undefined;
+    #_AUTH(param0: string, param1?: string): string {
+        if(!param1) return param0;
+        return createHash("md5").update(`${param0}:${this.#PATH}:${param1}`).toString();
+    }
+
+    AUTH(): string[] | undefined;
     AUTH(hash: string): Route;
-    AUTH(user: string, password: string): Route;
-    AUTH(param0?: string, param1?: string): string | undefined | Route {
-        if(param0) {
-            if(!param1) this.#AUTH = param0;
-            else this.#AUTH = createHash("md5").update(`${param0}:${this.#PATH}:${param1}`).toString();
+    AUTH(name: string, password: string): Route;
+    AUTH(...param: {[key:string]:string;}[]): Route;
+    AUTH(...param: (string|{[key:string]:string;})[]): string[] | undefined | Route {
+        if(param.length == 0) return this.#AUTH;
+        if(param.length <= 2 && typeof param[0] == "string") {
+            if(typeof param[1] == "string") this.#AUTH = [this.#_AUTH(param[0], param[1])];
+            else this.#AUTH = [this.#_AUTH(param[0])];
             return this;
-        } else if(!param1) return this.#AUTH;
+        }
+        const hash: string[] = [];
+        for(let v of param) {
+            if(typeof v != "object") continue;
+            if(v.name && v.password) hash.push(this.#_AUTH(v.name, v.password));
+            else if(v.hash) hash.push(this.#_AUTH(v.hash));
+        }
+        this.#AUTH = hash;
+        return this;
     }
 
     /**

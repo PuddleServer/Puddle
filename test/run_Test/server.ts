@@ -12,7 +12,7 @@ import {
 
 const defaultList: {[key: string]: string;} = {name: "apple", color: "red"}
 
-System.createRoute("./assets/index.html").URL("/", "/get");
+System.createRoute("./assets/index.html").URL("/", "/get").AUTH("user", "pwd");
 
 System.createRoute("./assets/post.html").URL("/post")
 .POST(async function (request: SystemRequest, response: SystemResponse) {
