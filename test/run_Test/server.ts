@@ -12,8 +12,10 @@ import {
 
 const defaultList: {[key: string]: string;} = {name: "apple", color: "red"}
 
-System.createRoute("./assets/index.html").URL("/", "/get").AUTH("user", "pwd");
+// getテスト用
+System.createRoute("./assets/index.html").URL("/", "/get")
 
+// postテスト用
 System.createRoute("./assets/post.html").URL("/post")
 .POST(async function (request: SystemRequest, response: SystemResponse) {
     const body = await request.body;
@@ -24,6 +26,7 @@ System.createRoute("./assets/post.html").URL("/post")
     response.send();
 });
 
+// putテスト用
 System.createRoute("./assets/put.html").URL("/put")
 .PUT(async function (request: SystemRequest, response: SystemResponse) {
     const body = await request.body;
@@ -35,10 +38,13 @@ System.createRoute("./assets/put.html").URL("/put")
         let keyOrCon = e.split('=');
         defaultList[keyOrCon[0]] = keyOrCon[1];
     }
-
+    
     response.setText(JSON.stringify(defaultList));
     response.send();
 });
+
+// 認証テスト用
+System.createRoute("./assets/auth.html").URL("/auth").AUTH("user", "pwd");
 
 System.listen(8080, (conf: Config)=>{
     console.log(`The server running on http://${conf.hostname}:${conf.port}`);
