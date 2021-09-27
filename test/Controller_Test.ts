@@ -32,6 +32,7 @@ const post   :string = await runCommand(`curl -X POST -H "Content-Type:applicati
 const put    :string = await runCommand(`curl -X PUT -d 'color=green&location=japan' http://localhost:8080/put`);
 // const delete :string = await runCommand();
 // const patch  :string = await runCommand();
+const auth  :string = await runCommand(`curl --anyauth --user user:pwd localhost:8080/auth`);
 
 Deno.test({
     name: "getテスト",
@@ -65,5 +66,15 @@ Deno.test({
     name: "patchテスト",
     fn(): void {
 
+    }
+});
+
+/**
+ * 認証テスト
+ */
+Deno.test({
+    name: "authテスト",
+    fn(): void {
+        assertEquals(true, auth.includes("認証成功"));
     }
 });
