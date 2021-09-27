@@ -7,7 +7,7 @@
 
 import {
     serve, serveTLS, Server, HTTPOptions, HTTPSOptions,
-    SystemRequest, Route, control, ConfigReader, Logger, Log
+    SystemRequest, Route, control, ConfigReader, Log, GoogleOAuth2
 } from "./mod.ts"
 
 export type Config = {[key:string]: any; };
@@ -73,7 +73,7 @@ export class System {
     /** サーバーを保持する変数 */
     static server: Server;
 
-    static logger: Logger;
+    static GoogleOAuth2: GoogleOAuth2;
 
     /** 開発者が追加したモジュールを保持する */
     static modules: { [key: string]: any; } = {};
@@ -183,6 +183,13 @@ export class System {
         return Route.getRouteByPath(path);
     }
 
+    static GOOGLE_OAUTH2(): GoogleOAuth2;
+    static GOOGLE_OAUTH2(client_id: string, client_secret: string, server_url: string, URL?: string[], process?: Function): void;
+    static GOOGLE_OAUTH2(client_id?: string, client_secret?: string, server_url?: string, URL?: string[], process?: Function): void | GoogleOAuth2 {
+        if(!(client_id && client_secret)) return System.GoogleOAuth2;
+        System.GoogleOAuth2 = new GoogleOAuth2(client_id, client_secret, server_url, URL, process);
+    }
+
     static async listen(option: number | string | HTTPOptions, startFunction?: Function): Promise<void> {
         const httpOptions: HTTPOptions = {hostname: "localhost", port: 8080};
         let logDirectoryPath: string = "./log";
@@ -199,7 +206,7 @@ export class System {
             }
             if(startFunction) startFunction(httpOptions);
         }
-        System.logger = new Logger(logDirectoryPath);
+        Logger.setDirectoryPath(logDirectoryPath);
         System.close();
         System.server = serve(httpOptions);
         for await (const request of System.server) {
@@ -221,7 +228,7 @@ export class System {
             logDirectoryPath = conf.LOG || conf.log || conf.SERVER.LOG || conf.SERVER.log || conf.server.LOG || conf.server.log || "./log";
             if(startFunction) startFunction(conf);
         }  else if(startFunction) startFunction(httpsOptions);
-        System.logger = new Logger(logDirectoryPath);
+        Logger.setDirectoryPath(logDirectoryPath);
         System.close();
         System.server = serveTLS(httpsOptions);
         for await (const request of System.server) {
@@ -233,9 +240,5 @@ export class System {
 
     static close(): void {
         if(System.server) System.server.close();
-    }
-
-    static record(log: Log): void {
-        System.logger.record(log);
     }
 }

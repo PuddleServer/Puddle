@@ -44,6 +44,7 @@ export class Route {
 
     constructor(PATH: string, URL: string[] = [], GET?: Function | null, POST?: Function | null, PUT?: Function | null, DELETE?: Function | null, PATCH?: Function | null) {
         if(Route.isThePathInUse(PATH)) {
+            new ErrorLog("error", `The path "${PATH}" is already in use.`);
             throw new Error(`\n[ Error ]\n
             The path "${PATH}" is already in use.\n
             "${PATH}"というパスは既に使用されています。\n`);
@@ -88,7 +89,7 @@ export class Route {
         urls.filter(function (url, i, self) {
             return self.indexOf(url) === i;
         });
-        this.#URL = this.getUniqueUrlArray(urls);
+        this.#URL = Route.getUniqueUrlArray(urls);
         return this;
 
     }
@@ -202,7 +203,7 @@ export class Route {
     /**
      * WebSocket通信かどうか
      */
-    get isWebSocket() {
+    get isWebSocket(): boolean {
         return Boolean(this.#wsRoute);
     }
 
@@ -220,7 +221,7 @@ export class Route {
      * @param urls チェックするURL配列
      * @returns 重複を取り除いたURL配列。
      */
-    private getUniqueUrlArray(urls: string[]): string[] {
+    static getUniqueUrlArray(urls: string[]): string[] {
         
         const uniqueUrlArray: string[] = urls.filter( u => !Route.list.map(route=>route.URL()).flat().includes(u) );
         if( uniqueUrlArray.length != urls.length ) {
@@ -228,7 +229,7 @@ export class Route {
             console.log(`\n[ warning ]\n
             Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.\n
             指定されたURLのうち、${duplicateUrl.join(', ')} が重複しています。\n`);
-            System.record(new ErrorLog("warning", `Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.`));
+            new ErrorLog("warning", `Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.`);
         }
         return uniqueUrlArray;
     }
@@ -263,7 +264,7 @@ export class Route {
             console.log(`\n[ warning ]\n
             There is no Route with the PATH "${path}".\n
             パスが"${path}"のRouteはありません。\n`);
-            System.record(new ErrorLog("warning", `There is no Route with the PATH "${path}".`));
+            new ErrorLog("warning", `There is no Route with the PATH "${path}".`);
             return new Route(path);
         }
     }
