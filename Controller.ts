@@ -15,12 +15,12 @@ import {
  * @param route Routeオブジェクト。
  */
 export function control(request: SystemRequest, route: Route): void {
-    System.record(new RequestLog(
+    new RequestLog(
         route.PATH(),
         request.method,
         parseUrl(request.url).search?parseUrl(request.url).toString():parseUrl(request.url).path,
         request.headers.get("Forwarded") || (request.conn.remoteAddr as Deno.NetAddr).hostname
-    ));
+    );
     if(route.AUTH()) authentication(request, route);
     switch (request.method) {
         case "GET":

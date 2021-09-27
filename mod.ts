@@ -27,5 +27,6 @@ export * from "./Controller.ts";
 export * from "./HtmlCompiler.ts";
 export * from "./Config.ts";
 export * from "./Logger.ts";
+export * from "./GoogleOAuth2.ts";
 
 export * from "./default/default_controller.ts";

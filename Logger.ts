@@ -6,6 +6,7 @@ async function ensureDir(dir: string) {
     try {
         const fileInfo = await Deno.lstat(dir);
         if (!fileInfo.isDirectory) {
+            new ErrorLog("error", `Ensure path exists, expected 'dir', "${dir}"`);
             throw new Error(
                 `Ensure path exists, expected 'dir', "${dir}"`,
             );
@@ -25,6 +26,7 @@ async function ensureFile(filePath: string) {
         // if file exists
         const stat = await Deno.lstat(filePath);
         if (!stat.isFile) {
+            new ErrorLog("error", `Ensure path exists, expected 'file', "${filePath}"`);
             throw new Error(
                 `Ensure path exists, expected 'file', "${filePath}"`,
             );
@@ -44,33 +46,48 @@ async function ensureFile(filePath: string) {
 }
 
 export class Log {
+
     fileName: string = ".log"
     header: string[] = ["Date"];
     data: string[];
+
     constructor(...data: string[]) {
         this.data = [];
         this.data.push(new Date().toString().replace(/\s\(.*\)/g, ""));
         this.data.push(...data);
+        this.record()
     }
+
     get headerLine(): string {
         return `${this.header.join(",")}\n`;
     }
+
     toString(): string {
         return `${this.data.join(",")}\n`;
+    }
+
+    async record() {
+        const texts: string = await Logger.read(this.fileName);
+        if(!texts.length) await Logger.insert(this.fileName, this.headerLine);
+        await Logger.insert(this.fileName, this.toString());
     }
 }
 
 export class RequestLog extends Log {
+
     fileName = "request.log";
     header = ["Date", "Path", "Method", "URL", "Address"];
+
     constructor(Path: string, Method: string, URL: string, Address: string) {
         super(Path, Method, URL, Address);
     }
 }
 
 export class ErrorLog extends Log {
+
     fileName: string = "error.log";
     header: string[] = ["Date", "Type", "Message"];
+    
     constructor(Type: "error" | "warning", Message: string) {
         super(Type, Message);
     }
@@ -78,33 +95,33 @@ export class ErrorLog extends Log {
 
 export class Logger {
     
-    #directoryPath: string;
+    static directoryPath: string = "./log";
 
-    constructor(directoryPath?: string) {
-        this.#directoryPath = directoryPath || "./log";
+    static setDirectoryPath(directoryPath: string) {
+        Logger.directoryPath = directoryPath;
     }
     
-    async read(fileName: string): Promise<string> {
-        const filePath: string = `${this.#directoryPath}/${fileName}`;
+    static async read(fileName: string): Promise<string> {
+        const filePath: string = `${Logger.directoryPath}/${fileName}`;
         await ensureFile(filePath)
         const text:string = await Deno.readTextFile(filePath);
         return new Promise(resolve=>resolve(text));
     }
 
-    async write(fileName: string, text: string): Promise<void> {
-        const filePath: string = `${this.#directoryPath}/${fileName}`;
+    static async write(fileName: string, text: string): Promise<void> {
+        const filePath: string = `${Logger.directoryPath}/${fileName}`;
         await ensureFile(filePath)
         await Deno.writeTextFile(filePath, text)
     }
 
-    async insert(fileName: string, text: string): Promise<void> {
-        const texts: string = await this.read(fileName);
-        await this.write(fileName, texts+text);
+    static async insert(fileName: string, text: string): Promise<void> {
+        const texts: string = await Logger.read(fileName);
+        await Logger.write(fileName, texts+text);
     }
 
-    async record(log: Log): Promise<void> {
-        const texts: string = await this.read(log.fileName);
-        if(!texts.length) await this.insert(log.fileName, log.headerLine);
-        await this.insert(log.fileName, log.toString());
+    static async record(log: Log): Promise<void> {
+        const texts: string = await Logger.read(log.fileName);
+        if(!texts.length) await Logger.insert(log.fileName, log.headerLine);
+        await Logger.insert(log.fileName, log.toString());
     }
 }
