@@ -51,7 +51,6 @@ export class GoogleOAuth2 {
     #client_secret: string;
 
     #route_login: Route;
-
     constructor(client_id: string, client_secret: string, URL: string[] = [], process?: Function) {
         this.#client_id = client_id;
         this.#client_secret = client_secret;
