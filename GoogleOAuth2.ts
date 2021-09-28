@@ -1,4 +1,4 @@
-import { Route, SystemRequest, SystemResponse, redirect, ErrorLog } from "./mod.ts";
+import { System, Route, SystemRequest, SystemResponse, redirect, ErrorLog } from "./mod.ts";
 
 export async function getAccessToken(client_id: string, client_secret: string, redirect_url: string, code: string): Promise<string> {
 	const post = 'client_id=' + client_id + 
@@ -50,12 +50,12 @@ export class GoogleOAuth2 {
 
     #client_secret: string;
 
-    constructor(client_id: string, client_secret: string, server_url?: string, URL: string[] = [], process?: Function) {
+    constructor(client_id: string, client_secret: string, URL: string[] = [], process?: Function) {
         this.#client_id = client_id;
         this.#client_secret = client_secret;
         GoogleOAuth2.client = this;
         this.#URL = `/google_oauth2`;
-        const redirect_URL = this.#getGoogleOAuth2_URL(client_id, `${server_url}${this.#URL}`);
+        const redirect_URL = this.#getGoogleOAuth2_URL(client_id, `${System.URL}${this.#URL}`);
         new Route(`${this.#URL}_redirect`, URL, redirect(redirect_URL));
     }
 
@@ -70,7 +70,7 @@ export class GoogleOAuth2 {
     LOGIN(process: Function): GoogleOAuth2 {
         new Route(this.#URL, [], async (request: SystemRequest, response: SystemResponse)=>{
             try {
-				const access_token = await getAccessToken(this.#client_id, this.#client_secret, this.#URL, request.getURL().query?.code||"");
+				const access_token = await getAccessToken(this.#client_id, this.#client_secret, this.#URL, request.getURL().searchParams.get("code")||"");
 				const profile_info = await getProfileInfo(access_token);
                 process(request, response, profile_info);
 			} catch(error) {

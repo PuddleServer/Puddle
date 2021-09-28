@@ -4,7 +4,7 @@
  * @author AO2324(AO2324-00)
  * @Date   2021-09-23
  */
-import { SystemRequest, SystemResponse, System, Route, parseUrl, WebSocketClient } from "../mod.ts"
+import { SystemRequest, SystemResponse, System, Route, WebSocketClient } from "../mod.ts"
 
 export function redirect(url: string): Function {
     return function(request: SystemRequest, response: SystemResponse): void {
@@ -14,7 +14,7 @@ export function redirect(url: string): Function {
 
 export function default_get(): Function {
     return async function default_get(request: SystemRequest, response: SystemResponse): Promise<void> {
-        const route: string | undefined = Route.getRouteByUrl(request.getURL().path)?.PATH();
+        const route: string | undefined = Route.getRouteByUrl(request.getURL().pathname)?.PATH();
         console.log(`>> ${request.method} request to "${route}".`);
         if(!route) return Route["404"].GET()(request, response);
         await response.setFile(route);
