@@ -10,7 +10,8 @@ import {
     SystemResponse
 } from "../../mod.ts"
 
-const defaultList: {[key: string]: string;} = {name: "apple", color: "red"}
+const list1: {[key: string]: string} = {name: "apple", color: "red"};
+const list2: {[key: string]: string | number} = {name: "john", age: 23, location: "Osaka"};
 
 // getテスト用
 System.createRoute("./assets/index.html").URL("/", "/get")
@@ -36,10 +37,18 @@ System.createRoute("./assets/put.html").URL("/put")
     const eles: string[] = file_data.split('&');
     for(let e of eles) {
         let keyOrCon = e.split('=');
-        defaultList[keyOrCon[0]] = keyOrCon[1];
+        list1[keyOrCon[0]] = keyOrCon[1];
     }
     
-    response.setText(JSON.stringify(defaultList));
+    response.setText(JSON.stringify(list1));
+    response.send();
+});
+
+// deleteテスト用
+System.createRoute("delete_test").URL("/delete")
+.DELETE(async function (request: SystemRequest, response: SystemResponse) {
+    delete list2["location"];
+    response.setText(JSON.stringify(list2));
     response.send();
 });
 
