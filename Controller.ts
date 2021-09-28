@@ -6,7 +6,7 @@
  */
 import {
     System, RequestLog, SystemRequest, SystemResponse, Route, WebSocketRoute, WebSocketClient,
-    acceptWebSocket, isWebSocketCloseEvent, WebSocket, acceptable, parseUrl, createHash
+    acceptWebSocket, isWebSocketCloseEvent, WebSocket, acceptable, DecodedURL, createHash
 } from "./mod.ts"
 
 /**
@@ -18,7 +18,7 @@ export function control(request: SystemRequest, route: Route): void {
     new RequestLog(
         route.PATH(),
         request.method,
-        parseUrl(request.url).search?parseUrl(request.url).toString():parseUrl(request.url).path,
+        new DecodedURL(request.url).toString(),
         request.headers.get("Forwarded") || (request.conn.remoteAddr as Deno.NetAddr).hostname
     );
     if(route.AUTH()) authentication(request, route);
@@ -63,7 +63,7 @@ function authentication(request: SystemRequest, route: Route) {
     const _A1: string[] = route.AUTH() || [];
     const res: string[] = [];
     for(let A1 of _A1) {
-        const A2 = createHash("md5").update(`${request.method}:${request.getURL().path}`).toString();
+        const A2 = createHash("md5").update(`${request.method}:${request.getURL().pathname}`).toString();
         res.push(createHash("md5").update( `${A1}:${auth?.nonce}:${auth?.nc}:${auth?.cnonce}:${auth?.qop}:${A2}` ).toString());
     }
     if(res.includes(auth?.response)) return;
