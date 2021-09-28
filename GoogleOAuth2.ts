@@ -50,13 +50,18 @@ export class GoogleOAuth2 {
 
     #client_secret: string;
 
+    #route_login: Route;
     constructor(client_id: string, client_secret: string, URL: string[] = [], process?: Function) {
         this.#client_id = client_id;
         this.#client_secret = client_secret;
         GoogleOAuth2.client = this;
         this.#URL = `/google_oauth2`;
-        const redirect_URL = this.#getGoogleOAuth2_URL(client_id, `${System.URL}${this.#URL}`);
-        new Route(`${this.#URL}_redirect`, URL, redirect(redirect_URL));
+        this.#route_login = new Route(`${this.#URL}_redirect`, URL);
+    }
+
+    setup() {
+        const redirect_URL = this.#getGoogleOAuth2_URL(this.#client_id, `${System.URL}${this.#URL}`);
+        this.#route_login.GET(redirect(redirect_URL));
     }
 
     get client_id(): string {
@@ -67,10 +72,25 @@ export class GoogleOAuth2 {
         return this.#client_secret;
     }
 
+    /**
+     * URLの取得、設定を行う。
+     * @param urls 許可するリクエストURL(可変長引数)。
+     * @returns 引数がない場合はURLを、ある場合はthisを返す。
+     */
+    URL(): string[];
+    URL(urls: string[]): GoogleOAuth2;
+    URL(...urls: string[]): GoogleOAuth2;
+    URL(...urls: string[]|string[][]): string[] | GoogleOAuth2 {
+        if(!urls.length) return this.#route_login.URL();
+        urls = urls.flat();
+        this.#route_login.URL(urls);
+        return this;
+    }
+
     LOGIN(process: Function): GoogleOAuth2 {
         new Route(this.#URL, [], async (request: SystemRequest, response: SystemResponse)=>{
             try {
-				const access_token = await getAccessToken(this.#client_id, this.#client_secret, this.#URL, request.getURL().searchParams.get("code")||"");
+				const access_token = await getAccessToken(this.#client_id, this.#client_secret, System.URL+this.#URL, request.getURL().searchParams.get("code")||"");
 				const profile_info = await getProfileInfo(access_token);
                 process(request, response, profile_info);
 			} catch(error) {

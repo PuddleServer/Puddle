@@ -55,7 +55,7 @@ export class Log {
         this.data = [];
         this.data.push(new Date().toString().replace(/\s\(.*\)/g, ""));
         this.data.push(...data);
-        this.record()
+        this.record();
     }
 
     get headerLine(): string {

@@ -18,7 +18,7 @@ export function control(request: SystemRequest, route: Route): void {
     new RequestLog(
         route.PATH(),
         request.method,
-        new DecodedURL(request.url).toString(),
+        new DecodedURL(request.url, System.URL).toString(),
         request.headers.get("Forwarded") || (request.conn.remoteAddr as Deno.NetAddr).hostname
     );
     if(route.AUTH()) authentication(request, route);
