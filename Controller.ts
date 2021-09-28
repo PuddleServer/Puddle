@@ -19,7 +19,9 @@ export function control(request: SystemRequest, route: Route): void {
         route.PATH(),
         request.method,
         new DecodedURL(request.url, System.URI).toString(),
-        request.headers.get("Forwarded") || (request.conn.remoteAddr as Deno.NetAddr).hostname
+        (request.headers.get("Forwarded")||"").replace("Forwarded: ", "")
+        .split(/\,\s*/g).filter(param=>param.toLowerCase().includes("for"))
+        .concat([(request.conn.remoteAddr as Deno.NetAddr).hostname]).join(" ").replace(/for\s*\=\s*/g, "")
     );
     if(route.AUTH()) authentication(request, route);
     switch (request.method) {
