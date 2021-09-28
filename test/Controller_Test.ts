@@ -58,7 +58,7 @@ Deno.test({
 Deno.test({
     name: "deleteテスト",
     fn(): void {
-        assertEquals({"name":"john","age":23}, JSON.parse(del.replace(/'/g,"")))
+        assertEquals({"name":"john","age":23}, JSON.parse(del.replace(/'/g,"")), "deleteしたデータが不正であるか、正しい処理がされていません。")
     }
 });
 
