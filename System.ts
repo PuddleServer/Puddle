@@ -22,6 +22,9 @@ export class DecodedURL extends URL {
     pathname = decodeURIComponent(super.pathname);
     search = decodeURIComponent(super.search);
     username = decodeURIComponent(super.username);
+    toString() {
+        return decodeURIComponent(super.toString());
+    }
 }
 
 export interface RouteOption {
@@ -151,11 +154,9 @@ export class System {
         return Route.getRouteByPath(path);
     }
 
-    static GOOGLE_OAUTH2(): GoogleOAuth2;
-    static GOOGLE_OAUTH2(client_id: string, client_secret: string, URL?: string[], process?: Function): void;
-    static GOOGLE_OAUTH2(client_id?: string, client_secret?: string, URL?: string[], process?: Function): void | GoogleOAuth2 {
-        if(!(client_id && client_secret)) return System.GoogleOAuth2;
+    static GOOGLE_OAUTH2(client_id: string, client_secret: string, URL?: string[], process?: Function): GoogleOAuth2 {
         System.GoogleOAuth2 = new GoogleOAuth2(client_id, client_secret, URL, process);
+        return System.GoogleOAuth2;
     }
 
     static async listen(option: number | string | HTTPOptions, startFunction?: Function, url?: string): Promise<void> {
@@ -175,6 +176,7 @@ export class System {
             if(startFunction) startFunction(httpOptions);
         }
         System.URL = url? new URL(url).origin : `http://${httpOptions.hostname}:${httpOptions.port}`;
+        if(System.GoogleOAuth2) System.GoogleOAuth2.setup();
         Logger.setDirectoryPath(logDirectoryPath);
         System.close();
         System.server = serve(httpOptions);
@@ -198,6 +200,7 @@ export class System {
             if(startFunction) startFunction(conf);
         }  else if(startFunction) startFunction(httpsOptions);
         System.URL = url? new URL(url).origin : `https://${httpsOptions.hostname}:${httpsOptions.port}`;
+        if(System.GoogleOAuth2) System.GoogleOAuth2.setup();
         Logger.setDirectoryPath(logDirectoryPath);
         System.close();
         System.server = serveTLS(httpsOptions);
