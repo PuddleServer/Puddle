@@ -14,7 +14,7 @@ const list1: {[key: string]: string} = {name: "apple", color: "red"};
 const list2: {[key: string]: string | number} = {name: "john", age: 23, location: "Osaka"};
 
 // getテスト用
-System.createRoute("./assets/index.html").URL("/", "/get")
+System.createRoute("./assets/index.html").URL("/", "/get");
 
 // postテスト用
 System.createRoute("./assets/post.html").URL("/post")

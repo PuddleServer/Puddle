@@ -29,8 +29,8 @@ async function runCommand(c: string):Promise<string> {
 
 const get    :string = await runCommand("curl localhost:8080/");
 const post   :string = await runCommand(`curl -X POST -H "Content-Type:application/json" -d {"Name":"deno_taro"} localhost:8080/post`);
-const put    :string = await runCommand(`curl -X PUT -d 'color=green&location=japan' http://localhost:8080/put`);
-// const delete :string = await runCommand();
+const put    :string = await runCommand(`curl -X PUT -d 'color=green&location=japan' localhost:8080/put`);
+const del    :string = await runCommand("curl -X DELETE localhost:8080/delete");
 // const patch  :string = await runCommand();
 const auth  :string = await runCommand(`curl --anyauth --user user:pwd localhost:8080/auth`);
 
@@ -58,7 +58,7 @@ Deno.test({
 Deno.test({
     name: "deleteテスト",
     fn(): void {
-
+        //assertEquals(true, )
     }
 });
 
