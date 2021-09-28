@@ -7,7 +7,7 @@
 
 import {
     serve, serveTLS, Server, HTTPOptions, HTTPSOptions,
-    SystemRequest, Route, control, ConfigReader, Log, GoogleOAuth2
+    SystemRequest, Route, control, ConfigReader, Logger, Log, GoogleOAuth2
 } from "./mod.ts"
 
 export type Config = {[key:string]: any; };
@@ -15,47 +15,13 @@ export type Config = {[key:string]: any; };
 /**
  * URLを扱いやすくするクラス。
  */
-export class URL {
-    #url: [string, string|undefined];
-
-    constructor(url: string) {
-        url = decodeURIComponent(url);
-        const index: number = url.indexOf('?');
-        if(index < 0) this.#url = [url, undefined];
-        else this.#url = [url.slice(0, index), url.slice(index+1)];
-    }
-
-    toString(): string {
-        return this.#url.join('?');
-    }
-
-    get path(): string {
-        return this.#url[0];
-    }
-
-    get search(): string | undefined {
-        return this.#url[1];
-    }
-
-    get query(): { [key: string]: string; } | undefined {
-        if(!this.#url[1]) return undefined;
-        const query: string[][] = this.#url[1].split('&').map(v=>(v.includes('='))?v.split('='):[v,v]);
-        const params: { [key: string]: string; } = {};
-        for(let q of query) {
-            if(!(q[0] && q[1])) continue;
-            params[q[0]] = q[1];
-        }
-        return params;
-    }
-}
-
-/**
- * URLオブジェクトを返すクラス。
- * @param url 元となるurl
- * @returns URLオブジェクト。
- */
-export function parseUrl(url: string) {
-    return new URL(url);
+export class DecodedURL extends URL {
+    hash = decodeURIComponent(super.hash);
+    href = decodeURIComponent(super.href);
+    password = decodeURIComponent(super.password);
+    pathname = decodeURIComponent(super.pathname);
+    search = decodeURIComponent(super.search);
+    username = decodeURIComponent(super.username);
 }
 
 export interface RouteOption {
@@ -72,6 +38,8 @@ export class System {
 
     /** サーバーを保持する変数 */
     static server: Server;
+
+    static URL: string;
 
     static GoogleOAuth2: GoogleOAuth2;
 
@@ -184,13 +152,13 @@ export class System {
     }
 
     static GOOGLE_OAUTH2(): GoogleOAuth2;
-    static GOOGLE_OAUTH2(client_id: string, client_secret: string, server_url: string, URL?: string[], process?: Function): void;
-    static GOOGLE_OAUTH2(client_id?: string, client_secret?: string, server_url?: string, URL?: string[], process?: Function): void | GoogleOAuth2 {
+    static GOOGLE_OAUTH2(client_id: string, client_secret: string, URL?: string[], process?: Function): void;
+    static GOOGLE_OAUTH2(client_id?: string, client_secret?: string, URL?: string[], process?: Function): void | GoogleOAuth2 {
         if(!(client_id && client_secret)) return System.GoogleOAuth2;
-        System.GoogleOAuth2 = new GoogleOAuth2(client_id, client_secret, server_url, URL, process);
+        System.GoogleOAuth2 = new GoogleOAuth2(client_id, client_secret, URL, process);
     }
 
-    static async listen(option: number | string | HTTPOptions, startFunction?: Function): Promise<void> {
+    static async listen(option: number | string | HTTPOptions, startFunction?: Function, url?: string): Promise<void> {
         const httpOptions: HTTPOptions = {hostname: "localhost", port: 8080};
         let logDirectoryPath: string = "./log";
         if (typeof option === "string") {
@@ -206,17 +174,18 @@ export class System {
             }
             if(startFunction) startFunction(httpOptions);
         }
+        System.URL = url? new URL(url).origin : `http://${httpOptions.hostname}:${httpOptions.port}`;
         Logger.setDirectoryPath(logDirectoryPath);
         System.close();
         System.server = serve(httpOptions);
         for await (const request of System.server) {
             const systemRequest: SystemRequest = new SystemRequest(request);
-            const route: Route = Route.getRouteByUrl(systemRequest.getURL().path) || Route["404"];
+            const route: Route = Route.getRouteByUrl(systemRequest.getURL().pathname) || Route["404"];
             control(systemRequest, route);
         }
     }
 
-    static async listenTLS(option: string | HTTPSOptions, startFunction?: Function): Promise<void> {
+    static async listenTLS(option: string | HTTPSOptions, startFunction?: Function, url?: string): Promise<void> {
         const httpsOptions: HTTPSOptions = {hostname: "localhost", port: 8080, certFile: "", keyFile: ""};
         let logDirectoryPath: string = "./log";
         if (typeof option === "string") {
@@ -228,12 +197,13 @@ export class System {
             logDirectoryPath = conf.LOG || conf.log || conf.SERVER.LOG || conf.SERVER.log || conf.server.LOG || conf.server.log || "./log";
             if(startFunction) startFunction(conf);
         }  else if(startFunction) startFunction(httpsOptions);
+        System.URL = url? new URL(url).origin : `https://${httpsOptions.hostname}:${httpsOptions.port}`;
         Logger.setDirectoryPath(logDirectoryPath);
         System.close();
         System.server = serveTLS(httpsOptions);
         for await (const request of System.server) {
             const systemRequest: SystemRequest = new SystemRequest(request);
-            const route: Route = Route.getRouteByUrl(systemRequest.getURL().path) || Route["404"];
+            const route: Route = Route.getRouteByUrl(systemRequest.getURL().pathname) || Route["404"];
             control(systemRequest, route);
         }
     }

@@ -1,4 +1,4 @@
-import { ServerRequest, parseUrl, URL } from "./mod.ts";
+import { System, ServerRequest, DecodedURL } from "./mod.ts";
 export class SystemRequest {
 
     #request: ServerRequest;
@@ -30,8 +30,8 @@ export class SystemRequest {
         return this.#url;
     }
 
-    getURL(): URL {
-        return parseUrl(this.#url);
+    getURL(): DecodedURL {
+        return new DecodedURL(this.#url ,System.URL);
     }
 
     get method(): string {
