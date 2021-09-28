@@ -10,7 +10,7 @@ import { Logger, Log } from "../mod.ts";
 
 
 // ログファイルの名前
-const fileName: string = "logger_test.log";
+const fileName: string = "Logger_test.log";
 
 // 前回のテストファイルの削除
 async function rmLogFile(): Promise<void> {
@@ -21,9 +21,6 @@ async function rmLogFile(): Promise<void> {
     }
 }
 
-// ロガー
-const logger: Logger = new Logger();
-
 /**
  * writeテスト
  */
@@ -31,7 +28,7 @@ Deno.test({
     name: "writeテスト",
     async fn(): Promise<void> {
         await rmLogFile();
-        await logger.write(fileName, "Test1\n").then(async()=>{
+        await Logger.write(fileName, "Test1\n").then(async()=>{
             assertEquals("Test1\n", await Deno.readTextFile("./log/"+fileName), "ファイルが指定のパスに存在していない可能性があります");
         });
     },
@@ -44,8 +41,8 @@ Deno.test({
     name: "readテスト",
     async fn(): Promise<void> {
         await rmLogFile();
-        await logger.write(fileName, "Test2\n");
-        assertEquals("Test2\n", await logger.read(fileName), "ファイルが存在していないか、読み込み処理部分に不正箇所があります");
+        await Logger.write(fileName, "Test2\n");
+        assertEquals("Test2\n", await Logger.read(fileName), "ファイルが存在していないか、読み込み処理部分に不正箇所があります");
     },
 });
 
@@ -56,9 +53,9 @@ Deno.test({
     name: "insertテスト",
     async fn(): Promise<void> {
         await rmLogFile();
-        await logger.insert(fileName, "Test3\n");
-        await logger.insert(fileName, "Test4\n");
-        assertEquals("Test3\nTest4\n", await logger.read(fileName), "ファイルが存在していないか、処理部分に不正があります");
+        await Logger.insert(fileName, "Test3\n");
+        await Logger.insert(fileName, "Test4\n");
+        assertEquals("Test3\nTest4\n", await Logger.read(fileName), "ファイルが存在していないか、処理部分に不正があります");
     },
 });
 
@@ -72,8 +69,8 @@ Deno.test({
         const log: Log = new Log("Data1", "Data2");
         log.fileName = fileName;
 
-        await logger.record(log);
-        const res = await logger.read(fileName);
+        await Logger.record(log);
+        const res = await Logger.read(fileName);
         assertEquals(true, res.includes(",Data1,Data2"), "ファイルが存在していないか、処理部分に不正があります");
     },
 });

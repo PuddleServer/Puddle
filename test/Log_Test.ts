@@ -24,6 +24,8 @@ Deno.test({
         assertEquals("Date,Type,Message\n", err_log.headerLine, "ErrorLogのTypeの指定とheaderを見直してください");
         assertEquals("Date,Type,Message\n", war_log.headerLine, "ErrorLogのTypeの指定とheaderを見直してください");
     },
+    sanitizeResources: false,
+    sanitizeOps: false,
 });
 
 /**
@@ -37,4 +39,6 @@ Deno.test({
         assertEquals(true, err_log.toString().includes("error,errMessage"), "dataの記述を見直してください");
         assertEquals(true, war_log.toString().includes("warning,warMessage"), "dataの記述を見直してください");
     },
+    sanitizeResources: false,
+    sanitizeOps: false,
 });
