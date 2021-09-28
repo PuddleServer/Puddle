@@ -55,7 +55,6 @@ export class Log {
         this.data = [];
         this.data.push(new Date().toString().replace(/\s\(.*\)/g, ""));
         this.data.push(...data);
-        this.record();
     }
 
     get headerLine(): string {
@@ -67,29 +66,25 @@ export class Log {
     }
 
     async record() {
-        const texts: string = await Logger.read(this.fileName);
-        if(!texts.length) await Logger.insert(this.fileName, this.headerLine);
-        await Logger.insert(this.fileName, this.toString());
+        await Logger.insert(this.fileName, this.toString(), this.headerLine);
     }
 }
 
 export class RequestLog extends Log {
-
-    fileName = "request.log";
-    header = ["Date", "Path", "Method", "URL", "Address"];
-
     constructor(Path: string, Method: string, URL: string, Address: string) {
         super(Path, Method, URL, Address);
+        this.fileName = "request.log";
+        this.header = ["Date", "Path", "Method", "URL", "Address"];
+        this.record();
     }
 }
 
 export class ErrorLog extends Log {
-
-    fileName: string = "error.log";
-    header: string[] = ["Date", "Type", "Message"];
-    
     constructor(Type: "error" | "warning", Message: string) {
         super(Type, Message);
+        this.fileName = "error.log";
+        this.header = ["Date", "Type", "Message"];
+        this.record();
     }
 }
 
@@ -105,7 +100,7 @@ export class Logger {
         const filePath: string = `${Logger.directoryPath}/${fileName}`;
         await ensureFile(filePath)
         const text:string = await Deno.readTextFile(filePath);
-        return new Promise(resolve=>resolve(text));
+        return text;
     }
 
     static async write(fileName: string, text: string): Promise<void> {
@@ -114,14 +109,9 @@ export class Logger {
         await Deno.writeTextFile(filePath, text)
     }
 
-    static async insert(fileName: string, text: string): Promise<void> {
+    static async insert(fileName: string, text: string, header: string): Promise<void> {
         const texts: string = await Logger.read(fileName);
+        if(!texts.length) await Logger.write(fileName, header);
         await Logger.write(fileName, texts+text);
-    }
-
-    static async record(log: Log): Promise<void> {
-        const texts: string = await Logger.read(log.fileName);
-        if(!texts.length) await Logger.insert(log.fileName, log.headerLine);
-        await Logger.insert(log.fileName, log.toString());
     }
 }
