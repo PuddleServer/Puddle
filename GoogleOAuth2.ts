@@ -60,7 +60,7 @@ export class GoogleOAuth2 {
     }
 
     setup() {
-        const redirect_URL = this.#getGoogleOAuth2_URL(this.#client_id, `${System.URL}${this.#URL}`);
+        const redirect_URL = this.#getGoogleOAuth2_URL(this.#client_id, `${System.URI}${this.#URL}`);
         this.#route_login.GET(redirect(redirect_URL));
     }
 
@@ -90,7 +90,7 @@ export class GoogleOAuth2 {
     LOGIN(process: Function): GoogleOAuth2 {
         new Route(this.#URL, [], async (request: SystemRequest, response: SystemResponse)=>{
             try {
-				const access_token = await getAccessToken(this.#client_id, this.#client_secret, System.URL+this.#URL, request.getURL().searchParams.get("code")||"");
+				const access_token = await getAccessToken(this.#client_id, this.#client_secret, System.URI+this.#URL, request.getURL().searchParams.get("code")||"");
 				const profile_info = await getProfileInfo(access_token);
                 process(request, response, profile_info);
 			} catch(error) {

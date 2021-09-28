@@ -42,7 +42,7 @@ export class System {
     /** サーバーを保持する変数 */
     static server: Server;
 
-    static URL: string;
+    static URI: string;
 
     static GoogleOAuth2: GoogleOAuth2;
 
@@ -159,14 +159,16 @@ export class System {
         return System.GoogleOAuth2;
     }
 
-    static async listen(option: number | string | HTTPOptions, startFunction?: Function, url?: string): Promise<void> {
+    static async listen(option: number | string | HTTPOptions, startFunction?: Function, uri?: string): Promise<void> {
         const httpOptions: HTTPOptions = {hostname: "localhost", port: 8080};
         let logDirectoryPath: string = "./log";
+        let server_uri: string | undefined = uri;
         if (typeof option === "string") {
             const conf: Config = await ConfigReader.read(option);
             httpOptions.hostname = conf.HOSTNAME || conf.hostname || conf.SERVER.HOSTNAME || conf.SERVER.hostname || conf.server.HOSTNAME || conf.server.hostname;
             httpOptions.port = conf.PORT || conf.port || conf.SERVER.PORT || conf.SERVER.port || conf.server.PORT || conf.server.port;
             logDirectoryPath = conf.LOG || conf.log || conf.SERVER.LOG || conf.SERVER.log || conf.server.LOG || conf.server.log || "./log";
+            server_uri = uri || conf.URI || conf.uri || conf.SERVER.URI || conf.SERVER.uri || conf.server.URI || conf.server.uri;
             if(startFunction) startFunction(conf);
         } else {
             if(typeof option === "number") {
@@ -175,7 +177,7 @@ export class System {
             }
             if(startFunction) startFunction(httpOptions);
         }
-        System.URL = url? new URL(url).origin : `http://${httpOptions.hostname}:${httpOptions.port}`;
+        System.URI = server_uri? new URL(server_uri).origin : `http://${httpOptions.hostname}:${httpOptions.port}`;
         if(System.GoogleOAuth2) System.GoogleOAuth2.setup();
         Logger.setDirectoryPath(logDirectoryPath);
         System.close();
@@ -187,9 +189,10 @@ export class System {
         }
     }
 
-    static async listenTLS(option: string | HTTPSOptions, startFunction?: Function, url?: string): Promise<void> {
+    static async listenTLS(option: string | HTTPSOptions, startFunction?: Function, uri?: string): Promise<void> {
         const httpsOptions: HTTPSOptions = {hostname: "localhost", port: 8080, certFile: "", keyFile: ""};
         let logDirectoryPath: string = "./log";
+        let server_uri: string | undefined = uri;
         if (typeof option === "string") {
             const conf: Config = await ConfigReader.read(option);
             httpsOptions.hostname = conf.HOSTNAME || conf.hostname || conf.SERVER.HOSTNAME || conf.SERVER.hostname || conf.server.HOSTNAME || conf.server.hostname;
@@ -197,9 +200,10 @@ export class System {
             httpsOptions.certFile = conf.CERTFILE || conf.certFile || conf.certfile || conf.SERVER.CERTFILE || conf.SERVER.certFile || conf.SERVER.certfile || conf.server.CERTFILE || conf.server.certFile || conf.server.certfile;
             httpsOptions.keyFile = conf.KEYFILE || conf.keyFile || conf.keyfile || conf.SERVER.KEYFILE || conf.SERVER.keyFile || conf.SERVER.keyfile || conf.server.KEYFILE || conf.server.keyFile || conf.server.keyfile;
             logDirectoryPath = conf.LOG || conf.log || conf.SERVER.LOG || conf.SERVER.log || conf.server.LOG || conf.server.log || "./log";
+            server_uri = uri || conf.URI || conf.uri || conf.SERVER.URI || conf.SERVER.uri || conf.server.URI || conf.server.uri;
             if(startFunction) startFunction(conf);
         }  else if(startFunction) startFunction(httpsOptions);
-        System.URL = url? new URL(url).origin : `https://${httpsOptions.hostname}:${httpsOptions.port}`;
+        System.URI = server_uri? new URL(server_uri).origin : `https://${httpsOptions.hostname}:${httpsOptions.port}`;
         if(System.GoogleOAuth2) System.GoogleOAuth2.setup();
         Logger.setDirectoryPath(logDirectoryPath);
         System.close();

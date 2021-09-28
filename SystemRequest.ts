@@ -31,7 +31,7 @@ export class SystemRequest {
     }
 
     getURL(): DecodedURL {
-        return new DecodedURL(this.#url ,System.URL);
+        return new DecodedURL(this.#url ,System.URI);
     }
 
     get method(): string {
