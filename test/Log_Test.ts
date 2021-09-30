@@ -42,3 +42,15 @@ Deno.test({
     sanitizeResources: false,
     sanitizeOps: false,
 });
+
+Deno.test({
+    name: "recordテスト",
+    async fn() {
+        await log.record();
+        await req_log.record();
+        await err_log.record();
+        await war_log.record();
+    },
+    sanitizeResources: false,
+    sanitizeOps: false,
+});
