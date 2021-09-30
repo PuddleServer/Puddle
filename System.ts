@@ -13,9 +13,10 @@ export type Config = {[key:string]: any; };
  * デコードされたURLを操作するためのクラス。
  * Class for manipulating decoded URLs.
  * 
+ * ```ts
  *  new DecodedURL("https://www.example.com/abc?def");
  *  new DecodedURL("/abc?def", "https://www.example.com");
- * 
+ * ```
  * The link shows how to use it.
  * https://developer.mozilla.org/ja/docs/Web/API/URL
  */
