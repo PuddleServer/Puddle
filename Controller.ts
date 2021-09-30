@@ -71,7 +71,9 @@ function authentication(request: SystemRequest, route: Route) {
     if(res.includes(auth?.response)) return;
     response.status = 401;
     response.headers.set("WWW-Authenticate", `Digest realm="${route.PATH()}", nonce="${getRandomStr(60)}", algorithm=MD5, qop="auth"`);
-    response.redirect("/403");
+    response.headers.set('Content-Type', 'text/html');
+    response.body = `<body><script type="text/javascript">setTimeout(()=>location.pathname='/403', 0);</script></body>`;
+    response.send();
 }
 
 /**
