@@ -6,6 +6,12 @@
  */
 import { WebSocket, default_onmessage, default_onopen }  from "./mod.ts"
 
+export interface WebSocketEvent {
+    onopen?: Function;
+    onclose?: Function;
+    onmessage?: Function;
+}
+
 /**
  * WebSocket通信のハンドリングを行うクラス
  */
@@ -20,7 +26,7 @@ export class WebSocketRoute {
     /** クライアントからメッセージを受け付けた時に呼ばれる処理 */
     #onmessage: Function;
 
-    constructor(event?: { [key:string]: Function; }) {
+    constructor(event?: WebSocketEvent) {
         this.#onopen = event?.onopen || default_onopen;
         this.#onclose = event?.onclose || function(){};
         this.#onmessage = event?.onmessage || default_onmessage;
