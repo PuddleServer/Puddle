@@ -1,4 +1,4 @@
-import { System, ServerRequest, DecodedURL } from "./mod.ts";
+import { System, ServerRequest, DecodedURL, getCookies } from "./mod.ts";
 export class SystemRequest {
 
     #request: ServerRequest;
@@ -32,6 +32,14 @@ export class SystemRequest {
 
     getURL(): DecodedURL {
         return new DecodedURL(this.#url ,System.URI);
+    }
+
+    getCookies(): Record<string, string> {
+        return getCookies(this.#request);
+    }
+
+    getCookie(key: string): string | undefined {
+        return this.getCookies()[key];
     }
 
     get method(): string {
