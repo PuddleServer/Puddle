@@ -1,45 +1,92 @@
+import { createHash, WebSocketRoute, WebSocketEvent, default_get, default_error, ErrorLog } from "./mod.ts"
+
 /**
- * ルーティングを行うクラスファイル。
- * @author Daruo(KINGVOXY)
- * @author AO2324(AO2324-00)
- * @Date   2021-09-24
+ * サーバーのルーティングに関する設定を行う。
+ * Configure settings related to server routing.
+ * 
+ * ```ts
+ *  new Route("./assets/index.html");
+ *  new Route("./assets/about.html", ["/About", "about"]);
+ * ```
  */
-
-import { createHash, WebSocketRoute, default_get, default_error, System, ErrorLog } from "./mod.ts"
-
 export class Route {
 
+    /**
+     * ルートを格納する配列。
+     * Array to store the route.
+     */
     static list: Route[] = [];
 
+    /**
+     * 502エラーを返すルート。
+     * A route that returns a 502 error.
+     */
     static "502" = new Route("502", [], default_error(502, `Server error.<br>サーバーエラー。`));
 
+    /**
+     * 404エラーを返すルート。
+     * A route that returns a 404 error.
+     */
     static "404" = new Route("404", [], default_error(404, `Not found.<br>見つかりません。`));
-    
+
+    /**
+     * 403エラーを返すルート。
+     * A route that returns a 403 error.
+     */
     static "403" = new Route("403", ["/403"], default_error(403, `Forbidden.<br>認証が拒否されました。`));
 
-    /** サーバーへのリクエストの名前 */
+    /**
+     * ファイルパス。（`"default_get()"`を使わない場合は、どのルートかが分かるキーワード）
+     * File path. (if you don't use `"default_get()"`, the keyword that tells you which root it is)
+     */
     #PATH: string;
 
-    /** リクエストを許可する別名 */
+    /**
+     * リクエストを許可するURLのPathname。
+     * Pathname of the URL to allow the request.
+     */
     #URL: string[];
 
-    /** GETリクエスト時の処理をまとめた関数 */
+    /**
+     * GETリクエスト時の処理をまとめた関数。
+     * A function that summarizes the process when a GET request is made.
+     */
     #GET: Function;
 
-    /** PUTリクエスト時の処理まとめた関数 */
+    /**
+     * PUTリクエスト時の処理をまとめた関数。
+     * A function that summarizes the process when a PUT request is made.
+     */
     #PUT: Function;
 
-    /** POSTリクエスト時の処理まとめた関数 */
+    /**
+     * POSTリクエスト時の処理をまとめた関数。
+     * A function that summarizes the process when a POST request is made.
+     */
     #POST: Function;
 
-    /** DELETEリクエスト時の処理まとめた関数 */
+    /**
+     * DELETEリクエスト時の処理をまとめた関数。
+     * A function that summarizes the process when a DELETE request is made.
+     */
     #DELETE: Function;
 
-    /** PATCHリクエスト時の処理まとめた関数 */
+    /**
+     * PATCHリクエスト時の処理をまとめた関数。
+     * A function that summarizes the process when a PATCH request is made.
+     */
     #PATCH: Function;
 
+    /**
+     * ダイジェスト認証に使用するMd5ハッシュを格納した変数。認証を使用しない場合は`"undefined"`。
+     * A variable that contains the Md5 hash used for digest authentication; If authentication is not used, it is "undefined".
+     */
     #AUTH: string[] | undefined;
 
+    /**
+     * WebSocket通信を利用する場合にWebSocketRouteオブジェクトを格納する変数。WebSocket通信を利用しない場合は"undefined"。
+     * Variable that stores the WebSocketRoute object when WebSocket communication is used; `"undefined"` when WebSocket communication is not used.
+     */
     #wsRoute: WebSocketRoute | undefined;
 
     constructor(PATH: string, URL: string[] = [], GET?: Function | null, POST?: Function | null, PUT?: Function | null, DELETE?: Function | null, PATCH?: Function | null) {
@@ -67,7 +114,8 @@ export class Route {
     }
 
     /**
-     * サーバーへのリクエストの名前を返す。
+     * PATHのゲッター。
+     * Getter of PATH.
      * @returns PATH
      */
     PATH(): string {
@@ -75,9 +123,10 @@ export class Route {
     }
 
     /**
-     * URLの取得、設定を行う。
-     * @param urls 許可するリクエストURL(可変長引数)。
-     * @returns 引数がない場合はURLを、ある場合はthisを返す。
+     * URLのゲッター兼セッター。
+     * URL getter/setter.
+     * @param urls URL to allow requests; If not specified, it will function as a getter.
+     * @returns URL array or Route object.
      */
     URL(): string[];
     URL(urls: string[]): Route;
@@ -95,9 +144,10 @@ export class Route {
     }
 
     /**
-     * GETの取得、設定を行う。
-     * @param process 処理内容を記述した関数。
-     * @returns 引数がない場合はGETを、ある場合はthisを返す。
+     * GETリクエスト時の処理のゲッター兼セッター。
+     * A getter and setter for processing GET requests.
+     * @param process Handler function describing the process.
+     * @returns Handler function or Route object.
      */
     GET(): Function;
     GET(process: Function): Route;
@@ -111,9 +161,10 @@ export class Route {
     }
 
     /**
-     * PUTの取得、設定を行う。
-     * @param process 処理内容を記述した関数。
-     * @returns 引数がない場合はPUTを、ある場合はthisを返す。
+     * PUTリクエスト時の処理のゲッター兼セッター。
+     * A getter and setter for processing PUT requests.
+     * @param process Handler function describing the process.
+     * @returns Handler function or Route object.
      */
     PUT(): Function;
     PUT(process: Function): Route;
@@ -127,9 +178,10 @@ export class Route {
     }
 
     /**
-     * POSTの取得、設定を行う。
-     * @param process 処理内容を記述した関数。
-     * @returns 引数がない場合はPOSTを、ある場合はthisを返す。
+     * POSTリクエスト時の処理のゲッター兼セッター。
+     * A getter and setter for processing POST requests.
+     * @param process Handler function describing the process.
+     * @returns Handler function or Route object.
      */
     POST(): Function;
     POST(process: Function): Route;
@@ -143,9 +195,10 @@ export class Route {
     }
 
     /**
-     * DELETEの取得、設定を行う。
-     * @param process 処理内容を記述した関数。
-     * @returns 引数がない場合はDELETEを、ある場合はthisを返す。
+     * DELETEリクエスト時の処理のゲッター兼セッター。
+     * A getter and setter for processing DELETE requests.
+     * @param process Handler function describing the process.
+     * @returns Handler function or Route object.
      */
     DELETE(): Function;
     DELETE(process: Function): Route;
@@ -159,9 +212,10 @@ export class Route {
     }
 
     /**
-     * PATCHの取得、設定を行う。
-     * @param process 処理内容を記述した関数。
-     * @returns 引数がない場合はPATCHを、ある場合はthisを返す。
+     * PATCHリクエスト時の処理のゲッター兼セッター。
+     * A getter and setter for processing PATCH requests.
+     * @param process Handler function describing the process.
+     * @returns Handler function or Route object.
      */
     PATCH(): Function;
     PATCH(process: Function): Route;
@@ -174,11 +228,29 @@ export class Route {
 
     }
 
+    /**
+     * ダイジェスト認証に使用する"A1"の情報をハッシュ化するメソッド。
+     * A method for hashing the "A1" information used for digest authentication.
+     * @param param0 User name.
+     * @param param1 Password.
+     * @returns Hashed string.
+     */
     #_AUTH(param0: string, param1?: string): string {
         if(!param1) return param0;
         return createHash("md5").update(`${param0}:${this.#PATH}:${param1}`).toString();
     }
 
+    /**
+     * ダイジェスト認証のゲッター兼セッター。
+     * Getter and Setter for Digest Authentication.
+     * @param name User name.
+     * @param password Password.
+     * @param hash String of A1 information hashed with Md5.
+     * @return Hash value array or Route object.
+     * ```ts
+     * const hash = createHash("md5").update(`${user_name}:${Route.PATH()}:${password}`).toString();
+     * ```
+     */
     AUTH(): string[] | undefined;
     AUTH(hash: string): Route;
     AUTH(name: string, password: string): Route;
@@ -201,25 +273,49 @@ export class Route {
     }
 
     /**
-     * WebSocket通信かどうか
+     * WebSocket通信を使用するルートかどうか。
+     * Whether the Route uses WebSocket communication.
+     * @return True if WebSocket is used.
      */
     get isWebSocket(): boolean {
         return Boolean(this.#wsRoute);
     }
 
     /**
-     * WebSocket通信の場合に呼び出されるメソッド
-     * @returns WebSocketRouteを返す
+     * WebSocketRouteのゲッター兼セッター。
+     * Getter and Setter for WebSocketRoute.
+     * @param event An associative array that stores the respective processes with onopen, onclose, and onmessage as keys.
+     * @returns WebSocketRoute object.
+     * 
+     * ```ts
+     * System.createRoute("/ws").WebSocket({
+     *      onopen: ((req: SystemRequest, client: WebSocketClient) => {
+     *          console.log(`>> WebSocket opened.`);
+     *      },
+     *      onmessage: (req: SystemRequest, client: WebSocketClient, message: string) => {
+     *          client.sendAll(message);
+     *      }
+     * });
+     * 
+     * System.createRoute("/ws").WebSocket()
+     *      .onopen((req: SystemRequest, client: WebSocketClient) => {
+     *          console.log(`>> WebSocket opened.`);
+     *      })
+     *      .onmessage((req: SystemRequest, client: WebSocketClient, message: string) => {
+     *          client.sendAll(message);
+     *      });
+     * ```
      */
-    WebSocket(event?: { [key:string]: Function; }): WebSocketRoute {
+    WebSocket(event?: WebSocketEvent): WebSocketRoute {
         if(!this.#wsRoute) this.#wsRoute = new WebSocketRoute(event);
         return this.#wsRoute;
     }
 
     /**
-     * RouteのURLに重複がないかをチェックし、重複を削除したURL配列を返す。
-     * @param urls チェックするURL配列
-     * @returns 重複を取り除いたURL配列。
+     * ルートのURLに重複がないかをチェックし、重複を削除したURL配列を返す。
+     * Checks for duplicates in the Route URLs and returns a URL array with the duplicates removed.
+     * @param urls URL array to check.
+     * @returns URL array with duplicates removed.
      */
     static getUniqueUrlArray(urls: string[]): string[] {
         
@@ -235,27 +331,30 @@ export class Route {
     }
 
     /**
-     * 指定されたパスが使用済みかどうか。
-     * @param path パス。
-     * @returns 真偽値。
+     * 指定されたパスが既に使用されているかどうか。
+     * Whether or not the specified path is already in use.
+     * @param path PATH name.
+     * @returns True if it is already in use.
      */
     static isThePathInUse(path: string): boolean {
         return Route.list.map(route=>route.PATH()).flat().includes(path);
     }
 
     /**
-     * 指定されたURLが使用済みかどうか。
-     * @param urls URL配列。
-     * @returns 真偽値。
+     * 指定されたURLが既に使用されているかどうか。
+     * Whether or not the specified URL is already in use.
+     * @param urls URL.
+     * @returns True if it is already in use.
      */
     static isTheUrlAlreadyInUse(...urls: string[]): boolean {
         return Boolean(urls.filter( u => Route.list.map(route=>route.URL()).flat().includes(u) ).length);
     }
 
     /**
-     * 指定したpathが設定されたRouteオブジェクトを返す。
-     * @param path RouteオブジェクトのPATH
-     * @returns 指定されたRouteオブジェクト。
+     * 指定されたPATHが設定されているRouteオブジェクトを取得する。
+     * Get the Route object with the specified PATH set.
+     * @param path PATH of the Route object.
+     * @returns Route object; If it does not exist, create a new one.
      */
     static getRouteByPath(path: string): Route {
         const routes: Route[] = Route.list.filter( (route: Route) => route.PATH() == path );
@@ -270,9 +369,9 @@ export class Route {
     }
 
     /**
-     * 指定したurlを含むRouteを返す。
-     * @param url URL
-     * @returns Routeオブジェクト
+     * 指定したURLを含むルートオブジェクトを取得する。
+     * @param url Get a Route object containing the specified URL.
+     * @returns Route object.
      */
     static getRouteByUrl(url: string): Route | undefined {
         const routes: Route[] = Route.list.filter(route => route.URL().includes(url));
