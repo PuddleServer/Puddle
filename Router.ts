@@ -50,30 +50,40 @@ export class Route {
     /**
      * GETリクエスト時の処理をまとめた関数。
      * A function that summarizes the process when a GET request is made.
+     * @param request SystemRequest.
+     * @param response SystemResponse.
      */
     #GET: Function;
 
     /**
      * PUTリクエスト時の処理をまとめた関数。
      * A function that summarizes the process when a PUT request is made.
+     * @param request SystemRequest.
+     * @param response SystemResponse.
      */
     #PUT: Function;
 
     /**
      * POSTリクエスト時の処理をまとめた関数。
      * A function that summarizes the process when a POST request is made.
+     * @param request SystemRequest.
+     * @param response SystemResponse.
      */
     #POST: Function;
 
     /**
      * DELETEリクエスト時の処理をまとめた関数。
      * A function that summarizes the process when a DELETE request is made.
+     * @param request SystemRequest.
+     * @param response SystemResponse.
      */
     #DELETE: Function;
 
     /**
      * PATCHリクエスト時の処理をまとめた関数。
      * A function that summarizes the process when a PATCH request is made.
+     * @param request SystemRequest.
+     * @param response SystemResponse.
      */
     #PATCH: Function;
 
@@ -147,6 +157,7 @@ export class Route {
      * GETリクエスト時の処理のゲッター兼セッター。
      * A getter and setter for processing GET requests.
      * @param process Handler function describing the process.
+     *                Arguments: SystemRequest, SystemResponse.
      * @returns Handler function or Route object.
      */
     GET(): Function;
@@ -164,6 +175,7 @@ export class Route {
      * PUTリクエスト時の処理のゲッター兼セッター。
      * A getter and setter for processing PUT requests.
      * @param process Handler function describing the process.
+     *                Arguments: SystemRequest, SystemResponse.
      * @returns Handler function or Route object.
      */
     PUT(): Function;
@@ -181,6 +193,7 @@ export class Route {
      * POSTリクエスト時の処理のゲッター兼セッター。
      * A getter and setter for processing POST requests.
      * @param process Handler function describing the process.
+     *                Arguments: SystemRequest, SystemResponse.
      * @returns Handler function or Route object.
      */
     POST(): Function;
@@ -198,6 +211,7 @@ export class Route {
      * DELETEリクエスト時の処理のゲッター兼セッター。
      * A getter and setter for processing DELETE requests.
      * @param process Handler function describing the process.
+     *                Arguments: SystemRequest, SystemResponse.
      * @returns Handler function or Route object.
      */
     DELETE(): Function;
@@ -215,6 +229,7 @@ export class Route {
      * PATCHリクエスト時の処理のゲッター兼セッター。
      * A getter and setter for processing PATCH requests.
      * @param process Handler function describing the process.
+     *                Arguments: SystemRequest, SystemResponse.
      * @returns Handler function or Route object.
      */
     PATCH(): Function;
