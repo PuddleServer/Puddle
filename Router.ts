@@ -1,4 +1,4 @@
-import { createHash, WebSocketRoute, WebSocketEvent, default_get, default_error, ErrorLog } from "./mod.ts"
+import { createHash, WebSocketRoute, WebSocketEvent, default_get, default_error, redirect, ErrorLog } from "./mod.ts"
 
 /**
  * サーバーのルーティングに関する設定を行う。
@@ -34,6 +34,12 @@ export class Route {
      * A route that returns a 403 error.
      */
     static "403" = new Route("403", ["/403"], default_error(403, `Forbidden.<br>認証が拒否されました。`));
+
+    /**
+     * ファビコンを返すルート。
+     * Route to return the favicon.
+     */
+    static "favicon" = new Route("favicon", ["/favicon.ico"], redirect("https://puddleserver.github.io/Documents/favicon.ico"));
 
     /**
      * ファイルパス。（`"default_get()"`を使わない場合は、どのルートかが分かるキーワード）
