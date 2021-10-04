@@ -12,12 +12,13 @@ import {
 
 const list1: {[key: string]: string} = {name: "apple", color: "red"};
 const list2: {[key: string]: string | number} = {name: "john", age: 23, location: "Osaka"};
+const list3: {[key: string]: string | number} = {drink: "fanta"};
 
 // getテスト用
 System.createRoute("./assets/index.html").URL("/", "/get");
 
 // postテスト用
-System.createRoute("./assets/post.html").URL("/post")
+System.createRoute("post_test").URL("/post")
 .POST(async function (request: SystemRequest, response: SystemResponse) {
     const body = await request.body;
     const decoder = new TextDecoder('utf-8');
@@ -28,13 +29,14 @@ System.createRoute("./assets/post.html").URL("/post")
 });
 
 // putテスト用
-System.createRoute("./assets/put.html").URL("/put")
+System.createRoute("put_test").URL("/put")
 .PUT(async function (request: SystemRequest, response: SystemResponse) {
     const body = await request.body;
     const decoder: TextDecoder = new TextDecoder('utf-8');
     const file_data: string = decoder.decode(await Deno.readAll(body));
     
     const eles: string[] = file_data.split('&');
+    console.log(eles)
     for(let e of eles) {
         let keyOrCon = e.split('=');
         list1[keyOrCon[0]] = keyOrCon[1];
@@ -49,6 +51,19 @@ System.createRoute("delete_test").URL("/delete")
 .DELETE(async function (request: SystemRequest, response: SystemResponse) {
     delete list2["location"];
     response.setText(JSON.stringify(list2));
+    response.send();
+});
+
+System.createRoute("patch_test").URL("/patch")
+.PATCH(async function (request: SystemRequest, response: SystemResponse) {
+    const body = await request.body;
+    const decoder: TextDecoder = new TextDecoder('utf-8');
+    const file_data: string = decoder.decode(await Deno.readAll(body));
+    
+    const f_obj = JSON.parse(file_data);
+    list3[Object.keys(f_obj)[0]] = f_obj.drink;
+    
+    response.setText(JSON.stringify(list3));
     response.send();
 });
 
