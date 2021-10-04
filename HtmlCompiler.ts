@@ -1,15 +1,9 @@
 /**
- * HTMLファイル内に埋め込まれた変数をテキストに変換したHTMLを作成する。
- * @author Daruo(KINGVOXY)
- * @author AO2324(AO2324-00)
- * @Date   2021-08-27
- */
-
-/**
- * HTMLファイル内に埋め込まれた変数をテキストに変換したHTMLを作成する関数。
- * @param html 変数を含んだhtml形式のテキスト。
- * @param params html内で呼び出される変数名をキーとした連想配列。
- * @returns 変数に代入を行った後のhtmlテキスト。
+ * HTMLファイル内に埋め込まれた変数にテキストを挿入してHTMLを作成する関数。
+ * Function to create HTML by inserting text into variables embedded in an HTML file.
+ * @param html Text in html format that contains variables.
+ * @param params An associative array with variable names as keys, called in html.
+ * @returns The html after inserting text into the variable.
  */
 export function htmlCompile(html: string, params: { [key: string]: ( string | Number ); }): string {
     for(let param in params) {
