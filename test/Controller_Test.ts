@@ -29,10 +29,10 @@ async function runCommand(c: string):Promise<string> {
 
 const get    :string = await runCommand("curl localhost:8080/");
 const post   :string = await runCommand(`curl -X POST -H "Content-Type:application/json" -d {"Name":"deno_taro"} localhost:8080/post`);
-const put    :string = await runCommand(`curl -X PUT -d 'color=green&location=japan' localhost:8080/put`);
+const put    :string = await runCommand(`curl -X PUT -d color=green&location=japan localhost:8080/put`);
 const del    :string = await runCommand("curl -X DELETE localhost:8080/delete");
-// const patch  :string = await runCommand();
-const auth  :string = await runCommand(`curl --anyauth --user user:pwd localhost:8080/auth`);
+const patch  :string = await runCommand(`curl -X PATCH "Content-Type:application/json" -d {"drink":"cola"} localhost:8080/patch`);
+const auth   :string = await runCommand(`curl --anyauth --user user:pwd localhost:8080/auth`);
 
 Deno.test({
     name: "getテスト",
@@ -65,7 +65,7 @@ Deno.test({
 Deno.test({
     name: "patchテスト",
     fn(): void {
-
+        assertEquals("cola", JSON.parse(patch).drink, "patchしたデータが不正であるか、正しい処理がされていません。" )
     }
 });
 
@@ -75,6 +75,6 @@ Deno.test({
 Deno.test({
     name: "authテスト",
     fn(): void {
-        assertEquals(true, auth.includes("認証成功"));
+        assertEquals(true, auth.includes("認証成功"), "認証処理に問題があるか、ユーザ名・パスワードが変更されています。");
     }
 });
