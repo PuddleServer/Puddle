@@ -1,18 +1,13 @@
-/**
- * Response処理を行うクラス。
- * @author Daruo(KINGVOXY)
- * @author AO2324(AO2324-00)
- * @Date   2021-09-23
- */
 import {
     System, RequestLog, SystemRequest, SystemResponse, Route, WebSocketRoute, WebSocketClient,
     acceptWebSocket, isWebSocketCloseEvent, WebSocket, acceptable, DecodedURL, createHash
 } from "./mod.ts"
 
 /**
- * Routeの処理をメソッドごとに分けて実行する。
- * @param request リクエストオブジェクト。
- * @param route Routeオブジェクト。
+ * Routeの処理をリクエストメソッドに応じて実行する。
+ * Route processing is executed according to the request method.
+ * @param request SystemRequest object.
+ * @param route Route object.
  */
 export function control(request: SystemRequest, route: Route): void {
     new RequestLog(
@@ -48,6 +43,12 @@ export function control(request: SystemRequest, route: Route): void {
     }
 }
 
+/**
+ * ランダムな文字列を生成する。
+ * Generate a random string.
+ * @param length Number of characters.
+ * @returns Random string.
+ */
 function getRandomStr(length: number = 8): string{
     const CHAR = "ABCDEFGHIJKLMNOPQRSTUabcdefghijklmnopqrstuvwxyz0123456789=.?!^|-_<>";
     const result = [];
@@ -55,6 +56,12 @@ function getRandomStr(length: number = 8): string{
     return result.join("");
 }
 
+/**
+ * ダイジェスト認証を使用する場合に呼び出す関数。
+ * Function to call when digest authentication is used.
+ * @param request SystemRequest object.
+ * @param route Route object.
+ */
 function authentication(request: SystemRequest, route: Route) {
     const response = new SystemResponse(request.request)
     const auth: {[key:string]:string;} = {};
@@ -77,18 +84,20 @@ function authentication(request: SystemRequest, route: Route) {
 }
 
 /**
- * 通常のリクエスト時の処理を実行する。
- * @param request リクエストオブジェクト。
- * @param process 実行する処理。
+ * リクエスト時の処理を実行する。
+ * Execute the process at the time of the request.
+ * @param request SystemRequest object.
+ * @param process Function.
  */
 function controller(request: SystemRequest, process: Function) {
     process(request, new SystemResponse(request.request));
 }
 
 /**
- * WebSocket通信時のリクエスト時の処理を実行する。
- * @param request リクエストオブジェクト。
- * @param process 実行する処理。
+ * WebSocket通信時の処理を実行する。
+ * Performs processing during WebSocket communication.
+ * @param request SystemRequest object.
+ * @param wsRoute WebSocketRoute object.
  */
 async function webSocketController(request: SystemRequest, wsRoute: WebSocketRoute) {
     if (acceptable(request)) {
