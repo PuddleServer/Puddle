@@ -24,7 +24,6 @@ export function default_get(): Function {
 
 export function default_error(status: number, description: string): Function {
     return async function (request: SystemRequest, response: SystemResponse): Promise<void> {
-        //response.preset({status, description});
         const html = `
         <!DOCTYPE html>
         <html lang="ja">
@@ -40,7 +39,7 @@ export function default_error(status: number, description: string): Function {
         </body>
         </html>
         `;
-        await response.setText(encodeURIComponent(html), status, description);
+        await response.setText(html, status, description);
         response.headers.set('Content-Type', 'text/html');
         response.send();
     }
