@@ -112,9 +112,9 @@ export class Route {
             The path "${PATH}" is already in use.\n
             "${PATH}"というパスは既に使用されています。\n`);
         }
-        this.#PATH = (PATH[0] == ".")? PATH.slice(1) : PATH;
+        this.#PATH = PATH;
         this.#URL = [];
-        URL.push(this.#PATH);
+        URL.push( this.#PATH[0] == "." ? this.#PATH.slice(1) : this.#PATH );
         this.URL.apply(this, URL);
         this.#GET = GET || default_get();
         const process_502: Function = (this.#PATH == "502")? this.#GET : Route["502"].GET();
