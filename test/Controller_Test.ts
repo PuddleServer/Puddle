@@ -28,10 +28,10 @@ async function runCommand(c: string):Promise<string> {
 }
 
 const get    :string = await runCommand("curl localhost:8080/");
-const post   :string = await runCommand(`curl -X POST -H "Content-Type:application/json" -d {"Name":"deno_taro"} localhost:8080/post`);
-const put    :string = await runCommand(`curl -X PUT -d color=green&location=japan localhost:8080/put`);
+const post   :string = await runCommand(`curl -X POST -H "Content-Type:application/json" -d {"Name":"${encodeURIComponent("デノ太郎")}"} localhost:8080/post`);
+const put    :string = await runCommand(`curl -X PUT -d color=${encodeURIComponent("みどり")}&location=${encodeURIComponent("日本")} localhost:8080/put`);
 const del    :string = await runCommand("curl -X DELETE localhost:8080/delete");
-const patch  :string = await runCommand(`curl -X PATCH "Content-Type:application/json" -d {"drink":"cola"} localhost:8080/patch`);
+const patch  :string = await runCommand(`curl -X PATCH "Content-Type:application/json" -d {"drink":"${encodeURIComponent("コーラ")}"} localhost:8080/patch`);
 const auth   :string = await runCommand(`curl --anyauth --user user:pwd localhost:8080/auth`);
 
 Deno.test({
@@ -44,14 +44,14 @@ Deno.test({
 Deno.test({
     name: "postテスト",
     fn(): void {
-        assertEquals("deno_taro", JSON.parse(post).Name, "postしたデータが不正であるか、正しい処理がされていません。")
+        assertEquals("デノ太郎", JSON.parse(post).Name, "postしたデータが不正であるか、正しい処理がされていません。")
     }
 });
 
 Deno.test({
     name: "putテスト",
     fn(): void {
-        assertEquals({name: "apple", color: "green", location: "japan"}, JSON.parse(put.replace(/'/g,"")), "putしたデータが不正であるか、正しい処理がされていません。")
+        assertEquals({name: "りんご", color: "みどり", location: "日本"}, JSON.parse(put.replace(/'/g,"")), "putしたデータが不正であるか、正しい処理がされていません。")
     }
 });
 
@@ -65,7 +65,7 @@ Deno.test({
 Deno.test({
     name: "patchテスト",
     fn(): void {
-        assertEquals("cola", JSON.parse(patch).drink, "patchしたデータが不正であるか、正しい処理がされていません。" )
+        assertEquals("コーラ", JSON.parse(patch).drink, "patchしたデータが不正であるか、正しい処理がされていません。" )
     }
 });
 

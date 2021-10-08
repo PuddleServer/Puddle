@@ -7,35 +7,32 @@
 import { 
     System, Config, default_get, 
     default_error, redirect, SystemRequest, 
-    SystemResponse
+    SystemResponse, Route
 } from "../../mod.ts"
 
-const list1: {[key: string]: string} = {name: "apple", color: "red"};
+const list1: {[key: string]: string} = {name: "りんご", color: "あか"};
 const list2: {[key: string]: string | number} = {name: "john", age: 23, location: "Osaka"};
 const list3: {[key: string]: string | number} = {drink: "fanta"};
 
 // getテスト用
-System.createRoute("./assets/index.html").URL("/", "/get");
+System.createRoute("./assets/default.css").URL("/neko");
+System.createRoute("./assets/index.html").URL("/", "/get","/🐈");
 
 // postテスト用
 System.createRoute("post_test").URL("/post")
 .POST(async function (request: SystemRequest, response: SystemResponse) {
-    const body = await request.body;
-    const decoder = new TextDecoder('utf-8');
-    const file_data = decoder.decode(await Deno.readAll(body));
-    
-    response.setText(file_data);
+    const body = await request.readBody();
+
+    response.setText(body);
     response.send();
 });
 
 // putテスト用
 System.createRoute("put_test").URL("/put")
 .PUT(async function (request: SystemRequest, response: SystemResponse) {
-    const body = await request.body;
-    const decoder: TextDecoder = new TextDecoder('utf-8');
-    const file_data: string = decoder.decode(await Deno.readAll(body));
+    const body = await request.readBody();
     
-    const eles: string[] = file_data.split('&');
+    const eles: string[] = body.split('&');
     console.log(eles)
     for(let e of eles) {
         let keyOrCon = e.split('=');
@@ -54,13 +51,12 @@ System.createRoute("delete_test").URL("/delete")
     response.send();
 });
 
+// patchテスト用
 System.createRoute("patch_test").URL("/patch")
 .PATCH(async function (request: SystemRequest, response: SystemResponse) {
-    const body = await request.body;
-    const decoder: TextDecoder = new TextDecoder('utf-8');
-    const file_data: string = decoder.decode(await Deno.readAll(body));
+    const body = await request.readBody();
     
-    const f_obj = JSON.parse(file_data);
+    const f_obj = JSON.parse(body);
     list3[Object.keys(f_obj)[0]] = f_obj.drink;
     
     response.setText(JSON.stringify(list3));
