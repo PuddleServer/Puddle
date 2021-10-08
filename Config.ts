@@ -1,7 +1,17 @@
 import { Config } from "./mod.ts"
 
+/**
+ * コンフィグファイルを読み込むためのクラス。
+ * Class for loading the configuration file.
+ */
 export class ConfigReader {
 
+    /**
+     * JSONかENV形式のファイルを読み込んで、連想配列データに変換する。
+     * Reads JSON or ENV format files and converts them to associative array data.
+     * @param filePath Path of the file to read.
+     * @returns Config object. {[key:string]: any; }
+     */
     static async read(filePath: string): Promise<Config> {
         const ext: string = filePath.split(/\./g).pop()||"";
         const file = await Deno.open(filePath);
@@ -18,6 +28,12 @@ export class ConfigReader {
         }
     }
 
+    /**
+     * ENV形式のデータを連想配列に変換する。
+     * Convert data in ENV format to an associative array.
+     * @param file_data A string in ENV format.
+     * @returns Config object. {[key:string]: any; }
+     */
     static decodeEnv(file_data: string): Config {
         const result: object = {};
         const data: string[][] = file_data.replace(/\s+#.*(?=\r?\n?)/g, "").split(/\r?\n/).map(data=>{
