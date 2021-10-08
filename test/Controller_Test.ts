@@ -2,7 +2,7 @@
  * run_Testを使用してcontrolの動作が正しくされているか見るファイル
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-23
+ * @Date   2021-10-08
  */
 
  import { assertEquals }     from "https://deno.land/std@0.88.0/testing/asserts.ts";
