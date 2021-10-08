@@ -2,7 +2,7 @@
  * run_Testを使用してcontrolの動作が正しくされているか見るファイル
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-09-23
+ * @Date   2021-10-08
  */
 
  import { assertEquals }     from "https://deno.land/std@0.88.0/testing/asserts.ts";
@@ -37,35 +37,35 @@ const auth   :string = await runCommand(`curl --anyauth --user user:pwd localhos
 Deno.test({
     name: "getテスト",
     fn(): void {
-        assertEquals(true, get.includes("./index.html を表示させるテスト。"), (get.includes("404"))? "ページが見つかりません。ルーティング関係を見直してください。" : "./run_test/server.tsを起動していますか?");
+        assertEquals(true, get.includes("./index.html を表示させるテスト。"), (get.includes("404"))? "ページが見つかりません。ルーティング関係を見直してください。" : "./run_test/testServer.tsを起動していますか?");
     }
 });
 
 Deno.test({
     name: "postテスト",
     fn(): void {
-        assertEquals("デノ太郎", JSON.parse(post).Name, "postしたデータが不正であるか、正しい処理がされていません。")
+        assertEquals("デノ太郎", JSON.parse(post).Name, "postしたデータが不正であるか、正しい処理がされていません。");
     }
 });
 
 Deno.test({
     name: "putテスト",
     fn(): void {
-        assertEquals({name: "りんご", color: "みどり", location: "日本"}, JSON.parse(put.replace(/'/g,"")), "putしたデータが不正であるか、正しい処理がされていません。")
+        assertEquals({name: "りんご", color: "みどり", location: "日本"}, JSON.parse(put.replace(/'/g,"")), "putしたデータが不正であるか、正しい処理がされていません。");
     }
 });
 
 Deno.test({
     name: "deleteテスト",
     fn(): void {
-        assertEquals({"name":"john","age":23}, JSON.parse(del.replace(/'/g,"")), "deleteしたデータが不正であるか、正しい処理がされていません。")
+        assertEquals({"name":"john","age":23}, JSON.parse(del.replace(/'/g,"")), "deleteしたデータが不正であるか、正しい処理がされていません。");
     }
 });
 
 Deno.test({
     name: "patchテスト",
     fn(): void {
-        assertEquals("コーラ", JSON.parse(patch).drink, "patchしたデータが不正であるか、正しい処理がされていません。" )
+        assertEquals("コーラ", JSON.parse(patch).drink, "patchしたデータが不正であるか、正しい処理がされていません。" );
     }
 });
 
