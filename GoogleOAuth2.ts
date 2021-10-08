@@ -1,5 +1,14 @@
 import { System, Route, SystemRequest, SystemResponse, redirect, ErrorLog } from "./mod.ts";
 
+/**
+ * GoogleAPIのアクセストークンを取得する。
+ * Obtain an access token for Google API.
+ * @param client_id Client ID.
+ * @param client_secret Client secret.
+ * @param redirect_url The URL to use to redirect from the Google API to the server.
+ * @param code Code.
+ * @returns Access token.
+ */
 export async function getAccessToken(client_id: string, client_secret: string, redirect_url: string, code: string): Promise<string> {
 	const post = 'client_id=' + client_id + 
 				'&redirect_uri=' + redirect_url + 
@@ -24,6 +33,12 @@ export async function getAccessToken(client_id: string, client_secret: string, r
 	return access_token;
 }
 
+/**
+ * GoogleAPIからユーザー情報を取得する。
+ * Get user information from Google API.
+ * @param access_token Access token.
+ * @returns An associative array containing user information.
+ */
 export async function getProfileInfo(access_token: string): Promise<{ [key: string]: string; }>  {
 	const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo?fields=name,email,id,picture,verified_email', {
 		method: 'GET',
@@ -40,17 +55,42 @@ export async function getProfileInfo(access_token: string): Promise<{ [key: stri
 	return json_response;
 }
 
+/**
+ * GoogleのOAuth2.0認証を導入するためのクラス。
+ * A class for implementing Google's OAuth2.0 authentication.
+ */
 export class GoogleOAuth2 {
 
+    /**
+     * Google OAuth2.0 のクライアントを格納する変数。
+     * A variable that stores the Google OAuth2.0 client.
+     */
     static client: GoogleOAuth2;
 
+    /**
+     * GoogleAPIからのリダイレクト先となるURLのpathname。
+     * The pathname of the URL to be redirected from the Google API.
+     */
     #URL: string;
 
+    /**
+     * GoogleAPIで必要なクライアントID。
+     * Client ID required by Google API.
+     */
     #client_id: string;
 
+    /**
+     * GoogleAPIで必要なクライアントシークレット。
+     * Client secret required by Google API.
+     */
     #client_secret: string;
 
+    /**
+     * Googleでログインするためのページにリダイレクトさせるためのルート。
+     * Route to redirect to the page for logging in with Google.
+     */
     #route_login: Route;
+
     constructor(client_id: string, client_secret: string, URL: string[] = [], process?: Function) {
         this.#client_id = client_id;
         this.#client_secret = client_secret;
@@ -59,15 +99,27 @@ export class GoogleOAuth2 {
         this.#route_login = new Route(`${this.#URL}_redirect`, URL);
     }
 
+    /**
+     * GoogleAPIからリダイレクトさせるためのURLを設定する。
+     * Set the URL to be redirected from the Google API.
+     */
     setup() {
         const redirect_URL = this.#getGoogleOAuth2_URL(this.#client_id, `${System.URI}${this.#URL}`);
         this.#route_login.GET(redirect(redirect_URL));
     }
 
+    /**
+     * クライアントIDのゲッター。
+     * Getter of client ID.
+     */
     get client_id(): string {
         return this.#client_id;
     }
 
+    /**
+     * クライアントシークレットのゲッター。
+     * Getter of client secret.
+     */
     get client_secret(): string {
         return this.#client_secret;
     }
@@ -87,6 +139,13 @@ export class GoogleOAuth2 {
         return this;
     }
 
+    /**
+     * GoogleAPIからユーザー情報を取得する。
+     * Get user information from Google API.
+     * @param process Handler function describing the process.
+     *                Arguments: SystemRequest, SystemResponse, String.
+     * @returns GoogleOAuth2 object.
+     */
     LOGIN(process: Function): GoogleOAuth2 {
         new Route(this.#URL, [], async (request: SystemRequest, response: SystemResponse)=>{
             try {
@@ -101,6 +160,13 @@ export class GoogleOAuth2 {
         return this;
     }
 
+    /**
+     * GoogleAPIへリダイレクトする為のURLを生成する。
+     * Generate a URL to redirect to the Google API.
+     * @param client_id Client ID.
+     * @param redirect_url The URL to use to redirect from the Google API to the server.
+     * @returns URL to redirect to Google API.
+     */
     #getGoogleOAuth2_URL(client_id: string, redirect_url: string): string {
         const google_oauth_url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
         google_oauth_url.searchParams.set('scope', 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email');
