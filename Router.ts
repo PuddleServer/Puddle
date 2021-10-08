@@ -112,7 +112,7 @@ export class Route {
             The path "${PATH}" is already in use.\n
             "${PATH}"というパスは既に使用されています。\n`);
         }
-        this.#PATH = PATH;
+        this.#PATH = (PATH[0] == ".")? PATH.slice(1) : PATH;
         this.#URL = [];
         URL.push(this.#PATH);
         this.URL.apply(this, URL);
