@@ -15,7 +15,7 @@ const list2: {[key: string]: string | number} = {name: "john", age: 23, location
 const list3: {[key: string]: string | number} = {drink: "fanta"};
 
 // getテスト用
-System.createRoute("./assets/default.css").URL("/neko");
+System.createRoute("./assets/default.css");
 System.createRoute("./assets/index.html").URL("/", "/get","/🐈");
 
 // postテスト用
