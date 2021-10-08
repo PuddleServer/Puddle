@@ -40,7 +40,7 @@ export function default_error(status: number, description: string): Function {
         </body>
         </html>
         `;
-        await response.setText(html, status, description);
+        await response.setText(encodeURIComponent(html), status, description);
         response.headers.set('Content-Type', 'text/html');
         response.send();
     }
