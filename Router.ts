@@ -36,12 +36,6 @@ export class Route {
     static "403" = new Route("403", ["/403"], default_error(403, `Forbidden.<br>認証が拒否されました。`));
 
     /**
-     * ファビコンを返すルート。
-     * Route to return the favicon.
-     */
-    static "favicon" = new Route("favicon", ["/favicon.ico"], redirect("https://puddleserver.github.io/Documents/favicon.ico"));
-
-    /**
      * ファイルパス。（`"default_get()"`を使わない場合は、どのルートかが分かるキーワード）
      * File path. (if you don't use `"default_get()"`, the keyword that tells you which root it is)
      */
