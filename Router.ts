@@ -108,7 +108,7 @@ export class Route {
         }
         this.#PATH = PATH;
         this.#URL = [];
-        URL.push( this.#PATH[0] == "." ? this.#PATH.slice(1) : this.#PATH );
+        URL.push( (this.#PATH[0] == "." ? "/" + this.#PATH.slice(1) : "/" + this.#PATH).replace("//", "/") );
         this.URL.apply(this, URL);
         this.#GET = GET || default_get();
         const process_502: Function = (this.#PATH == "502")? this.#GET : Route["502"].GET();

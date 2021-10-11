@@ -1,5 +1,5 @@
 import {
-    serve, serveTLS, Server, HTTPOptions, HTTPSOptions,
+    serve, serveTLS, Server, HTTPOptions, HTTPSOptions, walkSync,
     SystemRequest, Route, control, ConfigReader, Logger, GoogleOAuth2
 } from "./mod.ts"
 
@@ -177,8 +177,19 @@ export class System {
     static createRoutes(...pathsOrRoutes: (string | RouteOption)[]): System {
 
         for(let pathOrRoute of pathsOrRoutes) {
-            if(typeof pathOrRoute == "string") System.createRoute(pathOrRoute);
-            else new Route(
+            if(typeof pathOrRoute == "string") {
+                const fileName = pathOrRoute.split("/").pop();
+                if(fileName?.includes(".")) {
+                    System.createRoute(pathOrRoute);
+                    continue;
+                }
+                for (const entry of walkSync(pathOrRoute.replace(/\*/g, ""))) {
+                    const path = entry.path.replace(/\\/g, "/");
+                    const fileName = path.split("/").pop();
+                    if(path.includes("../") || !fileName?.includes(".")) continue;
+                    System.createRoute(`./${path}`);
+                }
+            } else new Route(
                 pathOrRoute.PATH,
                 pathOrRoute.URL || [],
                 pathOrRoute.GET || null,
