@@ -1,5 +1,5 @@
 import {
-    System, RequestLog, SystemRequest, SystemResponse, Route, WebSocketRoute, WebSocketClient,
+    System, RequestLog, SystemRequest, SystemResponse, Response, Route, WebSocketRoute, WebSocketClient,
     acceptWebSocket, isWebSocketCloseEvent, WebSocket, acceptable, DecodedURL, createHash
 } from "./mod.ts"
 
@@ -89,8 +89,11 @@ function authentication(request: SystemRequest, route: Route) {
  * @param request SystemRequest object.
  * @param process Function.
  */
-function controller(request: SystemRequest, process: Function) {
-    process(request, new SystemResponse(request.request));
+async function controller(request: SystemRequest, process: Function) {
+    const response = new SystemResponse(request.request);
+    const res: Response | undefined = await process(request, response);
+    if(res) response.send(res);
+    else response.send();
 }
 
 /**
