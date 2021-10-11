@@ -1,4 +1,4 @@
-import { createHash, WebSocketRoute, WebSocketEvent, default_get, default_error, redirect, ErrorLog } from "./mod.ts"
+import { Response, createHash, WebSocketRoute, WebSocketEvent, default_get, default_error, redirect, ErrorLog } from "./mod.ts"
 
 /**
  * サーバーのルーティングに関する設定を行う。
@@ -162,11 +162,12 @@ export class Route {
      */
     GET(): Function;
     GET(process: Function): Route;
-    GET(process?: Function): Function | Route {
+    GET(process: Response): Route;
+    GET(process?: Function | Response): Function | Route {
 
         if(!process) return this.#GET;
-
-        this.#GET = process;
+        if(typeof process == "object") this.#GET = ()=>process;
+        else this.#GET = process;
         return this;
 
     }
@@ -180,11 +181,13 @@ export class Route {
      */
     PUT(): Function;
     PUT(process: Function): Route;
-    PUT(process?: Function): Function | Route {
+    PUT(process: Response): Route;
+    PUT(process?: Function | Response): Function | Route {
 
         if(!process) return this.#PUT;
 
-        this.#PUT = process;
+        if(typeof process == "object") this.#PUT = ()=>process;
+        else this.#PUT = process;
         return this;
 
     }
@@ -198,11 +201,13 @@ export class Route {
      */
     POST(): Function;
     POST(process: Function): Route;
-    POST(process?: Function): Function | Route {
+    POST(process: Response): Route;
+    POST(process?: Function | Response): Function | Route {
 
         if(!process) return this.#POST;
 
-        this.#POST = process;
+        if(typeof process == "object") this.#POST = ()=>process;
+        else this.#POST = process;
         return this;
 
     }
@@ -216,11 +221,12 @@ export class Route {
      */
     DELETE(): Function;
     DELETE(process: Function): Route;
-    DELETE(process?: Function): Function | Route {
+    DELETE(process?: Function | Response): Function | Route {
 
         if(!process) return this.#DELETE;
 
-        this.#DELETE = process;
+        if(typeof process == "object") this.#DELETE = ()=>process;
+        else this.#DELETE = process;
         return this;
 
     }
@@ -234,11 +240,13 @@ export class Route {
      */
     PATCH(): Function;
     PATCH(process: Function): Route;
-    PATCH(process?: Function): Function | Route {
+    PATCH(process: Response): Route;
+    PATCH(process?: Function | Response): Function | Route {
 
         if(!process) return this.#PATCH;
 
-        this.#PATCH = process;
+        if(typeof process == "object") this.#PATCH = ()=>process;
+        else this.#PATCH = process;
         return this;
 
     }
