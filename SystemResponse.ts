@@ -3,7 +3,7 @@ import {
     Cookie, setCookie,
     lookup,
     htmlCompile
-} from "./mod.ts"
+} from "./mod.ts";
 
 /**
  * クライアントへのレスポンス機能を拡張するクラス。
@@ -61,18 +61,34 @@ export class SystemResponse {
     }
 
     /**
+     * MIMEタイプを設定する。
+     * Set the MIME type.
+     * @param type MIME (Content-Type)
+     * 
+     * ```ts
+     * response.setType("text/plain");
+     * ```
+     */
+    setType(type: string): SystemResponse {
+        this.headers.set('Content-Type', type);
+        return this;
+    }
+
+    /**
      * レスポンスオブジェクトにテキストを設定する。
      * Set the response object to text.
      * @param text A string to return to the client.
      * @param status Status code (default is 200).
      * @param statusText Status text.
+     * @param filePath File path.
      */
-    setText(text: string, status: number = 200, statusText: string | null = null): void {
-        this.body = htmlCompile(text, this.#preset);
+    setText(text: string, status: number = 200, statusText: string | null = null, filePath?: string): SystemResponse {
+        this.body = htmlCompile(text, this.#preset, filePath);
         this.status = status;
         if(statusText != null) this.response.statusText = statusText;
         else if(this.response.statusText != undefined) delete this.response.statusText;
-        this.headers.set('Content-Type', 'text/plain');
+        if(!this.headers.get('Content-Type')) this.setType('text/plain');
+        return this;
     }
 
     /**
@@ -82,21 +98,23 @@ export class SystemResponse {
      * @param status Status code (default is 200).
      * @param statusText Status text.
      */
-    async setFile(filePath: string, status: number = 200, statusText: string | null = null): Promise<void> {
+    async setFile(filePath: string, status: number = 200, statusText: string | null = null): Promise<SystemResponse> {
         const file = await Deno.open(filePath);
         let file_data: string;
         try {
             const decoder = new TextDecoder('utf-8');
             file_data = decoder.decode(await Deno.readAll(file));
-            this.setText(file_data, status, statusText);
+            this.setText(file_data, status, statusText, filePath);
             const extensions: false | string = lookup(filePath);
-            if(extensions) this.headers.set('Content-Type', extensions);
-        } catch {
+            if(extensions) this.setType(extensions);
+        } catch (e) {
             console.log(`\n[ warning ]\n
             The "${filePath}" file could not be read.\n
             "${filePath}"ファイルが読み取れませんでした。\n`);
             this.setText("500 Internal Server Error", 500);
+            console.log(e);
         }
+        return this;
     }
 
     /**
@@ -104,8 +122,9 @@ export class SystemResponse {
      * Defines an object to be referenced when a variable is embedded in a set file or string.
      * @param object An object that contains a variable to be referenced.
      */
-    preset(object: { [key: string]: any; }): void {
+    preset(object: { [key: string]: any; }): SystemResponse {
         this.#preset = object;
+        return this;
     }
 
     /**
@@ -119,8 +138,9 @@ export class SystemResponse {
      * });
      * ```
      */
-    setCookie(cookie: Cookie): void {
+    setCookie(cookie: Cookie): SystemResponse {
         setCookie(this.response, cookie);
+        return this;
     }
 
     /**
@@ -131,13 +151,14 @@ export class SystemResponse {
     deleteCookie(
         name: string,
         attributes?: { path?: string; domain?: string }
-    ): void {
+    ): SystemResponse {
         this.setCookie({
             name: name,
             value: "",
             expires: new Date(0),
             ...attributes,
         });
+        return this;
     }
 
     /**
