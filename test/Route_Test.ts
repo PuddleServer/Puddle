@@ -5,8 +5,8 @@
  * @Date   2021-09-24
  */
 
-import { assertEquals }     from "https://deno.land/std@0.88.0/testing/asserts.ts";
-import { Route }            from "../mod.ts";
+import { assertEquals }                         from "https://deno.land/std@0.88.0/testing/asserts.ts";
+import { Route, default_get, default_error }    from "../mod.ts";
 
 
 // Routeオブジェクトに必要なもの
@@ -70,9 +70,13 @@ Deno.test({
     fn(): void {
         const path: string   = "/get.html";
         const route: Route = new Route(path, ["/GETtest"], get, pos, put, del, pat);
+        const default_route: Route = new Route("/dGet.html", ["/dGet"]);
+        
+        const isMatch = (default_route.GET().toString()==default_get().toString())
 
         // 引数無しの時は#GETが返る
         assertEquals(get, route.GET(), "取得したgetに不正な変更があります．");
+        assertEquals(isMatch, true, "取得したgetに不正な変更があります．");
         // アリの時はthisが返る
         assertEquals(get, route.GET(get).GET(), "オブジェクトを取得できていないか，取得したgetに不正な変更があります．");
     },
