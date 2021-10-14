@@ -1,4 +1,4 @@
-import { SystemRequest, SystemResponse, System, Route, WebSocketClient } from "../mod.ts"
+import { SystemRequest, SystemResponse, System, Route, WebSocketClient } from "../mod.ts";
 
 /**
  * リダイレクト処理を行う関数。

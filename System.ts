@@ -1,7 +1,7 @@
 import {
     serve, serveTLS, Server, HTTPOptions, HTTPSOptions, walkSync,
     SystemRequest, Route, control, ConfigReader, Logger, GoogleOAuth2
-} from "./mod.ts"
+} from "./mod.ts";
 
 /**
  * System.listenの第二引数のコールバック関数に使う引数の型。
