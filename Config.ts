@@ -1,4 +1,4 @@
-import { Config } from "./mod.ts"
+import { Config } from "./mod.ts";
 
 /**
  * コンフィグファイルを読み込むためのクラス。
