@@ -80,9 +80,10 @@ export class SystemResponse {
      * @param text A string to return to the client.
      * @param status Status code (default is 200).
      * @param statusText Status text.
+     * @param filePath File path.
      */
-    setText(text: string, status: number = 200, statusText: string | null = null): SystemResponse {
-        this.body = htmlCompile(text, this.#preset);
+    setText(text: string, status: number = 200, statusText: string | null = null, filePath?: string): SystemResponse {
+        this.body = htmlCompile(text, this.#preset, filePath);
         this.status = status;
         if(statusText != null) this.response.statusText = statusText;
         else if(this.response.statusText != undefined) delete this.response.statusText;
@@ -103,14 +104,15 @@ export class SystemResponse {
         try {
             const decoder = new TextDecoder('utf-8');
             file_data = decoder.decode(await Deno.readAll(file));
-            this.setText(file_data, status, statusText);
+            this.setText(file_data, status, statusText, filePath);
             const extensions: false | string = lookup(filePath);
             if(extensions) this.setType(extensions);
-        } catch {
+        } catch (e) {
             console.log(`\n[ warning ]\n
             The "${filePath}" file could not be read.\n
             "${filePath}"ファイルが読み取れませんでした。\n`);
             this.setText("500 Internal Server Error", 500);
+            console.log(e);
         }
         return this;
     }
