@@ -1,6 +1,6 @@
 import {
     serve, serveTLS, Server, HTTPOptions, HTTPSOptions, walkSync,
-    SystemRequest, Route, control, ConfigReader, Logger, GoogleOAuth2
+    SystemRequest, Route, control, ConfigReader, Logger, GoogleOAuth2, FileManager, PuddleJSON
 } from "./mod.ts";
 
 /**
@@ -63,6 +63,22 @@ export interface RouteOption {
  * ```
  */
 export class System {
+
+    /**
+     * ファイルマネージャーのゲッター。
+     * Getter of FileManager class.
+     */
+    static get fm() {
+        return FileManager;
+    }
+
+    /**
+     * PuddleJSONのゲッター。
+     * Getter of PuddleJSON class.
+     */
+    static get JSON() {
+        return PuddleJSON;
+    }
 
     /**
      * サーバーを保持する変数。

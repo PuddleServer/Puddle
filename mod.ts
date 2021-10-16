@@ -19,6 +19,7 @@ export * as path from "https://deno.land/std@0.106.0/path/mod.ts";
 export * from "https://deno.land/std@0.106.0/hash/mod.ts";
 export * from "https://deno.land/std@0.106.0/fs/walk.ts";
 
+export * from "./FileManager.ts";
 export * from "./System.ts";
 export * from "./SystemRequest.ts";
 export * from "./SystemResponse.ts";
