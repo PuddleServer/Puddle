@@ -260,16 +260,3 @@ export class ResultOfPuddleJSON {
         return this.REMOVE().length;
     }
 }
-
-const USERS = PuddleJSON.USE("./users.json", {
-    id:     ["UNIQUE", "NOT NULL", "AUTO INCREMENT"],
-    name:   ["NOT NULL"],
-    age:    []
-});
-
-USERS.INSERT({name: "Steve", age: 20});
-USERS.INSERT({name: "Alex"});
-
-console.log(USERS.SELECT().RESULT());
-console.log(USERS.SELECT({id:1}).RESULT("name", "age"));
-console.log(USERS.SELECTIF(row=>({id:Number(row.id) > 3})).RESULT());
