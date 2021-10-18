@@ -1,49 +1,4 @@
-import {
-    path
-} from "./mod.ts";
-
-async function ensureDir(dir: string) {
-    try {
-        const fileInfo = await Deno.lstat(dir);
-        if (!fileInfo.isDirectory) {
-            new ErrorLog("error", `Ensure path exists, expected 'dir', "${dir}"`);
-            throw new Error(
-                `Ensure path exists, expected 'dir', "${dir}"`,
-            );
-        }
-    } catch (err) {
-        if (err instanceof Deno.errors.NotFound) {
-            // if dir not exists. then create it.
-            await Deno.mkdir(dir, { recursive: true });
-            return;
-        }
-        throw err;
-    }
-}
-
-async function ensureFile(filePath: string) {
-    try {
-        // if file exists
-        const stat = await Deno.lstat(filePath);
-        if (!stat.isFile) {
-            new ErrorLog("error", `Ensure path exists, expected 'file', "${filePath}"`);
-            throw new Error(
-                `Ensure path exists, expected 'file', "${filePath}"`,
-            );
-        }
-    } catch (err) {
-        // if file not exists
-        if (err instanceof Deno.errors.NotFound) {
-            // ensure dir exists
-            await ensureDir(path.dirname(filePath));
-            // create file
-            await Deno.writeFile(filePath, new Uint8Array());
-            return;
-        }
-
-        throw err;
-    }
-}
+import { FileManager, path } from "./mod.ts";
 
 export class Log {
 
@@ -98,14 +53,14 @@ export class Logger {
     
     static async read(fileName: string): Promise<string> {
         const filePath: string = `${Logger.directoryPath}/${fileName}`;
-        await ensureFile(filePath)
+        await FileManager.ensureFile(filePath)
         const text:string = await Deno.readTextFile(filePath);
         return text;
     }
 
     static async write(fileName: string, text: string): Promise<void> {
         const filePath: string = `${Logger.directoryPath}/${fileName}`;
-        await ensureFile(filePath)
+        await FileManager.ensureFile(filePath)
         await Deno.writeTextFile(filePath, text)
     }
 
