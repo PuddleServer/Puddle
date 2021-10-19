@@ -1,4 +1,4 @@
-import { System, Route, SystemRequest, SystemResponse, redirect, ErrorLog } from "./mod.ts";
+import { System, DecodedURL, Route, SystemRequest, SystemResponse, redirect, ErrorLog } from "./mod.ts";
 
 /**
  * GoogleAPIのアクセストークンを取得する。
@@ -91,12 +91,12 @@ export class GoogleOAuth2 {
      */
     #route_login: Route;
 
-    constructor(client_id: string, client_secret: string, URL: string[] = [], process?: Function) {
+    constructor(client_id: string, client_secret: string, redirect_url?: string, URL: string[] = []) {
         this.#client_id = client_id;
         this.#client_secret = client_secret;
         GoogleOAuth2.client = this;
-        this.#URL = `/google_oauth2`;
-        this.#route_login = new Route(`${this.#URL}_redirect`, URL);
+        this.#URL = new DecodedURL(redirect_url||`${System.URI}/google_oauth2`).pathname;
+        this.#route_login = new Route(this.#URL, URL);
     }
 
     /**
@@ -147,7 +147,7 @@ export class GoogleOAuth2 {
      * @returns GoogleOAuth2 object.
      */
     LOGIN(process: Function): GoogleOAuth2 {
-        new Route(this.#URL, [], async (request: SystemRequest, response: SystemResponse)=>{
+        new Route(`${this.#URL}_redirect`, [], async (request: SystemRequest, response: SystemResponse)=>{
             try {
 				const access_token = await getAccessToken(this.#client_id, this.#client_secret, System.URI+this.#URL, request.getURL().searchParams.get("code")||"");
 				const profile_info = await getProfileInfo(access_token);
