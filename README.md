@@ -119,7 +119,10 @@ System.createRoute("/auth.html").URL("/authPage")
 ### How to set up Google OAuth 2.0
 You can use OAuth 2.0 with the Google API to retrieve user information.
 ```typescript
-System.GOOGLE_OAUTH2(`${client_id}`, `${client_secret}`, `http://localhost:8080/google_auth2`).URL("/Login")
+const client_id = "*******.apps.googleusercontent.com";
+const client_secret = "*******";
+const redirect_url = "http://localhost:8080/google_auth2";
+System.GOOGLE_OAUTH2(client_id, client_secret, redirect_url).URL("/Login")
 .LOGIN((
     req:        SystemRequest,
     res:        SystemResponse,

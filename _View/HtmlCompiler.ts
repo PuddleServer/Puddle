@@ -1,4 +1,4 @@
-import { System, Route } from "./mod.ts";
+import { System, Route } from "../mod.ts";
 
 /**
  * HTMLファイル内に埋め込まれた変数にテキストを挿入してHTMLを作成する関数。

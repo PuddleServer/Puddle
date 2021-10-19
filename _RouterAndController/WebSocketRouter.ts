@@ -1,4 +1,4 @@
-import { WebSocket, default_onmessage, default_onopen }  from "./mod.ts";
+import { WebSocket, default_onmessage, default_onopen }  from "../mod.ts";
 
 /**
  * WebSocketRouteを初期化する際の引数として使用されるオブジェクト。

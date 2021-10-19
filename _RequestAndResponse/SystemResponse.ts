@@ -3,7 +3,7 @@ import {
     Cookie, setCookie,
     lookup,
     htmlCompile
-} from "./mod.ts";
+} from "../mod.ts";
 
 /**
  * クライアントへのレスポンス機能を拡張するクラス。

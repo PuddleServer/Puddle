@@ -1,4 +1,4 @@
-import { FileManager } from "./mod.ts";
+import { FileManager } from "../mod.ts";
 
 /**
  * ログのスーパークラス。

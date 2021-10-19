@@ -1,7 +1,7 @@
 import {
     System, RequestLog, SystemRequest, SystemResponse, Response, Route, WebSocketRoute, WebSocketClient,
     acceptWebSocket, isWebSocketCloseEvent, WebSocket, acceptable, DecodedURL, createHash
-} from "./mod.ts";
+} from "../mod.ts";
 
 /**
  * Routeの処理をリクエストメソッドに応じて実行する。

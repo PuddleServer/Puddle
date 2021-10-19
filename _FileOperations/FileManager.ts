@@ -1,6 +1,6 @@
 import {
     path, ErrorLog
-} from "./mod.ts";
+} from "../mod.ts";
 
 /**
  * ファイルの操作を行うクラス。

@@ -1,4 +1,4 @@
-import { System, ServerRequest, DecodedURL, getCookies } from "./mod.ts";
+import { System, ServerRequest, DecodedURL, getCookies } from "../mod.ts";
 
 /**
  * リクエストオブジェクトのアダプタークラス。
