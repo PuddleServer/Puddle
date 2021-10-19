@@ -260,6 +260,7 @@ export class System {
      * Implement Google OAuth2.0.
      * @param client_id OAuth2.0 client_id.
      * @param client_secret OAuth2.0 client_secret.
+     * @param redirect_url OAuth2.0 redirect_url.
      * @param URL Pathname of the URL to login.
      * @param process Callback function to process user information associated with an email address.
      * @returns GoogleOAuth2 object.
@@ -273,10 +274,10 @@ export class System {
      *  });
      * ```
      * 
-     * ※ The redirect URL to set for the Google API is `"http(s)://(www.example.com)/google_oauth2_redirect"`.
+     * ※ The redirect URL to set for the Google API is `"http(s)://(www.example.com)/google_oauth2"`.
      */
-    static GOOGLE_OAUTH2(client_id: string, client_secret: string, URL?: string[], process?: Function): GoogleOAuth2 {
-        System.GoogleOAuth2 = new GoogleOAuth2(client_id, client_secret, URL, process);
+    static GOOGLE_OAUTH2(client_id: string, client_secret: string, redirect_url?: string, URL?: string[]): GoogleOAuth2 {
+        System.GoogleOAuth2 = new GoogleOAuth2(client_id, client_secret, redirect_url, URL);
         return System.GoogleOAuth2;
     }
 
