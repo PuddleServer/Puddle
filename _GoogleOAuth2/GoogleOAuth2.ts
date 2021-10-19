@@ -1,4 +1,4 @@
-import { System, DecodedURL, Route, SystemRequest, SystemResponse, redirect, ErrorLog } from "./mod.ts";
+import { System, DecodedURL, Route, SystemRequest, SystemResponse, redirect, ErrorLog } from "../mod.ts";
 
 /**
  * GoogleAPIのアクセストークンを取得する。

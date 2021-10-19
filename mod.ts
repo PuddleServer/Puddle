@@ -19,16 +19,16 @@ export * as path from "https://deno.land/std@0.106.0/path/mod.ts";
 export * from "https://deno.land/std@0.106.0/hash/mod.ts";
 export * from "https://deno.land/std@0.106.0/fs/walk.ts";
 
-export * from "./FileManager.ts";
+export * from "./_FileOperations/FileManager.ts";
 export * from "./System.ts";
-export * from "./SystemRequest.ts";
-export * from "./SystemResponse.ts";
-export * from "./Router.ts";
-export * from "./WebSocketRouter.ts";
-export * from "./Controller.ts";
-export * from "./HtmlCompiler.ts";
-export * from "./Config.ts";
-export * from "./Logger.ts";
-export * from "./GoogleOAuth2.ts";
+export * from "./_RequestAndResponse/SystemRequest.ts";
+export * from "./_RequestAndResponse/SystemResponse.ts";
+export * from "./_RouterAndController/Router.ts";
+export * from "./_RouterAndController/WebSocketRouter.ts";
+export * from "./_RouterAndController/Controller.ts";
+export * from "./_View/HtmlCompiler.ts";
+export * from "./_FileOperations/Config.ts";
+export * from "./_FileOperations/Logger.ts";
+export * from "./_GoogleOAuth2/GoogleOAuth2.ts";
 
 export * from "./default/default_controller.ts";

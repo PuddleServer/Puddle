@@ -1,4 +1,4 @@
-import { Response, createHash, WebSocketRoute, WebSocketEvent, default_get, default_error, redirect, ErrorLog } from "./mod.ts";
+import { Response, createHash, WebSocketRoute, WebSocketEvent, default_get, default_error, redirect, ErrorLog } from "../mod.ts";
 
 /**
  * サーバーのルーティングに関する設定を行う。
