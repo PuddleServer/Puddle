@@ -48,9 +48,15 @@ System.listen(8080, (conf: Config) => {
 ### Configuring Routing
 You can host a static server by simply specifying the file path!
 ```typescript
+import { System, Config } from "https://github.com/PuddleServer/Puddle/raw/develop/System.ts";
+
 System.createRoute("./index.html").URL("/", "/Top");
 
 System.createRoutes("./styles/*");
+
+System.listen(8080, (conf: Config) => {
+    console.log(`The server running on http://${conf.hostname}:${conf.port}`);
+});
 ```
 
 ### Configuring Controller
@@ -74,6 +80,10 @@ System.createRoute("ContactForm").URL("/Contact")
 
     await res.setText("Collect.");
 });
+
+System.listen(8080, (conf: Config) => {
+    console.log(`The server running on http://${conf.hostname}:${conf.port}`);
+});
 ```
 
 ## How to set up a Websocket server
@@ -94,7 +104,10 @@ System.listen(8080, (conf: Config)=>{
 ### How to set up Websockets events
 To handle each Websocket event, set up a handler function by connecting a method to the created Websocket route.
 ```typescript
-System.Route("/ws").WebSocket()
+import { System, Config, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
+
+System.createRoute("./webSocket.html").URL("/", "/トップ");
+System.createRoute("/ws").WebSocket()
 .onopen((req: SystemRequest, client: WebSocketClient) => {
     client.send("Connection to server complete.");
 })
@@ -104,6 +117,10 @@ System.Route("/ws").WebSocket()
     msg:    string
 ) => {
     client.sendAll(message);
+});
+
+System.listen(8080, (conf: Config)=>{
+    console.log(`The server running on http://${conf.hostname}:${conf.port}`);
 });
 ```
 
