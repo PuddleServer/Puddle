@@ -25,7 +25,8 @@ export * from "./_RouterAndController/Controller.ts";
 export * from "./_View/HtmlCompiler.ts";
 export * from "./_FileOperations/Config.ts";
 export * from "./_FileOperations/Logger.ts";
-export * from "./_GoogleOAuth2/GoogleOAuth2.ts";
+export * from "./_Authentication/GoogleOAuth2.ts";
+export * from "./_Authentication/AuthDigest.ts";
 
 export * from "./default/default_errorFile.ts";
 export * from "./default/default_controller.ts";
