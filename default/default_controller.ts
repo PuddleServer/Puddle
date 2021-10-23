@@ -1,4 +1,4 @@
-import { SystemRequest, SystemResponse, System, Route, WebSocketClient } from "../mod.ts";
+import { SystemRequest, SystemResponse, System, Route, WebSocketClient, errorHTML, version } from "../mod.ts";
 
 /**
  * リダイレクト処理を行う関数。
@@ -35,22 +35,8 @@ export function default_get(): Function {
  */
 export function default_error(status: number, description: string): Function {
     return async function (request: SystemRequest, response: SystemResponse): Promise<void> {
-        const html = `
-        <!DOCTYPE html>
-        <html lang="ja">
-        <head>
-            <meta charset="UTF-8">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${status} ${description}</title>
-        </head>
-        <body>
-            <h1>${status}</h1>
-            <p>${description}</p>
-        </body>
-        </html>
-        `;
-        response.setText(html, status, description).setType('text/html');
+        response.preset({version, status, description});
+        response.setText(errorHTML, status, description).setType('text/html');
     }
 }
 

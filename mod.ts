@@ -1,9 +1,5 @@
-/**
- * inportをまとめたファイル。
- * @author Daruo(KINGVOXY)
- * @author AO2324(AO2324-00)
- * @Date   2021-09-23
- */
+export const version = "develop";
+
 export { serve, serveTLS, Server, ServerRequest } from "https://deno.land/std@0.106.0/http/server.ts";
 export type { Response , HTTPOptions, HTTPSOptions} from "https://deno.land/std@0.106.0/http/server.ts";
 export { getCookies, setCookie } from "https://deno.land/std@0.106.0/http/cookie.ts";
@@ -31,4 +27,5 @@ export * from "./_FileOperations/Config.ts";
 export * from "./_FileOperations/Logger.ts";
 export * from "./_GoogleOAuth2/GoogleOAuth2.ts";
 
+export * from "./default/default_errorFile.ts";
 export * from "./default/default_controller.ts";
