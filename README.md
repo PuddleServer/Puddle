@@ -90,6 +90,24 @@ System.listen(8080, (conf: Config) => {
 });
 ```
 
+### How to set up the redirection process
+The Puddle Framework provides two ways to redirect clients.
+```typescript
+import { System, Config, SystemRequest, SystemResponse, redirect } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
+
+System.createRoute("example1").URL("/Redirect1")
+.GET(redirect("https://www.example.com"));
+
+System.createRoute("example2").URL("/Redirect2")
+.GET(async (req: SystemRequest, res: SystemResponse) => {
+    res.redirect("https://www.example.com");
+});
+
+System.listen(8080, (conf: Config) => {
+    console.log(`The server running on http://${conf.hostname}:${conf.port}`);
+});
+```
+
 ## How to set up a Websocket server
 
 ### Start the Websocket server
