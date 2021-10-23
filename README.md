@@ -114,7 +114,7 @@ System.createRoute("/ws").WebSocket()
 .onmessage((
     req:    SystemRequest,
     client: WebSocketClient,
-    msg:    string
+    message:    string
 ) => {
     client.sendAll(message);
 });
