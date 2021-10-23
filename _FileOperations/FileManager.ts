@@ -363,8 +363,10 @@ export class PuddleJSON {
         const rows = this.#parse;
         const selectedRows: ROW[] = [];
         for(let row of rows) {
-            if(!Object.values(criteria(row)).filter(column=>!column).length) selectedRows.push(row);
-            if(++count >= LIMIT) break;
+            if(!Object.values(criteria(row)).filter(column=>!column).length) {
+                selectedRows.push(row);
+                if(++count >= LIMIT) break;
+            }
         };
         return new ResultOfPuddleJSON(selectedRows, this.#filePath, this.#SCHEMA);
     }
