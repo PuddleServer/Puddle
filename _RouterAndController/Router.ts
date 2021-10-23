@@ -21,19 +21,19 @@ export class Route {
      * 502エラーを返すルート。
      * A route that returns a 502 error.
      */
-    static "502" = new Route("502", [], default_error(502, `Server error.<br>サーバーエラー。`));
+    static "502" = new Route("502", [], default_error(502, `Server error. サーバーエラー。`));
 
     /**
      * 404エラーを返すルート。
      * A route that returns a 404 error.
      */
-    static "404" = new Route("404", [], default_error(404, `Not found.<br>見つかりません。`));
+    static "404" = new Route("404", [], default_error(404, `Not found. 見つかりません。`));
 
     /**
      * 403エラーを返すルート。
      * A route that returns a 403 error.
      */
-    static "403" = new Route("403", ["/403"], default_error(403, `Forbidden.<br>認証が拒否されました。`));
+    static "403" = new Route("403", ["/403"], default_error(403, `Forbidden. 認証が拒否されました。`));
 
     /**
      * ファイルパス。（`"default_get()"`を使わない場合は、どのルートかが分かるキーワード）
