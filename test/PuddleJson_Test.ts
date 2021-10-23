@@ -66,12 +66,6 @@ Deno.test({
             `\n[PuddleJSON]\nSchema error. "name" has null object.\nスキーマエラーです。"name"はNULLオブジェクトを持っています。`,
         );
 
-    },
-});
-
-Deno.test({
-    name: "SELECT",
-    fn(): void {
         PJ[1].INSERT({ name: "Yukito Kunisaki", game: "Air"   });
         PJ[1].INSERT({ name: "Misuzu Kamio",    game: "Air"   });
         PJ[1].INSERT({ name: "Kano Kirishima",  game: "Air"   });
@@ -82,7 +76,12 @@ Deno.test({
         PJ[1].INSERT({ name: "Shiori Misaka",   game: "Kanon" });
         PJ[1].INSERT({ name: "Ayu Tsukimiya",   game: "Kanon" });
         PJ[1].INSERT({ name: "Mai Kawasumi",    game: "Kanon" });
+    },
+});
 
+Deno.test({
+    name: "SELECT",
+    fn(): void {
         const res = PJ[1].SELECT().RESULT();
         assertEquals(10, res.length)
 
