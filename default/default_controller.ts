@@ -20,9 +20,13 @@ export function redirect(url: string): Function {
 export function default_get(): Function {
     return async function default_get(request: SystemRequest, response: SystemResponse): Promise<void> {
         const route: string | undefined = Route.getRouteByUrl(request.getURL().pathname)?.PATH();
-        console.log(`>> ${request.method} request to "${route}".`);
         if(!route) return Route["404"].GET()(request, response);
-        await response.setFile(route);
+        try {
+            await response.setFile(route);
+            console.log(`>> [${new Date().toLocaleString()}] Send the "${route}" file to the client.`);
+        } catch {
+            return Route["404"].GET()(request, response);
+        }
     }
 }
 

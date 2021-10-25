@@ -42,7 +42,7 @@ See [deno.land](https://deno.land/#installation) for more installation options.
 ### Start the server
 You can start the server with the command "deno run -A . /server.ts".
 ```typescript
-import { System, Config } from "https://github.com/PuddleServer/Puddle/raw/develop/System.ts";
+import { System, Config } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
 
 System.listen(8080, (conf: Config) => {
     console.log(`The server running on http://${conf.hostname}:${conf.port}`);
@@ -52,7 +52,7 @@ System.listen(8080, (conf: Config) => {
 ### Configuring Routing
 You can host a static server by simply specifying the file path!
 ```typescript
-import { System, Config } from "https://github.com/PuddleServer/Puddle/raw/develop/System.ts";
+import { System, Config } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
 
 System.createRoute("./index.html").URL("/", "/Top");
 
