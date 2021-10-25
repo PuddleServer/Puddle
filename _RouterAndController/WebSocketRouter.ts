@@ -208,6 +208,27 @@ export class WebSocketClient {
         this.#tags = tags;
     }
 
+    /** 
+     * クライアントから指定したタグを削除する。
+     * Removes the specified tag from the client.
+     * @param tags Tag name.
+     * 
+     * ```ts
+     * client.removeTag("A", "B", ...);
+     * ```
+     */
+    removeTag(...tags: string[]): string[] {
+        const removedTags: string[] = [];
+        this.#tags = this.#tags.filter(tag=>{
+            if(tags.includes(tag)) {
+                removedTags.push(tag);
+                return false;
+            }
+            return true;
+        });
+        return removedTags;
+    }
+
     /**
      * クライアントの属性のゲッター。
      * Getter of client attributes.
@@ -226,6 +247,18 @@ export class WebSocketClient {
      */
     setAttribute(key: string, value: any): Map<string, any> {
         return this.#attribute.set(key, value);
+    }
+
+    /**
+     * クライアントから指定した属性を削除する。
+     * Removes the specified attribute from the client.
+     * @param key Attribute name.
+     * @returns Attribute value.
+     */
+    removeAttribute(key: string): any {
+        const removedAttribute = this.getAttribute(key);
+        this.#attribute.delete(key);
+        return removedAttribute;
     }
 
     /**

@@ -109,11 +109,15 @@ Connected client.
 - `ws.getTags(): string[]`  
 Getter for tags tied to clients.
 - `ws.setTags(...tags: string[])`  
-Setter for tags tied to clients.
+Getter for tags tied to clients.
+- `ws.removeTag(...tags: string[]): string[]`  
+Removes the specified tag from the client.
 - `ws.getAttribute(key: string): any`  
 Getter of client attributes.
 - `ws.setAttribute(key: string, value: any)`  
 Setter of client attributes.
+- `ws.removeAttribute(key: string): any`  
+Removes the specified attribute from the client.
 - `ws.getClientById(id: number): WebSocketClient`  
 Get the client by client ID.
 - `ws.getAllClients(): WebSocketClient[]`  
