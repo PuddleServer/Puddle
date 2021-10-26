@@ -91,7 +91,7 @@ export class System {
      * Origin information for the server URL
      *  `"https://www.example.com"`
      */
-    static URI: string;
+    static baseURL: string;
 
     /**
      * GoogleのOAuth2.0認証を利用する際に使用するクラスを格納する変数。
@@ -149,7 +149,7 @@ export class System {
     /**
      * サーバーに新しくルートを追加する。
      * Add a new route to the Server.
-     * @param pathOrRoute Key name of the Route, or RouteOption.
+     * @param pathOrRouteOption Key name of the Route, or RouteOption.
      * @returns Route object created.
      * 
      * ```ts
@@ -165,16 +165,16 @@ export class System {
      *  });
      * ```
      */
-    static createRoute(pathOrRoute: string | RouteOption): Route {
+    static createRoute(pathOrRouteOption: string | RouteOption): Route {
 
-        const route = (typeof pathOrRoute == "string")? new Route(pathOrRoute) : new Route(
-            pathOrRoute.PATH,
-            pathOrRoute.URL || [],
-            pathOrRoute.GET || null,
-            pathOrRoute.POST || null,
-            pathOrRoute.PUT || null,
-            pathOrRoute.DELETE || null,
-            pathOrRoute.PATCH || null
+        const route = (typeof pathOrRouteOption == "string")? new Route(pathOrRouteOption) : new Route(
+            pathOrRouteOption.PATH,
+            pathOrRouteOption.URL || [],
+            pathOrRouteOption.GET || null,
+            pathOrRouteOption.POST || null,
+            pathOrRouteOption.PUT || null,
+            pathOrRouteOption.DELETE || null,
+            pathOrRouteOption.PATCH || null
         );
 
         return route;
@@ -183,36 +183,36 @@ export class System {
     /**
      * サーバーに新しく複数のルートを追加する。
      * Add multiple new routes to the server.
-     * @param pathOrRoute Key name of the Route, or RouteOption.
+     * @param pathsOrRouteOptions Key name of the Route, or RouteOption.
      * @returns System class.
      * 
      * ```ts
      *  System.createRoutes("./assets/index.html", "./assets/about.html");
      * ```
      */
-    static createRoutes(...pathsOrRoutes: (string | RouteOption)[]): System {
+    static createRoutes(...pathsOrRouteOptions: (string | RouteOption)[]): System {
 
-        for(let pathOrRoute of pathsOrRoutes) {
-            if(typeof pathOrRoute == "string") {
-                const fileName = pathOrRoute.split("/").pop();
+        for(let pathOrRouteOption of pathsOrRouteOptions) {
+            if(typeof pathOrRouteOption == "string") {
+                const fileName = pathOrRouteOption.split("/").pop();
                 if(fileName?.includes(".")) {
-                    System.createRoute(pathOrRoute);
+                    System.createRoute(pathOrRouteOption);
                     continue;
                 }
-                for (const entry of walkSync(pathOrRoute.replace(/\*/g, ""))) {
+                for (const entry of walkSync(pathOrRouteOption.replace(/\*/g, ""))) {
                     const path = entry.path.replace(/\\/g, "/");
                     const fileName = path.split("/").pop();
                     if(path.includes("../") || !fileName?.includes(".")) continue;
                     System.createRoute(`./${path}`);
                 }
             } else new Route(
-                pathOrRoute.PATH,
-                pathOrRoute.URL || [],
-                pathOrRoute.GET || null,
-                pathOrRoute.POST || null,
-                pathOrRoute.PUT || null,
-                pathOrRoute.DELETE || null,
-                pathOrRoute.PATCH || null
+                pathOrRouteOption.PATH,
+                pathOrRouteOption.URL || [],
+                pathOrRouteOption.GET || null,
+                pathOrRouteOption.POST || null,
+                pathOrRouteOption.PUT || null,
+                pathOrRouteOption.DELETE || null,
+                pathOrRouteOption.PATCH || null
             );
         }
 
@@ -321,13 +321,11 @@ export class System {
         
         if (typeof option === "string") {
             const conf: Config = await ConfigReader.read(option);
-            
-            httpOptions.hostname = conf.HOSTNAME || conf.hostname || conf.SERVER.HOSTNAME || conf.SERVER.hostname || conf.server.HOSTNAME || conf.server.hostname;
-            httpOptions.port = conf.PORT || conf.port || conf.SERVER.PORT || conf.SERVER.port || conf.server.PORT || conf.server.port;
-            
-            logDirectoryPath = conf.LOG || conf.log || conf.SERVER.LOG || conf.SERVER.log || conf.server.LOG || conf.server.log || "./log";
-            server_uri = uri || conf.URI || conf.uri || conf.SERVER.URI || conf.SERVER.uri || conf.server.URI || conf.server.uri;
-            
+            httpOptions.hostname = getValueByAllKeys(conf, "HostName") || getValueByAllKeys(conf, "Server", "HostName");
+            httpOptions.port = getValueByAllKeys(conf, "Port") || getValueByAllKeys(conf, "Server", "Port") || 80;
+
+            logDirectoryPath = getValueByAllKeys(conf, "Log") || getValueByAllKeys(conf, "Server", "Log") || "./log";;
+            server_uri = uri || getValueByAllKeys(conf, "Uri") || getValueByAllKeys(conf, "Server", "Uri");
             if(startFunction) startFunction(conf);
         
         } else {
@@ -338,7 +336,7 @@ export class System {
             if(startFunction) startFunction(httpOptions);
         }
         
-        System.URI = server_uri? new URL(server_uri).origin : `http://${httpOptions.hostname}:${httpOptions.port}`;
+        System.baseURL = server_uri? new URL(server_uri).origin : `http://${httpOptions.hostname}:${httpOptions.port}`;
         
         if(System.GoogleOAuth2) System.GoogleOAuth2.setup();
         
@@ -398,13 +396,13 @@ export class System {
         if (typeof option === "string") {
             const conf: Config = await ConfigReader.read(option);
             
-            httpsOptions.hostname = conf.HOSTNAME || conf.hostname || conf.SERVER.HOSTNAME || conf.SERVER.hostname || conf.server.HOSTNAME || conf.server.hostname;
-            httpsOptions.port = conf.PORT || conf.port || conf.SERVER.PORT || conf.SERVER.port || conf.server.PORT || conf.server.port;
-            httpsOptions.certFile = conf.CERTFILE || conf.certFile || conf.certfile || conf.SERVER.CERTFILE || conf.SERVER.certFile || conf.SERVER.certfile || conf.server.CERTFILE || conf.server.certFile || conf.server.certfile;
-            httpsOptions.keyFile = conf.KEYFILE || conf.keyFile || conf.keyfile || conf.SERVER.KEYFILE || conf.SERVER.keyFile || conf.SERVER.keyfile || conf.server.KEYFILE || conf.server.keyFile || conf.server.keyfile;
+            httpsOptions.hostname = getValueByAllKeys(conf, "HostName") || getValueByAllKeys(conf, "Server", "HostName");
+            httpsOptions.port = getValueByAllKeys(conf, "Port") || getValueByAllKeys(conf, "Server", "Port") || 443;
+            httpsOptions.certFile = getValueByAllKeys(conf, "certFile") || getValueByAllKeys(conf, "Server", "certFile");
+            httpsOptions.keyFile = getValueByAllKeys(conf, "keyFile") || getValueByAllKeys(conf, "Server", "keyFile");
             
-            logDirectoryPath = conf.LOG || conf.log || conf.SERVER.LOG || conf.SERVER.log || conf.server.LOG || conf.server.log || "./log";
-            server_uri = uri || conf.URI || conf.uri || conf.SERVER.URI || conf.SERVER.uri || conf.server.URI || conf.server.uri;
+            logDirectoryPath = getValueByAllKeys(conf, "Log") || getValueByAllKeys(conf, "Server", "Log") || "./log";;
+            server_uri = uri || getValueByAllKeys(conf, "Uri") || getValueByAllKeys(conf, "Server", "Uri");
             
             if(startFunction) startFunction(conf);
         
@@ -412,7 +410,7 @@ export class System {
             startFunction(httpsOptions);
         }
         
-        System.URI = server_uri? new URL(server_uri).origin : `https://${httpsOptions.hostname}:${httpsOptions.port}`;
+        System.baseURL = server_uri? new URL(server_uri).origin : `https://${httpsOptions.hostname}:${httpsOptions.port}`;
         
         if(System.GoogleOAuth2) System.GoogleOAuth2.setup();
         
@@ -435,4 +433,20 @@ export class System {
     static close(): void {
         if(System.server) System.server.close();
     }
+}
+
+/**
+ * 様々な形式のキーからオブジェクトの値を取得する。
+ * Get the value of an object from keys of various forms.
+ * @param object target object
+ * @param keys Keys of the object
+ * @returns Object Value
+ */
+function getValueByAllKeys(object: Config, ...keys: string[]): any {
+    const key = keys.shift();
+    if(!(key && object)) return undefined;
+    if(!keys.length) {
+        return  object[key] || object[key.toUpperCase()] || object[key.toLowerCase()];
+    }
+    return  getValueByAllKeys(object[key], ...keys) || getValueByAllKeys(object[key.toUpperCase()], ...keys) || getValueByAllKeys(object[key.toLowerCase()], ...keys);
 }
