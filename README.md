@@ -161,7 +161,7 @@ You can use OAuth 2.0 with the Google API to retrieve user information.
 const client_id = "*******.apps.googleusercontent.com";
 const client_secret = "*******";
 const redirect_url = "http://localhost:8080/google_auth2";
-System.GOOGLE_OAUTH2(client_id, client_secret, redirect_url).URL("/Login")
+System.AUTH.GOOGLE(client_id, client_secret, redirect_url).URL("/Login")
 .LOGIN((
     req:        SystemRequest,
     res:        SystemResponse,

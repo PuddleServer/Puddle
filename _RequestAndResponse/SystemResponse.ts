@@ -182,9 +182,9 @@ export class SystemResponse {
      * @param url URL of the redirection destination.
      */
     redirect(url: string): void {
-        this.response.status = 302;
-        this.headers.set("Location", url);
-        this.response.body = "";
-        this.#request.respond(this.response);
+        this.status = 302;
+        this.body = "";
+        this.headers.set('Location', url);
+        this.send(this.response);
     }
 }
