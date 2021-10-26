@@ -231,8 +231,8 @@ export class PuddleJSON {
             const isAutoIncrement = SCHEMA[key].includes("AUTO INCREMENT");
             if(!isAutoIncrement) continue;
             let max = 0;
-            data.map(columns=>columns[key]).forEach(column=>{
-                if(!Number.isNaN(column) && max < Number(column)) max = Number(column);
+            data.forEach(columns=>{
+                if(!Number.isNaN(columns[key]) && max < Number(columns[key])) max = Number(columns[key]);
             });
             KeyAndValue[key] = ++max;
         }
