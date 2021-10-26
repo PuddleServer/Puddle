@@ -95,7 +95,7 @@ export class GoogleOAuth2 {
         this.#client_id = client_id;
         this.#client_secret = client_secret;
         GoogleOAuth2.client = this;
-        this.#URL = new DecodedURL(redirect_url||`${System.URI}/google_oauth2`).pathname;
+        this.#URL = new DecodedURL(redirect_url||`${System.baseURL}/google_oauth2`).pathname;
         this.#route_login = new Route(this.#URL, URL);
     }
 
@@ -104,7 +104,7 @@ export class GoogleOAuth2 {
      * Set the URL to be redirected from the Google API.
      */
     setup() {
-        const redirect_URL = this.#getGoogleOAuth2_URL(this.#client_id, `${System.URI}${this.#URL}`);
+        const redirect_URL = this.#getGoogleOAuth2_URL(this.#client_id, `${System.baseURL}${this.#URL}`);
         this.#route_login.GET(redirect(redirect_URL));
     }
 
@@ -149,7 +149,7 @@ export class GoogleOAuth2 {
     LOGIN(process: Function): GoogleOAuth2 {
         new Route(`${this.#URL}_redirect`, [], async (request: SystemRequest, response: SystemResponse)=>{
             try {
-				const access_token = await getAccessToken(this.#client_id, this.#client_secret, System.URI+this.#URL, request.getURL().searchParams.get("code")||"");
+				const access_token = await getAccessToken(this.#client_id, this.#client_secret, System.baseURL+this.#URL, request.getURL().searchParams.get("code")||"");
 				const profile_info = await getProfileInfo(access_token);
                 process(request, response, profile_info);
 			} catch(error) {

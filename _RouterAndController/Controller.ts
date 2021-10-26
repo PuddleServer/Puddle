@@ -13,7 +13,7 @@ export function control(request: SystemRequest, route: Route): void {
     new RequestLog(
         route.PATH(),
         request.method,
-        new DecodedURL(request.url, System.URI).toString(),
+        new DecodedURL(request.url, System.baseURL).toString(),
         (request.headers.get("Forwarded")||"").replace("Forwarded: ", "")
         .split(/\,\s*/g).filter(param=>param.toLowerCase().includes("for"))
         .concat([(request.conn.remoteAddr as Deno.NetAddr).hostname]).join(" ").replace(/for\s*\=\s*/g, "")

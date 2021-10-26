@@ -73,7 +73,7 @@ export class SystemRequest {
      * @returns Decoded URL object.
      */
     getURL(): DecodedURL {
-        return new DecodedURL(this.#url ,System.URI);
+        return new DecodedURL(this.#url ,System.baseURL);
     }
 
     /**
