@@ -47,6 +47,12 @@ export interface RouteOption {
 }
 
 /**
+ * 認証に使えるサービスを格納する型。
+ * A type that stores services that can be used for authentication.
+ */
+type authType = { "GOOGLE": Function; };
+
+/**
  * 実行クラス。
  * Execution class.
  * 
@@ -92,12 +98,6 @@ export class System {
      *  `"https://www.example.com"`
      */
     static baseURL: string;
-
-    /**
-     * GoogleのOAuth2.0認証を利用する際に使用するクラスを格納する変数。
-     * Variable that stores the class to be used when using Google's OAuth2.0 authentication.
-     */
-    static GoogleOAuth2: GoogleOAuth2;
 
     /**
      * 開発者が追加したモジュールを保持する変数。
@@ -260,13 +260,13 @@ export class System {
      * Implement Google OAuth2.0.
      * @param client_id OAuth2.0 client_id.
      * @param client_secret OAuth2.0 client_secret.
-     * @param redirect_url OAuth2.0 redirect_url.
+     * @param redirect_uri OAuth2.0 redirect_url.
      * @param URL Pathname of the URL to login.
      * @param process Callback function to process user information associated with an email address.
      * @returns GoogleOAuth2 object.
      * 
      * ```ts
-     *  System.GOOGLE_OAUTH2(`${client_id}`, `${client_secret}`).URL("/login", "/Login")
+     *  System.AUTH.GOOGLE(`${client_id}`, `${client_secret}`).URL("/login", "/Login")
      *  .LOGIN((req: SystemRequest, res: SystemResponse, user_info: {[key:string]: string;}) => {
      *      // Register a user in the database.
      *      // Set a session information cookie in Header.
@@ -274,11 +274,12 @@ export class System {
      *  });
      * ```
      * 
-     * ※ The redirect URL to set for the Google API is `"http(s)://(www.example.com)/google_oauth2"`.
+     * ※ The redirect URL to set for the Google API is `"http(s)://(www.example.com)/auth_google"`.
      */
-    static GOOGLE_OAUTH2(client_id: string, client_secret: string, redirect_url?: string, URL?: string[]): GoogleOAuth2 {
-        System.GoogleOAuth2 = new GoogleOAuth2(client_id, client_secret, redirect_url, URL);
-        return System.GoogleOAuth2;
+    static get AUTH(): authType {
+        return {
+            GOOGLE: GoogleOAuth2.setup
+        }
     }
 
     /**
@@ -338,8 +339,8 @@ export class System {
         
         System.baseURL = server_uri? new URL(server_uri).origin : `http://${httpOptions.hostname}:${httpOptions.port}`;
         
-        if(System.GoogleOAuth2) System.GoogleOAuth2.setup();
-        
+        System.AUTH.GOOGLE()?.setRedirectURL();
+
         Logger.setDirectoryPath(logDirectoryPath);
         
         System.close();
@@ -412,8 +413,8 @@ export class System {
         
         System.baseURL = server_uri? new URL(server_uri).origin : `https://${httpsOptions.hostname}:${httpsOptions.port}`;
         
-        if(System.GoogleOAuth2) System.GoogleOAuth2.setup();
-        
+        System.AUTH.GOOGLE()?.setRedirectURL();
+
         Logger.setDirectoryPath(logDirectoryPath);
         
         System.close();
