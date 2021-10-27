@@ -317,7 +317,7 @@ export class System {
      */
     static async listen(option: number | string | HTTPOptions, startFunction?: Function, uri?: string): Promise<void> {
         const httpOptions: HTTPOptions = {hostname: "localhost", port: 8080};
-        let logDirectoryPath: string = "./log";
+        let logDirectoryPath: string = "";
         let server_uri: string | undefined = uri;
         
         if (typeof option === "string") {
@@ -325,7 +325,7 @@ export class System {
             httpOptions.hostname = getValueByAllKeys(conf, "HostName") || getValueByAllKeys(conf, "Server", "HostName");
             httpOptions.port = getValueByAllKeys(conf, "Port") || getValueByAllKeys(conf, "Server", "Port") || 80;
 
-            logDirectoryPath = getValueByAllKeys(conf, "Log") || getValueByAllKeys(conf, "Server", "Log") || "./log";;
+            logDirectoryPath = getValueByAllKeys(conf, "Log") || getValueByAllKeys(conf, "Server", "Log") || "./log";
             server_uri = uri || getValueByAllKeys(conf, "Uri") || getValueByAllKeys(conf, "Server", "Uri");
             if(startFunction) startFunction(conf);
         
@@ -391,7 +391,7 @@ export class System {
      */
     static async listenTLS(option: string | HTTPSOptions, startFunction?: Function, uri?: string): Promise<void> {
         const httpsOptions: HTTPSOptions = {hostname: "localhost", port: 8080, certFile: "", keyFile: ""};
-        let logDirectoryPath: string = "./log";
+        let logDirectoryPath: string = "";
         let server_uri: string | undefined = uri;
         
         if (typeof option === "string") {
@@ -402,7 +402,7 @@ export class System {
             httpsOptions.certFile = getValueByAllKeys(conf, "certFile") || getValueByAllKeys(conf, "Server", "certFile");
             httpsOptions.keyFile = getValueByAllKeys(conf, "keyFile") || getValueByAllKeys(conf, "Server", "keyFile");
             
-            logDirectoryPath = getValueByAllKeys(conf, "Log") || getValueByAllKeys(conf, "Server", "Log") || "./log";;
+            logDirectoryPath = getValueByAllKeys(conf, "Log") || getValueByAllKeys(conf, "Server", "Log") || "./log";
             server_uri = uri || getValueByAllKeys(conf, "Uri") || getValueByAllKeys(conf, "Server", "Uri");
             
             if(startFunction) startFunction(conf);

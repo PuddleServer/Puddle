@@ -35,7 +35,7 @@ export class SystemResponse {
      */
     headers: Headers;
     status: number;
-    body: string;
+    body: string | Uint8Array | Deno.Reader | undefined;
 
     /**
      * 強制ダウンロードかどうか（初期値はfalse）。
@@ -82,8 +82,12 @@ export class SystemResponse {
      * @param statusText Status text.
      * @param filePath File path.
      */
-    setText(text: string, status: number = 200, statusText: string | null = null, filePath?: string): SystemResponse {
-        this.body = htmlCompile(text, this.#preset, filePath);
+    setText(text: string | Uint8Array, status: number = 200, statusText: string | null = null, filePath?: string): SystemResponse {
+        if(typeof text === "string") {
+            this.body = htmlCompile(text, this.#preset, filePath);
+        } else {
+            this.body = text;
+        }
         this.status = status;
         if(statusText != null) this.response.statusText = statusText;
         else if(this.response.statusText != undefined) delete this.response.statusText;
@@ -98,14 +102,15 @@ export class SystemResponse {
      * @param status Status code (default is 200).
      * @param statusText Status text.
      */
-    async setFile(filePath: string, status: number = 200, statusText: string | null = null): Promise<SystemResponse> {
-        const file = await Deno.open(filePath);
-        let file_data: string;
+    async setFile(filePath: string, status?: number, statusText?: string | null): Promise<SystemResponse> {
+        let file_data: string | Uint8Array;
         try {
-            const decoder = new TextDecoder('utf-8');
-            file_data = decoder.decode(await Deno.readAll(file));
-            this.setText(file_data, status, statusText, filePath);
             const extensions: false | string = lookup(filePath);
+            file_data = await Deno.readFile(filePath);
+            if(extensions && extensions.split("/")[0] === "text") {
+                file_data = new TextDecoder('utf-8').decode(file_data);
+            }
+            this.setText(file_data, status, statusText, filePath);
             if(extensions) this.setType(extensions);
         } catch (e) {
             console.log(`\n[ warning ]\n
