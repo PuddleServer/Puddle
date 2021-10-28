@@ -54,6 +54,7 @@ export class SystemResponse {
             headers: this.headers,
             body: undefined
         }
+        this.setType('text/plain');
 
         this.#preset = {};
 
@@ -91,7 +92,6 @@ export class SystemResponse {
         this.status = status;
         if(statusText != null) this.response.statusText = statusText;
         else if(this.response.statusText != undefined) delete this.response.statusText;
-        if(!this.headers.get('Content-Type')) this.setType('text/plain');
         return this;
     }
 
