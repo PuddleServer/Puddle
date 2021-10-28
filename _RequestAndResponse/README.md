@@ -35,6 +35,9 @@ Headers object.
     - `.get(name: string)`
 - `req.url: string`  
 The URL that was accessed.
+- `req.variables`  
+The variable name and its value included in the pathname of the URL.  
+( Variables are defined by prefixing them with a colon. `/user/:id/info` )
 - `req.getURL(): DecodedURL`  
 Decoded URL object
     - `.hash`
@@ -46,6 +49,8 @@ Decoded URL object
     - `.protocol`
     - `.search`
     - `.searchParams`
+    - `.variable` Get the name of the variable included in pathname and its value.  
+    (Variables are defined by prefixing them with a colon.)
 - `await req.readBody(): string`  
 Data sent by the client via POST request, etc.
 - `req.getCookie(key: string): string | undefined`  

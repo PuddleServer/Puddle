@@ -108,7 +108,9 @@ export class Route {
         }
         this.#PATH = PATH;
         this.#URL = [];
-        URL.push( (this.#PATH[0] == "." ? "/" + this.#PATH.slice(1) : "/" + this.#PATH).replace("//", "/") );
+        const _path = (this.#PATH[0] == "." ? "/" + this.#PATH.slice(1) : "/" + this.#PATH).replace("//", "/");
+        URL.unshift(_path.replace(".html", ""));
+        if(URL[0] != _path) URL.push(_path);
         this.URL.apply(this, URL);
         this.#GET = GET || default_get();
         const process_502: Function = (this.#PATH == "502")? this.#GET : Route["502"].GET();
@@ -144,11 +146,7 @@ export class Route {
     URL(...urls: string[]|string[][]): string[] | Route {
         if(!urls.length) return this.#URL;
         urls = urls.flat();
-
-        urls.filter(function (url, i, self) {
-            return self.indexOf(url) === i;
-        });
-        this.#URL = Route.getUniqueUrlArray(urls);
+        this.#URL = this.getUniqueUrlArray(urls);
         return this;
 
     }
@@ -340,15 +338,22 @@ export class Route {
      * @param urls URL array to check.
      * @returns URL array with duplicates removed.
      */
-    static getUniqueUrlArray(urls: string[]): string[] {
-        
-        const uniqueUrlArray: string[] = urls.filter( u => !Route.list.map(route=>route.URL()).flat().includes(u) );
-        if( uniqueUrlArray.length != urls.length ) {
-            const duplicateUrl = urls.filter( u => !uniqueUrlArray.includes(u) );
+    getUniqueUrlArray(urls: string[]): string[] {
+        const registeredURL: string[] = [];
+        Route.list.forEach(route=>{
+            if(route.PATH()!=this.#PATH) registeredURL.push(...route.URL());
+        });
+        const uniqueUrlArray: string[] = [];
+        const duplicateUrlArray: string[] = [];
+        urls.forEach(url=>{
+            if(!registeredURL.includes(url)) uniqueUrlArray.push(url);
+            else duplicateUrlArray.push(url);
+        })
+        if( duplicateUrlArray.length ) {
             console.log(`\n[ warning ]\n
-            Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.\n
-            指定されたURLのうち、${duplicateUrl.join(', ')} が重複しています。\n`);
-            new ErrorLog("warning", `Of the specified URLs, ${duplicateUrl.join(', ')} are duplicated.`);
+            Of the specified URLs, ${duplicateUrlArray.join(', ')} are duplicated.\n
+            指定されたURLのうち、${duplicateUrlArray.join(', ')} が重複しています。\n`);
+            new ErrorLog("warning", `Of the specified URLs, ${duplicateUrlArray.join(', ')} are duplicated.`);
         }
         return uniqueUrlArray;
     }
@@ -396,9 +401,34 @@ export class Route {
      * @param url Get a Route object containing the specified URL.
      * @returns Route object.
      */
-    static getRouteByUrl(url: string): Route | undefined {
-        const routes: Route[] = Route.list.filter(route => route.URL().includes(url));
-        return routes[0];
+    static getRouteByUrl(url: string, variables: {[key: string]: string;} = {}): Route | undefined {
+        let result: Route | undefined = undefined;
+        const targets = `${url}/`.replace(/\/+/g, "/").split("/");
+        for(let route of Route.list) {
+            const urls = route.URL()
+            for(let registeredURL of urls) {
+                const span = `${registeredURL}/`.replace(/\/+/g, "/").split("/");
+                if(targets.length != span.length) continue;
+                let flug = true;
+                for(let i in span) {
+                    if(span[i][0] == ":") {
+                        variables[span[i].slice(1)] = targets[i];
+                        continue;
+                    }
+                    if(span[i] != targets[i]) {
+                        flug = false;
+                        break;
+                    }
+                }
+                if(flug) {
+                    result = Route.getRouteByPath(route.PATH());
+                    break;
+                }
+                
+            }
+            if(result) break;
+        }
+        return result;
     }
 
 }
