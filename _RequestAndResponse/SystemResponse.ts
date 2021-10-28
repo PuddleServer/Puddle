@@ -2,7 +2,7 @@ import {
     ServerRequest, Response,
     Cookie, setCookie,
     lookup,
-    htmlCompile
+    assignToVariables
 } from "../mod.ts";
 
 /**
@@ -85,7 +85,7 @@ export class SystemResponse {
      */
     setText(text: string | Uint8Array, status: number = 200, statusText: string | null = null, filePath?: string): SystemResponse {
         if(typeof text === "string") {
-            this.body = htmlCompile(text, this.#preset, filePath);
+            this.body = assignToVariables(text, this.#preset, filePath);
         } else {
             this.body = text;
         }
