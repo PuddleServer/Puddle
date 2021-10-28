@@ -42,9 +42,15 @@ export class SystemRequest {
      */
     #body: Deno.Reader;
 
+    /**
+     * URLのpathnameに含まれる変数の名前とその値
+     * The variable name and its value included in the pathname of the URL.
+     */
+    variables: {[key:string]:string;} = {};
+
     constructor(request: ServerRequest) {
         this.#request = request;
-        this.#url = request.url;
+        this.#url = request.url.replace(/\/+/g, "/");
         this.#method = request.method;
         this.#conn = request.conn;
         this.#headers = request.headers;
@@ -73,7 +79,14 @@ export class SystemRequest {
      * @returns Decoded URL object.
      */
     getURL(): DecodedURL {
-        return new DecodedURL(this.#url ,System.baseURL);
+        try {
+            const url = new DecodedURL(this.#url ,System.baseURL);
+            url.valiable = this.variables;
+            return url;
+        } catch {
+            console.log(new DecodedURL("404" ,System.baseURL))
+            return new DecodedURL("404" ,System.baseURL);
+        }
     }
 
     /**
