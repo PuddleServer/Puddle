@@ -17,7 +17,9 @@ try {
 } catch (e) {
 }
 
-
+/**
+ * USEとCREATE(委譲)のテスト
+ */
 Deno.test({
     name: "USE,CREATE",
     fn(): void {
@@ -40,6 +42,9 @@ Deno.test({
     },
 });
 
+/**
+ * INSERTテスト
+ */
 Deno.test({
     name: "INNSERT",
     async fn(): Promise<void> {
@@ -49,9 +54,9 @@ Deno.test({
 {"name":"Steve","age":20,"psy":"ironbody","id":1}
 ]`
         
-        assertEquals(ans, await Deno.readTextFile("./run_Test/assets/test.json"), "データ挿入は正常ですか？");
+        assertEquals(ans, await Deno.readTextFile("./run_Test/assets/test.json"), "データが正しく挿入されていません");
         
-        assertThrows((): void => { // UNIQUE
+        assertThrows((): void => { // UNIQUEエラー
             PJ[0].INSERT({ name: "taro", psy: "ironbody" });
 
         },
@@ -59,13 +64,16 @@ Deno.test({
             `\n[PuddleJSON]\nSchema error. There is a duplicate element in the "psy" field.\nスキーマエラーです。"psy"に重複があります。`,
         );
         
-        assertThrows((): void => { // NOT NULL
+        assertThrows((): void => { // NOT NULLエラー
             PJ[0].INSERT({ age: 20 });
 
         },
             Error,
             `\n[PuddleJSON]\nSchema error. "name" has null object.\nスキーマエラーです。"name"はNULLオブジェクトを持っています。`,
         );
+
+
+        // 複数行INSERT
 
         PJ[1].INSERT({ name: "Yukito Kunisaki", height: 185, game: "Air"   });
         PJ[1].INSERT({ name: "Misuzu Kamio",    height: 159, game: "Air"   });
@@ -77,19 +85,41 @@ Deno.test({
         PJ[1].INSERT({ name: "Shiori Misaka",   height: 157, game: "Kanon" });
         PJ[1].INSERT({ name: "Ayu Tsukimiya",   height: 154, game: "Kanon" });
         PJ[1].INSERT({ name: "Mai Kawasumi",    height: 167, game: "Kanon" });
+
+        const ans2 =
+`[
+{"name":"Mai Kawasumi","height":167,"game":"Kanon","id":10},
+{"name":"Ayu Tsukimiya","height":154,"game":"Kanon","id":9},
+{"name":"Shiori Misaka","height":157,"game":"Kanon","id":8},
+{"name":"Makoto Sawatari","height":159,"game":"Kanon","id":7},
+{"name":"Nayuki Minase","height":164,"game":"Kanon","id":6},
+{"name":"Yuichi Aizawa","height":173,"game":"Kanon","id":5},
+{"name":"Minagi Tono","height":169,"game":"Air","id":4},
+{"name":"Kano Kirishima","height":156,"game":"Air","id":3},
+{"name":"Misuzu Kamio","height":159,"game":"Air","id":2},
+{"name":"Yukito Kunisaki","height":185,"game":"Air","id":1}
+]`
+    assertEquals(ans2, await Deno.readTextFile("./run_Test/assets/test2.json"), "データが正しく挿入されていません")
+
     },
 });
 
+/**
+ * SELECTテスト
+ */
 Deno.test({
     name: "SELECT",
     fn(): void {
+        // 全データ取得
         const res = PJ[1].SELECT().RESULT();
         assertEquals(10, res.length)
 
+        // id指定で取得
         const res2 = PJ[1].SELECT({ id: 1 }, 1).RESULT();
         assertEquals("Yukito Kunisaki", res2[0].name);
         assertEquals("Air", res2[0].game);
         
+        // game指定で最大5権取得
         const res3 = PJ[1].SELECT({ game: "Air" }, 5).RESULT();
         assertEquals("Minagi Tono",     res3[0].name);
         assertEquals("Kano Kirishima",  res3[1].name);
@@ -97,27 +127,37 @@ Deno.test({
         assertEquals("Yukito Kunisaki", res3[3].name);
         assertEquals(undefined,         res3[4]);
         
+        // game指定で最大2件取得
         const res4 = PJ[1].SELECT({ game: "Air" }, 2).RESULT();
         assertEquals("Minagi Tono",     res4[0].name);
         assertEquals("Kano Kirishima",  res4[1].name);
         assertEquals(undefined,         res4[2]);
 
+        // name指定で取得
         const res5 = PJ[1].SELECT({ name: "Minagi Tono" }, 1).RESULT();
         assertEquals("Minagi Tono", res5[0].name);
         assertEquals(undefined,     res5[1]);
         
+        // 存在しない値での取得
         const res6 = PJ[1].SELECT({ id: 100 }, 1).RESULT();
         assertEquals(undefined, res6[0]);
     }
 });
 
+
+/**
+ * SELECTIFテスト
+ */
 Deno.test({
     name: "SELECTIF",
     fn(): void {
+        // 単純な条件での取得
         const res = PJ[1].SELECTIF(row=>({ height: Number(row.height) >= 180 })).RESULT();
         assertEquals("Yukito Kunisaki", res[0].name);
         assertEquals(undefined, res[1]);
         
+
+        // 複雑な条件での取得
         const res2 = PJ[1].SELECTIF(row=>({ height: Number(row.height) >= 150 && Number(row.height) < 160 })).RESULT();
         assertEquals("Ayu Tsukimiya",   res2[0].name);
         assertEquals("Shiori Misaka",   res2[1].name);
@@ -126,6 +166,8 @@ Deno.test({
         assertEquals("Misuzu Kamio",    res2[4].name);
         assertEquals(undefined, res2[5]);
         
+
+        // 等号条件で取得
         const res3 = PJ[1].SELECTIF(row=>({ game: row.game == "Air" })).RESULT();
         assertEquals("Minagi Tono",     res3[0].name);
         assertEquals("Kano Kirishima",  res3[1].name);
@@ -133,19 +175,26 @@ Deno.test({
         assertEquals("Yukito Kunisaki", res3[3].name);
         assertEquals(undefined, res3[4]);
 
+        // メソッドを使った条件での取得
         const res4 = PJ[1].SELECTIF(row=>({ game: String(row.name).includes("Ka") })).RESULT();
         assertEquals("Mai Kawasumi",    res4[0].name);
         assertEquals("Kano Kirishima",  res4[1].name);
         assertEquals("Misuzu Kamio",    res4[2].name);
+        assertEquals(undefined,    res4[3]);
+
         
     }
 });
 
+/**
+ * autoIncrementのテスト
+ */
 Deno.test({
     name: "autoIncrement",
     fn(): void {
         const results = PJ[1].SELECT().RESULT("id");
         
+        // それぞれのidを照合
         let i = results.length;
         results.forEach(result => {
             assertEquals(i, result.id);
@@ -155,14 +204,13 @@ Deno.test({
     }
 });
 
+/**
+ * parseテスト
+ */
 Deno.test({
     name: "parse",
     fn(): void {
         type SCHEMA = {[key:string]:("UNIQUE"|"AUTO INCREMENT"|"NOT NULL")[]|string;};
-        // const sos = PuddleJSON.USE("./run_Test/assets/test3.json", {
-        //     id: ["UNIQUE", "NOT NULL", "AUTO INCREMENT"],
-        //     name: ["UNIQUE", "NOT NULL"],
-        // });
         
         const row = [
             {name: "Haruhi Suzumiya", id: 5},
@@ -178,9 +226,11 @@ Deno.test({
         };
 
         const results = PuddleJSON.checkSchema(row, schema);
+        // 返ってきたデータと照合する
         let i = 5;
         results.forEach(result => {
             assertEquals(i, result.id);
+            assertEquals(row[5-i].name, result.name);
             i--;
         });
 
