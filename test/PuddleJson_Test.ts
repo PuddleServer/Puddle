@@ -72,7 +72,9 @@ Deno.test({
             `\n[PuddleJSON]\nSchema error. "name" has null object.\nスキーマエラーです。"name"はNULLオブジェクトを持っています。`,
         );
 
+
         // 複数行INSERT
+
         PJ[1].INSERT({ name: "Yukito Kunisaki", height: 185, game: "Air"   });
         PJ[1].INSERT({ name: "Misuzu Kamio",    height: 159, game: "Air"   });
         PJ[1].INSERT({ name: "Kano Kirishima",  height: 156, game: "Air"   });
@@ -83,6 +85,7 @@ Deno.test({
         PJ[1].INSERT({ name: "Shiori Misaka",   height: 157, game: "Kanon" });
         PJ[1].INSERT({ name: "Ayu Tsukimiya",   height: 154, game: "Kanon" });
         PJ[1].INSERT({ name: "Mai Kawasumi",    height: 167, game: "Kanon" });
+
         const ans2 =
 `[
 {"name":"Mai Kawasumi","height":167,"game":"Kanon","id":10},
@@ -97,6 +100,7 @@ Deno.test({
 {"name":"Yukito Kunisaki","height":185,"game":"Air","id":1}
 ]`
     assertEquals(ans2, await Deno.readTextFile("./run_Test/assets/test2.json"), "データが正しく挿入されていません")
+
     },
 });
 
@@ -140,6 +144,7 @@ Deno.test({
     }
 });
 
+
 /**
  * SELECTIFテスト
  */
@@ -151,6 +156,7 @@ Deno.test({
         assertEquals("Yukito Kunisaki", res[0].name);
         assertEquals(undefined, res[1]);
         
+
         // 複雑な条件での取得
         const res2 = PJ[1].SELECTIF(row=>({ height: Number(row.height) >= 150 && Number(row.height) < 160 })).RESULT();
         assertEquals("Ayu Tsukimiya",   res2[0].name);
@@ -160,6 +166,7 @@ Deno.test({
         assertEquals("Misuzu Kamio",    res2[4].name);
         assertEquals(undefined, res2[5]);
         
+
         // 等号条件で取得
         const res3 = PJ[1].SELECTIF(row=>({ game: row.game == "Air" })).RESULT();
         assertEquals("Minagi Tono",     res3[0].name);
@@ -174,6 +181,7 @@ Deno.test({
         assertEquals("Kano Kirishima",  res4[1].name);
         assertEquals("Misuzu Kamio",    res4[2].name);
         assertEquals(undefined,    res4[3]);
+
         
     }
 });
