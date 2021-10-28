@@ -68,7 +68,7 @@ Whether to let the client download the Response text or file.
 Default setting is `false`.
 - `res.setType(type: string)`  
 Set the MIME type.
-- `res.setText(text: string, status?: number, statusText?: string)`
+- `res.setText(text: string, status?: number, statusText?: string)`  
 Set the response body to a string.
 - `await res.setFile(filePath: string, status?: number, statusText?: string)`  
 Set the file in the response.
