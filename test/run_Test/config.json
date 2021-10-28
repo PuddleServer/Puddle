@@ -1,0 +1,8 @@
+{
+    "SERVER": {
+        "HOSTNAME": "localhost",
+        "PORT":     8080,
+        "URI":      "http://localhost"
+    },
+    "LOG": "./log"
+}

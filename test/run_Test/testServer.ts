@@ -66,6 +66,9 @@ System.createRoute("patch_test").URL("/patch")
 // 認証テスト用
 System.createRoute("./assets/auth.html").URL("/auth").AUTH("user", "pwd");
 
-System.listen(8080, (conf: Config)=>{
-    console.log(`The server running on http://${conf.hostname}:${conf.port}`);
+System.listen("./.env", (conf: Config)=>{
+    console.log(`The server running on http://${conf.SERVER.HOSTNAME}:${conf.SERVER.PORT}`);
 });
+// System.listen("./config.json", (conf: Config)=>{
+//     console.log(`The server running on http://${conf.SERVER.HOSTNAME}:${conf.SERVER.PORT}`);
+// });
