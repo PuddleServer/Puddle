@@ -1,4 +1,4 @@
-import { SystemRequest, SystemResponse, System, Route, WebSocketClient, errorHTML, version } from "../mod.ts";
+import { SystemRequest, SystemResponse, lookup, System, Route, WebSocketClient, errorHTML, version } from "../mod.ts";
 
 /**
  * リダイレクト処理を行う関数。
@@ -19,12 +19,18 @@ export function redirect(url: string): Function {
  */
 export function default_get(): Function {
     return async function default_get(request: SystemRequest, response: SystemResponse): Promise<void> {
-        const route: string | undefined = Route.getRouteByUrl(request.getURL().pathname)?.PATH();
-        if(!route) return Route["404"].GET()(request, response);
+        const filePath: string | undefined = Route.getRouteByUrl(request.getURL().pathname)?.PATH();
+        if(!filePath) return Route["404"].GET()(request, response);
         try {
-            await response.setFile(route);
-            console.log(`>> [${new Date().toLocaleString()}] Send the "${route}" file to the client.`);
-        } catch {
+            const extensions: false | string = lookup(filePath);
+            let file_data: string | Uint8Array = await Deno.readFile(filePath);
+            if(extensions && extensions.split("/")[0] === "text") {
+                file_data = new TextDecoder('utf-8').decode(file_data);
+            }
+            response.setText(file_data, 200, null, filePath);
+            if(extensions) response.setType(extensions);
+            console.log(`>> [${new Date().toLocaleString()}] Send the "${filePath}" file to the client.`);
+        } catch (e) {
             return Route["404"].GET()(request, response);
         }
     }
