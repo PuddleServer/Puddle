@@ -6,7 +6,7 @@
  */
 
 import { assertEquals }     from "https://deno.land/std@0.88.0/testing/asserts.ts";
-import { htmlCompile }            from "../HtmlCompiler.ts";
+import { htmlCompile }            from "../../mod.ts";
 
 const html_before: string = `
 <html>{{ header }}</html>

@@ -6,7 +6,7 @@
  */
 
 import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
-import { Logger, Log } from "../mod.ts";
+import { Logger, Log } from "../../mod.ts";
 
 
 // ログファイルの名前
@@ -15,11 +15,23 @@ const fileName: string = "logger_test.log";
 // 前回のテストファイルの削除
 async function rmLogFile(): Promise<void> {
     try {
-        await Deno.remove("./log/"+fileName);
+        await Deno.remove("../log/"+fileName);
     } catch (e) {
         console.log("No such old log file.");
     }
 }
+
+/**
+ * setDirectoryPathテスト
+ */
+Deno.test({
+    name: "setDirectoryPathテスト",
+    fn(): void {
+        assertEquals("./log", Logger.directoryPath);
+        Logger.setDirectoryPath("../log");
+        assertEquals("../log", Logger.directoryPath);
+    }
+});
 
 /**
  * writeテスト
@@ -29,7 +41,7 @@ Deno.test({
     async fn(): Promise<void> {
         await rmLogFile();
         await Logger.write(fileName, "Test1\n").then(async()=>{
-            assertEquals("Test1\n", await Deno.readTextFile("./log/"+fileName), "ファイルが指定のパスに存在していない可能性があります");
+            assertEquals("Test1\n", await Deno.readTextFile("../log/"+fileName), "ファイルが指定のパスに存在していない可能性があります");
         });
     },
 });
