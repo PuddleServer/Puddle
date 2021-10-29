@@ -18,22 +18,28 @@ export class Route {
     static list: Route[] = [];
 
     /**
-     * 502エラーを返すルート。
-     * A route that returns a 502 error.
-     */
-    static "502" = new Route("502", [], default_error(502, `Server error. サーバーエラー。`));
-
-    /**
      * 404エラーを返すルート。
      * A route that returns a 404 error.
      */
-    static "404" = new Route("404", [], default_error(404, `Not found. 見つかりません。`));
+    static "404" = new Route("404", [], default_error(404, `Not Found. 見つかりません。`));
+
+    /**
+     * 500エラーを返すルート。
+     * A route that returns a 500 error.
+     */
+    static "500" = new Route("500", [], default_error(500, `Internal Server Error. サーバーエラー。`));
+
+    /**
+     * 502エラーを返すルート。
+     * A route that returns a 502 error.
+     */
+    static "502" = new Route("502", [], default_error(502, `Bad Gateway. サーバー通信エラー。`));
 
     /**
      * 403エラーを返すルート。
      * A route that returns a 403 error.
      */
-    static "403" = new Route("403", ["/403"], default_error(403, `Forbidden. 認証が拒否されました。`));
+    static "403" = new Route("403", [], default_error(403, `Forbidden. 認証が拒否されました。`));
 
     /**
      * ファイルパス。（`"default_get()"`を使わない場合は、どのルートかが分かるキーワード）
@@ -113,13 +119,13 @@ export class Route {
         if(URL[0] != _path) URL.push(_path);
         this.URL.apply(this, URL);
         this.#GET = GET || default_get();
-        const process_502: Function = (this.#PATH == "502")? this.#GET : Route["502"].GET();
+        const process_404: Function = (this.#PATH == "404")? this.#GET : Route["404"].GET();
         if(GET==undefined) this.#GET = default_get();
-        else if(GET==null) this.#GET = process_502;
-        this.#PUT = PUT || process_502;
-        this.#POST = POST || process_502;
-        this.#DELETE = DELETE || process_502;
-        this.#PATCH = PATCH || process_502;
+        else if(GET==null) this.#GET = process_404;
+        this.#PUT = PUT || process_404;
+        this.#POST = POST || process_404;
+        this.#DELETE = DELETE || process_404;
+        this.#PATCH = PATCH || process_404;
         this.#AUTH = undefined;
         this.#wsRoute = undefined;
         Route.list.push(this);

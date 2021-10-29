@@ -44,7 +44,7 @@ export function default_get(): Function {
  * @returns Function.
  */
 export function default_error(status: number, description: string): Function {
-    return async function (request: SystemRequest, response: SystemResponse): Promise<void> {
+    return async function (request: SystemRequest | null, response: SystemResponse): Promise<void> {
         response.preset({version, status, description});
         response.setText(errorHTML, status, description).setType('text/html');
     }
