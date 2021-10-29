@@ -1,5 +1,5 @@
 import {
-    ServerRequest, Response,
+    ServerRequest, Response, Route,
     Cookie, setCookie,
     lookup,
     assignToVariables
@@ -116,8 +116,7 @@ export class SystemResponse {
             console.log(`\n[ warning ]\n
             The "${filePath}" file could not be read.\n
             "${filePath}"ファイルが読み取れませんでした。\n`);
-            this.setText("500 Internal Server Error", 500);
-            console.log(e);
+            Route["500"].GET()(null, this);
         }
         return this;
     }
