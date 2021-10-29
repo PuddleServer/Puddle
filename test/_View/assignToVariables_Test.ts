@@ -1,12 +1,12 @@
 /**
- * HtmlCompiler.tsのhtmlCompile関数テストファイル
+ * assignToVariables.tsのassignToVariables関数テストファイル
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
  * @Date   2021-08-31
  */
 
 import { assertEquals }     from "https://deno.land/std@0.88.0/testing/asserts.ts";
-import { htmlCompile }            from "../../mod.ts";
+import { assignToVariables }            from "../../mod.ts";
 
 const html_before: string = `
 <html>{{ header }}</html>
@@ -35,12 +35,12 @@ const answer: string = `
 `;
 
 /**
- * htmlCompile関数テスト
+ * assignToVariables関数テスト
  */
 Deno.test({
-    name: "htmlCompile関数テスト",
+    name: "assignToVariables関数テスト",
     fn(): void {
-        const html_after: string = htmlCompile(html_before, {header: "タイトル",contents: "本文"});
+        const html_after: string = assignToVariables(html_before, {header: "タイトル",contents: "本文"});
         assertEquals(true, html_after == answer)
 
     },
