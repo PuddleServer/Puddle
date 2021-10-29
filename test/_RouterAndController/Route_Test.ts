@@ -6,7 +6,7 @@
  */
 
 import { assertEquals }                         from "https://deno.land/std@0.88.0/testing/asserts.ts";
-import { Route, default_get, default_error }    from "../mod.ts";
+import { Route, default_get, default_error }    from "../../mod.ts";
 
 
 // Routeオブジェクトに必要なもの

@@ -6,14 +6,14 @@
  */
 
 import { assertEquals, assertThrows } from "https://deno.land/std/testing/asserts.ts";
-import { PuddleJSON } from "../mod.ts";
+import { PuddleJSON } from "../../mod.ts";
 
 let PJ: PuddleJSON[] = [];
 
 // テスト用のファイルが以前に作成されていたら消す
 try {
-    await Deno.remove("./run_Test/assets/test.json");
-    await Deno.remove("./run_Test/assets/test2.json");
+    await Deno.remove("../run_Test/assets/test.json");
+    await Deno.remove("../run_Test/assets/test2.json");
 } catch (e) {
 }
 
@@ -23,14 +23,14 @@ try {
 Deno.test({
     name: "USE,CREATE",
     fn(): void {
-        const users = PuddleJSON.USE("./run_Test/assets/test.json", {
+        const users = PuddleJSON.USE("../run_Test/assets/test.json", {
             id: ["UNIQUE", "NOT NULL", "AUTO INCREMENT"],
             name: ["NOT NULL"],
             age: [],
             psy: ["UNIQUE"]
         });
 
-        const visualArts = PuddleJSON.CREATE("./run_Test/assets/test2.json", {
+        const visualArts = PuddleJSON.CREATE("../run_Test/assets/test2.json", {
             id: ["UNIQUE", "NOT NULL", "AUTO INCREMENT"],
             name: ["NOT NULL"],
             height: ["NOT NULL"],
@@ -54,7 +54,7 @@ Deno.test({
 {"name":"Steve","age":20,"psy":"ironbody","id":1}
 ]`
         
-        assertEquals(ans, await Deno.readTextFile("./run_Test/assets/test.json"), "データが正しく挿入されていません");
+        assertEquals(ans, await Deno.readTextFile("../run_Test/assets/test.json"), "データが正しく挿入されていません");
         
         assertThrows((): void => { // UNIQUEエラー
             PJ[0].INSERT({ name: "taro", psy: "ironbody" });
@@ -99,7 +99,7 @@ Deno.test({
 {"name":"Misuzu Kamio","height":159,"game":"Air","id":2},
 {"name":"Yukito Kunisaki","height":185,"game":"Air","id":1}
 ]`
-    assertEquals(ans2, await Deno.readTextFile("./run_Test/assets/test2.json"), "データが正しく挿入されていません")
+    assertEquals(ans2, await Deno.readTextFile("../run_Test/assets/test2.json"), "データが正しく挿入されていません")
 
     },
 });
