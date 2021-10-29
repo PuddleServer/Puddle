@@ -27,6 +27,7 @@ export class DecodedURL extends URL {
     pathname = decodeURIComponent(super.pathname);
     search = decodeURIComponent(super.search);
     username = decodeURIComponent(super.username);
+    valiable: {[key:string]:string;} = {}; // The variable name and its value included in the pathname of the URL.
     toString() {
         return decodeURIComponent(super.toString());
     }
@@ -347,7 +348,7 @@ export class System {
         System.server = serve(httpOptions);
         for await (const request of System.server) {
             const systemRequest: SystemRequest = new SystemRequest(request);
-            const route: Route = Route.getRouteByUrl(systemRequest.getURL().pathname) || Route["404"];
+            const route: Route = Route.getRouteByUrl(systemRequest.getURL().pathname, systemRequest.variables) || Route["404"];
             control(systemRequest, route);
         }
     }
@@ -422,7 +423,7 @@ export class System {
         
         for await (const request of System.server) {
             const systemRequest: SystemRequest = new SystemRequest(request);
-            const route: Route = Route.getRouteByUrl(systemRequest.getURL().pathname) || Route["404"];
+            const route: Route = Route.getRouteByUrl(systemRequest.getURL().pathname, systemRequest.variables) || Route["404"];
             control(systemRequest, route);
         }
     }

@@ -10,14 +10,22 @@ import {
  * @param route Route object.
  */
 export function control(request: SystemRequest, route: Route): void {
+
+    let url = "";
+    try {
+        url = new DecodedURL(request.url, System.baseURL).toString();
+    } catch {
+        url = "url_error";
+    }
     new RequestLog(
         route.PATH(),
         request.method,
-        new DecodedURL(request.url, System.baseURL).toString(),
+        url,
         (request.headers.get("Forwarded")||"").replace("Forwarded: ", "")
         .split(/\,\s*/g).filter(param=>param.toLowerCase().includes("for"))
         .concat([(request.conn.remoteAddr as Deno.NetAddr).hostname]).join(" ").replace(/for\s*\=\s*/g, "")
     );
+    
     if(route.AUTH()) authDigest(request, route);
     switch (request.method) {
         case "GET":

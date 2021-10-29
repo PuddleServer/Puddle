@@ -35,6 +35,9 @@ Headers object.
     - `.get(name: string)`
 - `req.url: string`  
 The URL that was accessed.
+- `req.variables`  
+The variable name and its value included in the pathname of the URL.  
+( Variables are defined by prefixing them with a colon. `/user/:id/info` )
 - `req.getURL(): DecodedURL`  
 Decoded URL object
     - `.hash`
@@ -46,6 +49,8 @@ Decoded URL object
     - `.protocol`
     - `.search`
     - `.searchParams`
+    - `.variable` Get the name of the variable included in pathname and its value.  
+    (Variables are defined by prefixing them with a colon.)
 - `await req.readBody(): string`  
 Data sent by the client via POST request, etc.
 - `req.getCookie(key: string): string | undefined`  
@@ -63,7 +68,7 @@ Whether to let the client download the Response text or file.
 Default setting is `false`.
 - `res.setType(type: string)`  
 Set the MIME type.
-- `res.setText(text: string, status?: number, statusText?: string)`
+- `res.setText(text: string, status?: number, statusText?: string)`  
 Set the response body to a string.
 - `await res.setFile(filePath: string, status?: number, statusText?: string)`  
 Set the file in the response.

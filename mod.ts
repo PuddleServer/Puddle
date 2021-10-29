@@ -22,7 +22,7 @@ export * from "./_RequestAndResponse/SystemResponse.ts";
 export * from "./_RouterAndController/Router.ts";
 export * from "./_RouterAndController/WebSocketRouter.ts";
 export * from "./_RouterAndController/Controller.ts";
-export * from "./_View/HtmlCompiler.ts";
+export * from "./_View/AssignToVariables.ts";
 export * from "./_FileOperations/Config.ts";
 export * from "./_FileOperations/Logger.ts";
 export * from "./_Authentication/GoogleOAuth2.ts";

@@ -156,7 +156,7 @@ System.createRoute("/auth.html").URL("/authPage")
 ```
 
 ### How to set up Google OAuth 2.0
-You can use OAuth 2.0 with the Google API to retrieve user information.
+You can use OAuth 2.0 with the Google API to retrieve user information.  
 ```typescript
 const client_id = "*******.apps.googleusercontent.com";
 const client_secret = "*******";
