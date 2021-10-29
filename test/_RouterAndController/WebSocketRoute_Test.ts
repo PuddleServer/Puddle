@@ -6,7 +6,7 @@
  */
 
 import { assertEquals, assertNotEquals }        from "https://deno.land/std@0.88.0/testing/asserts.ts";
-import { WebSocketRoute, default_onopen, default_onmessage } from "../mod.ts";
+import { WebSocketRoute, default_onopen, default_onmessage } from "../../mod.ts";
 
 let wsr: WebSocketRoute;
 let wsr2: WebSocketRoute;

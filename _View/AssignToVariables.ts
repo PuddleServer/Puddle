@@ -8,7 +8,7 @@ import { System, Route } from "../mod.ts";
  * @param filePath File path.
  * @returns The html after inserting text into the variable.
  */
-export function assignToVariables(html: string, params: { [key: string]: ( string | Number ); }, filePath: string | undefined): string {
+export function assignToVariables(html: string, params: { [key: string]: ( string | Number ); }, filePath?: string): string {
     const paths = html.match(/\{\{\s*createPath\(.+\)\s*\}\}/g);
     const filePathArray = (filePath || "").split("/");
     filePathArray.pop();

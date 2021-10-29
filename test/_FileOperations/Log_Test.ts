@@ -6,8 +6,9 @@
  */
 
 import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
-import { Log, RequestLog, ErrorLog } from "../mod.ts";
+import { Log, RequestLog, ErrorLog, Logger } from "../../mod.ts";
 
+Logger.setDirectoryPath("../log");
 const log:      Log = new Log("Data1", "Data2");
 const req_log:  Log = new RequestLog("Path1", "Method1", "/URL1", "Address1");
 const err_log:  Log = new ErrorLog("error", "errMessage");

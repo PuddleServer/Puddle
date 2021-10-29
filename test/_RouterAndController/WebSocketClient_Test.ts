@@ -6,7 +6,7 @@
  */
 
 import { assertEquals, assertNotEquals }        from "https://deno.land/std/testing/asserts.ts";
-import { WebSocketClient, WebSocket } from "../mod.ts";
+import { WebSocketClient, WebSocket } from "../../mod.ts";
 
 Deno.test({
     name: "testing example",
