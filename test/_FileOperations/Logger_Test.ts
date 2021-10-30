@@ -70,19 +70,3 @@ Deno.test({
         assertEquals("Test3\nTest4\n", await Logger.read(fileName), "ファイルが存在していないか、処理部分に不正があります");
     },
 });
-
-/**
- * recordテスト
- */
-// Deno.test({
-//     name: "recordテスト",
-//     async fn(): Promise<void> {
-//         await rmLogFile();
-//         const log: Log = new Log("Data1", "Data2");
-//         log.fileName = fileName;
-
-//         await Logger.record(log);
-//         const res = await Logger.read(fileName);
-//         assertEquals(true, res.includes(",Data1,Data2"), "ファイルが存在していないか、処理部分に不正があります");
-//     },
-// });
