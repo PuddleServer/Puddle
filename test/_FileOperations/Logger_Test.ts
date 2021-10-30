@@ -5,7 +5,7 @@
  * @Date   2021-09-25
  */
 
-import { assertEquals } from "https://deno.land/std/testing/asserts.ts";
+import { assertEquals } from "../mod_test.ts";
 import { Logger, Log } from "../../mod.ts";
 
 
