@@ -318,7 +318,7 @@ export class System {
      */
     static async listen(option: number | string | HTTPOptions, startFunction?: Function, uri?: string): Promise<void> {
         const httpOptions: HTTPOptions = {hostname: "localhost", port: 8080};
-        let logDirectoryPath: string = "";
+        let logDirectoryPath: string = "./log";
         let server_uri: string | undefined = uri;
         
         if (typeof option === "string") {
@@ -392,7 +392,7 @@ export class System {
      */
     static async listenTLS(option: string | HTTPSOptions, startFunction?: Function, uri?: string): Promise<void> {
         const httpsOptions: HTTPSOptions = {hostname: "localhost", port: 8080, certFile: "", keyFile: ""};
-        let logDirectoryPath: string = "";
+        let logDirectoryPath: string = "./log";
         let server_uri: string | undefined = uri;
         
         if (typeof option === "string") {
