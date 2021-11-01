@@ -5,7 +5,7 @@
  * @Date   2021-10-08
  */
 
- import { assertEquals }     from "https://deno.land/std@0.88.0/testing/asserts.ts";
+ import { assertEquals }     from "../mod_test.ts";
 
 /**
  * シェル操作関数

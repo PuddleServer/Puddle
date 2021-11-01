@@ -1,4 +1,4 @@
-import { System, Config } from "../../System.ts";
+import { System, Config } from "../../mod.ts";
 
 System.createRoute("./assets/webSocket.html").URL("/", "/トップ");
 System.createRoute("/ws").WebSocket();

@@ -5,7 +5,7 @@
  * @Date   2021-10-01
  */
 
-import { assertEquals, assertNotEquals }        from "https://deno.land/std/testing/asserts.ts";
+import { assertEquals, assertNotEquals }        from "../mod_test.ts";
 import { WebSocketClient, WebSocket } from "../../mod.ts";
 
 Deno.test({
