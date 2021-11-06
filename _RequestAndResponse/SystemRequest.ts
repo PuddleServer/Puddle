@@ -1,4 +1,4 @@
-import { System, ServerRequest, DecodedURL, getCookies } from "../mod.ts";
+import { DecodedURL, getCookies } from "../mod.ts";
 
 /**
  * リクエストオブジェクトのアダプタークラス。
@@ -10,7 +10,7 @@ export class SystemRequest {
      * リクエストオブジェクトを格納する変数。
      * Variable that stores the request object.
      */
-    #request: ServerRequest;
+    #request: Request;
 
     /**
      * URLを格納する変数。
@@ -25,12 +25,6 @@ export class SystemRequest {
     #method: string;
 
     /**
-     * コネクションを格納する変数。
-     * Variable that stores the connection.
-     */
-    #conn: Deno.Conn;
-
-    /**
      * リクエストヘッダーを格納する変数。
      * Variable that stores the request header.
      */
@@ -40,28 +34,28 @@ export class SystemRequest {
      * ボディー情報を格納する変数。
      * Variable that stores the body information.
      */
-    #body: Deno.Reader;
+    #body: ReadableStream<Uint8Array> | null;
 
     /**
      * URLのpathnameに含まれる変数の名前とその値
      * The variable name and its value included in the pathname of the URL.
      */
-    variables: {[key:string]:string;} = {};
+    variables: { [key: string]: string; };
 
-    constructor(request: ServerRequest) {
+    constructor(request: Request, variables: {[key:string]:string;}) {
         this.#request = request;
         this.#url = request.url.replace(/\/+/g, "/");
         this.#method = request.method;
-        this.#conn = request.conn;
         this.#headers = request.headers;
         this.#body = request.body;
+        this.variables = variables;
     }
 
     /**
      * 変換前のリクエストオブジェクトのゲッター。
      * Getter for the request object before conversion.
      */
-    get request(): ServerRequest {
+    get request(): Request {
         return this.#request;
     }
 
@@ -80,12 +74,11 @@ export class SystemRequest {
      */
     getURL(): DecodedURL {
         try {
-            const url = new DecodedURL(this.#url ,System.baseURL);
+            const url = new DecodedURL(this.#url);
             url.valiable = this.variables;
             return url;
         } catch {
-            console.log(new DecodedURL("404" ,System.baseURL))
-            return new DecodedURL("404" ,System.baseURL);
+            return new DecodedURL("http://error");
         }
     }
 
@@ -95,7 +88,7 @@ export class SystemRequest {
      * @returns Cookies.
      */
     getCookies(): Record<string, string> {
-        return getCookies(this.#request);
+        return getCookies(this.#headers);
     }
 
     /**
@@ -117,14 +110,6 @@ export class SystemRequest {
     }
 
     /**
-     * コネクションのゲッター。
-     * Connection getter.
-     */
-    get conn(): Deno.Conn {
-        return this.#conn;
-    }
-
-    /**
      * リクエストヘッダーのゲッター。
      * Getter for the request header.
      */
@@ -136,7 +121,7 @@ export class SystemRequest {
      * ボディー情報のゲッター。
      * Getter of body information.
      */
-    get body(): Deno.Reader {
+    get body(): ReadableStream<Uint8Array> | null {
         return this.#body;
     }
 
@@ -147,8 +132,9 @@ export class SystemRequest {
      * @returns Body information.
      */
     async readBody(decodeURI: boolean = true): Promise<string> {
+        const result = await this.#body?.getReader().read();
         const decoder = new TextDecoder('utf-8');
-        const body: string = decoder.decode(await Deno.readAll(this.#body));
+        const body: string = decoder.decode(result?.value);
         if(decodeURI) return decodeURIComponent(body);
         return body;
     }

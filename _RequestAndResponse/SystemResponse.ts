@@ -1,5 +1,5 @@
 import {
-    ServerRequest, Response, Route,
+    SystemRequest, Route,
     Cookie, setCookie,
     lookup,
     assignToVariables
@@ -12,10 +12,12 @@ import {
 export class SystemResponse {
 
     /**
-     * リクエストオブジェクトを格納する変数。
-     * Variable that stores the Request object.
+     * リクエストイベントオブジェクトを格納する変数。
+     * Variable that stores the RequestEvent object.
      */
-    #request: ServerRequest;
+    #respondWith: Function;
+
+    #responded: boolean = false;
 
     /**
      * HTML内の変数に挿入するテキストを格納する連想配列。
@@ -23,11 +25,7 @@ export class SystemResponse {
      */
     #preset: { [key: string]: any; };
 
-    /**
-     * レスポンスオブジェクトを格納する変数。
-     * Variable that stores the Response object.
-     */
-    response: Response;
+    init: ResponseInit;
 
     /**
      * ヘッダーを格納する変数。
@@ -35,7 +33,7 @@ export class SystemResponse {
      */
     headers: Headers;
     status: number;
-    body: string | Uint8Array | Deno.Reader | undefined;
+    body: string | Uint8Array | undefined;
 
     /**
      * 強制ダウンロードかどうか（初期値はfalse）。
@@ -43,22 +41,23 @@ export class SystemResponse {
      */
     isForceDownload: boolean;
 
-    constructor(request: ServerRequest) {
-        this.#request = request;
+    constructor(requestEvent: Deno.RequestEvent) {
+        this.#respondWith = requestEvent.respondWith;
 
         this.headers = new Headers();
         this.status = 500;
         this.body = "500 Internal Server Error";
-        this.response = {
-            status: undefined,
-            headers: this.headers,
-            body: undefined
-        }
+        this.init = {headers: this.headers};
         this.setType('text/plain');
 
         this.#preset = {};
 
         this.isForceDownload = false;
+        Route["500"].GET()(new SystemRequest(requestEvent.request, {}), this);
+    }
+
+    get responded(): boolean {
+        return this.#responded;
     }
 
     /**
@@ -80,18 +79,15 @@ export class SystemResponse {
      * Set the response object to text.
      * @param text A string to return to the client.
      * @param status Status code (default is 200).
-     * @param statusText Status text.
      * @param filePath File path.
      */
-    setText(text: string | Uint8Array, status: number = 200, statusText: string | null = null, filePath?: string): SystemResponse {
+    setText(text: string | Uint8Array, status: number = 200, filePath?: string): SystemResponse {
         if(typeof text === "string") {
             this.body = assignToVariables(text, this.#preset, filePath);
         } else {
             this.body = text;
         }
         this.status = status;
-        if(statusText != null) this.response.statusText = statusText;
-        else if(this.response.statusText != undefined) delete this.response.statusText;
         return this;
     }
 
@@ -100,9 +96,8 @@ export class SystemResponse {
      * Set the file to the Response object.
      * @param filePath The path of the file to return to the client.
      * @param status Status code (default is 200).
-     * @param statusText Status text.
      */
-    async setFile(filePath: string, status?: number, statusText?: string | null): Promise<SystemResponse> {
+    async setFile(filePath: string, status?: number): Promise<SystemResponse> {
         let file_data: string | Uint8Array;
         try {
             const extensions: false | string = lookup(filePath);
@@ -110,13 +105,12 @@ export class SystemResponse {
             if(extensions && extensions.split("/")[0] === "text") {
                 file_data = new TextDecoder('utf-8').decode(file_data);
             }
-            this.setText(file_data, status, statusText, filePath);
+            this.setText(file_data, status, filePath);
             if(extensions) this.setType(extensions);
         } catch (e) {
             console.log(`\n[ warning ]\n
             The "${filePath}" file could not be read.\n
             "${filePath}"ファイルが読み取れませんでした。\n`);
-            Route["500"].GET()(null, this);
         }
         return this;
     }
@@ -143,7 +137,7 @@ export class SystemResponse {
      * ```
      */
     setCookie(cookie: Cookie): SystemResponse {
-        setCookie(this.response, cookie);
+        setCookie(this.headers, cookie);
         return this;
     }
 
@@ -170,14 +164,17 @@ export class SystemResponse {
      * Return the response to the client and finish the process.
      */
     send(response?: string | Response): void {
+        if(this.#responded) return;
         if(this.isForceDownload) {
             this.headers.set('Content-Type', 'application/octet-stream');
         }
-        this.response.status = this.status;
-        this.response.body = this.body;
+        this.init.status = this.status;
+        if(this.init.statusText) this.init.statusText = encodeURIComponent(this.init.statusText);
+        let res: Response = new Response(this.body, this.init);
         if(typeof response == "string") this.setText(response);
-        else if(response) this.response = response;
-        this.#request.respond(this.response);
+        else if(response) res = response;
+        this.#respondWith(res);
+        this.#responded = true;
     }
 
     /**
@@ -189,6 +186,6 @@ export class SystemResponse {
         this.status = 302;
         this.body = "";
         this.headers.set('Location', url);
-        this.send(this.response);
+        this.send();
     }
 }

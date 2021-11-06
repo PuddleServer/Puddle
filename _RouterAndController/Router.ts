@@ -1,4 +1,8 @@
-import { Response, createHash, WebSocketRoute, WebSocketEvent, default_get, default_error, redirect, ErrorLog } from "../mod.ts";
+import { SystemRequest, SystemResponse, createHash, WebSocketRoute, WebSocketEvent, default_get, default_error, redirect, ErrorLog } from "../mod.ts";
+
+export type handlerFunction = {
+    (request: SystemRequest, response: SystemResponse): Response | Promise<Response> | void | Promise<void>;
+};
 
 /**
  * サーバーのルーティングに関する設定を行う。
@@ -59,7 +63,7 @@ export class Route {
      * @param request SystemRequest.
      * @param response SystemResponse.
      */
-    #GET: Function;
+    #GET: handlerFunction;
 
     /**
      * PUTリクエスト時の処理をまとめた関数。
@@ -67,7 +71,7 @@ export class Route {
      * @param request SystemRequest.
      * @param response SystemResponse.
      */
-    #PUT: Function;
+    #PUT: handlerFunction;
 
     /**
      * POSTリクエスト時の処理をまとめた関数。
@@ -75,7 +79,7 @@ export class Route {
      * @param request SystemRequest.
      * @param response SystemResponse.
      */
-    #POST: Function;
+    #POST: handlerFunction;
 
     /**
      * DELETEリクエスト時の処理をまとめた関数。
@@ -83,7 +87,7 @@ export class Route {
      * @param request SystemRequest.
      * @param response SystemResponse.
      */
-    #DELETE: Function;
+    #DELETE: handlerFunction;
 
     /**
      * PATCHリクエスト時の処理をまとめた関数。
@@ -91,7 +95,7 @@ export class Route {
      * @param request SystemRequest.
      * @param response SystemResponse.
      */
-    #PATCH: Function;
+    #PATCH: handlerFunction;
 
     /**
      * ダイジェスト認証に使用するMd5ハッシュを格納した変数。認証を使用しない場合は`"undefined"`。
@@ -105,7 +109,7 @@ export class Route {
      */
     #wsRoute: WebSocketRoute | undefined;
 
-    constructor(PATH: string, URL: string[] = [], GET?: Function | null, POST?: Function | null, PUT?: Function | null, DELETE?: Function | null, PATCH?: Function | null) {
+    constructor(PATH: string, URL: string[] = [], GET?: handlerFunction | null, POST?: handlerFunction | null, PUT?: handlerFunction | null, DELETE?: handlerFunction | null, PATCH?: handlerFunction | null) {
         if(Route.isThePathInUse(PATH)) {
             new ErrorLog("error", `The path "${PATH}" is already in use.`);
             throw new Error(`\n[ Error ]\n
@@ -119,7 +123,7 @@ export class Route {
         if(URL[0] != _path) URL.push(_path);
         this.URL.apply(this, URL);
         this.#GET = GET || default_get();
-        const process_404: Function = (this.#PATH == "404")? this.#GET : Route["404"].GET();
+        const process_404: handlerFunction = (this.#PATH == "404")? this.#GET : Route["404"].GET();
         if(GET==undefined) this.#GET = default_get();
         else if(GET==null) this.#GET = process_404;
         this.#PUT = PUT || process_404;
@@ -164,10 +168,10 @@ export class Route {
      *                Arguments: SystemRequest, SystemResponse.
      * @returns Handler function or Route object.
      */
-    GET(): Function;
-    GET(process: Function): Route;
+    GET(): handlerFunction;
+    GET(process: handlerFunction): Route;
     GET(process: Response): Route;
-    GET(process?: Function | Response): Function | Route {
+    GET(process?: handlerFunction | Response): handlerFunction | Route {
 
         if(!process) return this.#GET;
         if(typeof process == "object") this.#GET = ()=>process;
@@ -183,10 +187,10 @@ export class Route {
      *                Arguments: SystemRequest, SystemResponse.
      * @returns Handler function or Route object.
      */
-    PUT(): Function;
-    PUT(process: Function): Route;
+    PUT(): handlerFunction;
+    PUT(process: handlerFunction): Route;
     PUT(process: Response): Route;
-    PUT(process?: Function | Response): Function | Route {
+    PUT(process?: handlerFunction | Response): handlerFunction | Route {
 
         if(!process) return this.#PUT;
 
@@ -203,10 +207,10 @@ export class Route {
      *                Arguments: SystemRequest, SystemResponse.
      * @returns Handler function or Route object.
      */
-    POST(): Function;
-    POST(process: Function): Route;
+    POST(): handlerFunction;
+    POST(process: handlerFunction): Route;
     POST(process: Response): Route;
-    POST(process?: Function | Response): Function | Route {
+    POST(process?: handlerFunction | Response): handlerFunction | Route {
 
         if(!process) return this.#POST;
 
@@ -223,9 +227,9 @@ export class Route {
      *                Arguments: SystemRequest, SystemResponse.
      * @returns Handler function or Route object.
      */
-    DELETE(): Function;
-    DELETE(process: Function): Route;
-    DELETE(process?: Function | Response): Function | Route {
+    DELETE(): handlerFunction;
+    DELETE(process: handlerFunction): Route;
+    DELETE(process?: handlerFunction | Response): handlerFunction | Route {
 
         if(!process) return this.#DELETE;
 
@@ -242,10 +246,10 @@ export class Route {
      *                Arguments: SystemRequest, SystemResponse.
      * @returns Handler function or Route object.
      */
-    PATCH(): Function;
-    PATCH(process: Function): Route;
+    PATCH(): handlerFunction;
+    PATCH(process: handlerFunction): Route;
     PATCH(process: Response): Route;
-    PATCH(process?: Function | Response): Function | Route {
+    PATCH(process?: handlerFunction | Response): handlerFunction | Route {
 
         if(!process) return this.#PATCH;
 
@@ -316,20 +320,22 @@ export class Route {
      * 
      * ```ts
      * System.createRoute("/ws").WebSocket({
-     *      onopen: ((req: SystemRequest, client: WebSocketClient) => {
+     *      onopen: ((client: WebSocketClient) => {
      *          console.log(`>> WebSocket opened.`);
+     *          client.reply("Connected");
      *      },
-     *      onmessage: (req: SystemRequest, client: WebSocketClient, message: string) => {
-     *          client.sendAll(message);
+     *      onmessage: (client: WebSocketClient) => {
+     *          client.sendAll(client.message);
      *      }
      * });
      * 
      * System.createRoute("/ws").WebSocket()
-     *      .onopen((req: SystemRequest, client: WebSocketClient) => {
+     *      .onopen((client: WebSocketClient) => {
      *          console.log(`>> WebSocket opened.`);
+     *          client.reply("Connected");
      *      })
-     *      .onmessage((req: SystemRequest, client: WebSocketClient, message: string) => {
-     *          client.sendAll(message);
+     *      .onmessage((client: WebSocketClient) => {
+     *          client.sendAll(client.message);
      *      });
      * ```
      */
