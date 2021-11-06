@@ -5,7 +5,7 @@
  * @Date   2021-08-31
  */
 
-import { assertEquals }     from "https://deno.land/std@0.88.0/testing/asserts.ts";
+import { assertEquals }     from "../mod_test.ts";
 import { assignToVariables }            from "../../mod.ts";
 
 const html_before: string = `

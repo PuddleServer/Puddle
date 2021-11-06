@@ -5,7 +5,7 @@
  * @Date   2021-10-01
  */
 
-import { assertEquals, assertNotEquals }        from "https://deno.land/std@0.88.0/testing/asserts.ts";
+import { assertEquals, assertNotEquals }        from "../mod_test.ts";
 import { WebSocketRoute, default_onopen, default_onmessage } from "../../mod.ts";
 
 let wsr: WebSocketRoute;

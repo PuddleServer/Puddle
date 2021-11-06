@@ -5,7 +5,7 @@
  * @Date   2021-10-22
  */
 
-import { assertEquals, assertThrows } from "https://deno.land/std/testing/asserts.ts";
+import { assertEquals, assertThrows } from "../mod_test.ts";
 import { PuddleJSON } from "../../mod.ts";
 
 let PJ: PuddleJSON[] = [];
