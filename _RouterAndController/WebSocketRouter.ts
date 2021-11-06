@@ -1,13 +1,18 @@
-import { WebSocket, default_onmessage, default_onopen }  from "../mod.ts";
+import { System, DecodedURL, default_onmessage, default_onopen }  from "../mod.ts";
+
+export type wsHandlerFunction = {
+    (client: WebSocketClient, ev?: Event | MessageEvent<any> | ErrorEvent | CloseEvent): void;
+}
 
 /**
  * WebSocketRouteを初期化する際の引数として使用されるオブジェクト。
  * An object used as an argument when initializing a WebSocketRoute.
  */
 export interface WebSocketEvent {
-    onopen?: Function;
-    onclose?: Function;
-    onmessage?: Function;
+    onopen?: wsHandlerFunction;
+    onclose?: wsHandlerFunction;
+    onmessage?: wsHandlerFunction;
+    onerror?: wsHandlerFunction;
 }
 
 /**
@@ -22,7 +27,7 @@ export class WebSocketRoute {
      * @param request SystemRequest.
      * @param client WebSocketClient.
      */
-    #onopen: Function;
+    #onopen: wsHandlerFunction;
 
     /**
      * クライアントとの接続が切れたときに実行される関数。
@@ -30,7 +35,7 @@ export class WebSocketRoute {
      * @param request SystemRequest.
      * @param client WebSocketClient.
      */
-    #onclose: Function;
+    #onclose: wsHandlerFunction;
 
     /**
      * クライアントからメッセージが送られてきたときに実行される関数。
@@ -39,12 +44,15 @@ export class WebSocketRoute {
      * @param client WebSocketClient.
      * @param message A message sent by the client.
      */
-    #onmessage: Function;
+    #onmessage: wsHandlerFunction;
+
+    #onerror: wsHandlerFunction;
 
     constructor(event?: WebSocketEvent) {
         this.#onopen = event?.onopen || default_onopen;
         this.#onclose = event?.onclose || function(){};
         this.#onmessage = event?.onmessage || default_onmessage;
+        this.#onerror = event?.onerror || function(){};
     }
 
     /**
@@ -60,9 +68,9 @@ export class WebSocketRoute {
      *  });
      * ```
      */
-    onopen(): Function;
-    onopen(process: Function): WebSocketRoute;
-    onopen(process?: Function): Function | WebSocketRoute {
+    onopen(): wsHandlerFunction;
+    onopen(process: wsHandlerFunction): WebSocketRoute;
+    onopen(process?: wsHandlerFunction): wsHandlerFunction | WebSocketRoute {
         if(process) {
             this.#onopen = process;
             return this;
@@ -83,9 +91,9 @@ export class WebSocketRoute {
      *  });
      * ```
      */
-    onclose(): Function;
-    onclose(process: Function): WebSocketRoute;
-    onclose(process?: Function): Function | WebSocketRoute {
+    onclose(): wsHandlerFunction;
+    onclose(process: wsHandlerFunction): WebSocketRoute;
+    onclose(process?: wsHandlerFunction): wsHandlerFunction | WebSocketRoute {
         if(process) {
             this.#onclose = process;
             return this;
@@ -106,9 +114,9 @@ export class WebSocketRoute {
      *  });
      * ```
      */
-    onmessage(): Function;
-    onmessage(process: Function): WebSocketRoute;
-    onmessage(process?: Function): Function | WebSocketRoute {
+    onmessage(): wsHandlerFunction;
+    onmessage(process: wsHandlerFunction): WebSocketRoute;
+    onmessage(process?: wsHandlerFunction): wsHandlerFunction | WebSocketRoute {
         if(process) {
             this.#onmessage = process;
             return this;
@@ -116,6 +124,15 @@ export class WebSocketRoute {
         return this.#onmessage;
     }
 
+    onerror(): wsHandlerFunction;
+    onerror(process: wsHandlerFunction): WebSocketRoute;
+    onerror(process?: wsHandlerFunction): wsHandlerFunction | WebSocketRoute {
+        if(process) {
+            this.#onerror = process;
+            return this;
+        }
+        return this.#onerror;
+    }
 }
 
 /**
@@ -139,42 +156,41 @@ export class WebSocketClient {
     static list: { [key: number]: WebSocketClient; } = {};
 
     /**
-     * クライアントID。
-     * Client ID.
+     * URLのpathnameに含まれる変数の名前とその値
+     * The variable name and its value included in the pathname of the URL.
      */
+    variables: { [key: string]: string; };
+
     #id: number;
+    #attributes: Map<string, any>;
+    #webSocket: WebSocket;
+    #url: string;
+    #message: string | ArrayBufferLike | Blob | ArrayBufferView;
+    #to: WebSocketClient[] = [];
 
-    /**
-     * 検索するときに使用されるタグを格納した配列。
-     * An array containing the tags to be used when searching.
-     */
-    #tags: string[];
-
-    /**
-     * クライアントに持たせる属性を保持する変数。
-     * A variable that holds attributes to be held by the client.
-     */
-    #attribute: Map<string, any>;
-    
-    /**
-     * クライアントを保持するための変数。
-     * A variable to hold the client.
-     */
-    #author: WebSocket;
-
-    constructor(author: WebSocket, tags?: string[]) {
+    constructor(webSocket: WebSocket, url: string, variables: { [key: string]: string; }) {
         this.#id = WebSocketClient.lastInsertedId++;
-        this.#tags = tags || [];
-        this.#attribute = new Map<string, any>();
-        this.#author = author;
+        this.#attributes = new Map<string, any>();
+        this.#webSocket = webSocket;
+        this.#url = url;
+        this.#message = "";
+        this.variables = variables;
         WebSocketClient.list[this.#id] = this;
+    }
+
+    get url(): string {
+        return this.#url;
+    }
+
+    get message(): string | ArrayBufferLike | Blob | ArrayBufferView {
+        return this.#message;
     }
 
     /**
      * クライアントIDのゲッター。
      * Getter of client ID.
      */
-    get id() {
+    get id(): number {
         return this.#id;
     }
 
@@ -182,51 +198,30 @@ export class WebSocketClient {
      * WebSocketオブジェクトのゲッター。
      * Getter of WebSocket object.
      */
-    get author() {
-        return this.#author;
+    get webSocket() {
+        return this.#webSocket;
+    }
+
+    static get concurrentConnections(): number {
+        return Object.keys(WebSocketClient.list).length;
+    }
+    get concurrentConnections(): number {
+        return WebSocketClient.concurrentConnections;
     }
 
     /**
-     * クライアントに紐づけられたタグのゲッター。
-     * Getter for tags tied to clients.
-     * @returns An array containing the tags to be used when searching.
+     * デコード済みのURLオブジェクトを取得する。
+     * Get the decoded URL object.
+     * @returns Decoded URL object.
      */
-    getTags(): string[] {
-        return this.#tags;
-    }
-
-    /** 
-     * クライアントに紐づけられたタグのセッター。
-     * Setter for tags tied to clients.
-     * @param tags Tag name.
-     * 
-     * ```ts
-     * client.setTags("A", "B", ...);
-     * ```
-     */
-    setTags(...tags: string[]): void {
-        this.#tags = tags;
-    }
-
-    /** 
-     * クライアントから指定したタグを削除する。
-     * Removes the specified tag from the client.
-     * @param tags Tag name.
-     * 
-     * ```ts
-     * client.removeTag("A", "B", ...);
-     * ```
-     */
-    removeTag(...tags: string[]): string[] {
-        const removedTags: string[] = [];
-        this.#tags = this.#tags.filter(tag=>{
-            if(tags.includes(tag)) {
-                removedTags.push(tag);
-                return false;
-            }
-            return true;
-        });
-        return removedTags;
+    getURL(): DecodedURL {
+        try {
+            const url = new DecodedURL(this.#url);
+            url.valiable = this.variables;
+            return url;
+        } catch {
+            return new DecodedURL("http://error");
+        }
     }
 
     /**
@@ -236,7 +231,12 @@ export class WebSocketClient {
      * @returns Attribute value.
      */
     getAttribute(key: string): any {
-        return this.#attribute.get(key);
+        return this.#attributes.get(key);
+    }
+    getAttributes(...keys: string[]): { [key: string]: any; } {
+        const attributes: {[key: string]:any;} = {};
+        keys.forEach(key=>attributes[key] = this.getAttribute(key));
+        return attributes;
     }
 
     /**
@@ -246,7 +246,11 @@ export class WebSocketClient {
      * @param value Attribute value.
      */
     setAttribute(key: string, value: any): Map<string, any> {
-        return this.#attribute.set(key, value);
+        return this.#attributes.set(key, value);
+    }
+    setAttributes(attributes: { [key: string]: any; }): Map<string, any> {
+        Object.keys(attributes).forEach(key=>this.setAttribute(key, attributes[key]));
+        return this.#attributes;
     }
 
     /**
@@ -257,8 +261,13 @@ export class WebSocketClient {
      */
     removeAttribute(key: string): any {
         const removedAttribute = this.getAttribute(key);
-        this.#attribute.delete(key);
+        this.#attributes.delete(key);
         return removedAttribute;
+    }
+    removeAttributes(...keys: string[]): {[key: string]:any;} {
+        const removedAttributes: {[key: string]:any;} = {};
+        keys.forEach(key=>removedAttributes[key] = this.removeAttribute(key));
+        return removedAttributes;
     }
 
     /**
@@ -267,8 +276,11 @@ export class WebSocketClient {
      * @param id Client ID.
      * @returns WebSocketClient
      */
-    getClientById(id: number): WebSocketClient {
+    static getClientById(id: number): WebSocketClient {
         return WebSocketClient.list[id];
+    }
+    getClientById(id: number): WebSocketClient {
+        return WebSocketClient.getClientById(id);
     }
 
     /**
@@ -276,8 +288,11 @@ export class WebSocketClient {
      * Get all connected clients.
      * @returns Client array.
      */
-    getAllClients(): WebSocketClient[] {
+    static getAllClients(): WebSocketClient[] {
         return Object.values(WebSocketClient.list);
+    }
+    getAllClients(): WebSocketClient[] {
+        return WebSocketClient.getAllClients();
     }
 
     /** 
@@ -290,32 +305,53 @@ export class WebSocketClient {
      * client.getClientsByTagName("Tag1", "Tag2", ...);
      * ```
      */
-    getClientsByTagName(...tags: string[]): WebSocketClient[] {
+    static getClientsByAttribute(...attributes: {[key:string]:any;}[]): WebSocketClient[] {
         const allClients: WebSocketClient[] = Object.values(WebSocketClient.list);
-        if(!tags.length) return allClients;
-        return allClients.filter(client=>tags.every(el=>client.getTags().includes(el)));
+        return allClients.filter(client=>{
+            return Boolean(attributes.filter(attribute=>{
+                return !Object.keys(attribute).filter(key=>!client.getAttribute(key)).length
+            }).length);
+        });
+    }
+    getClientsByAttribute(...attributes: {[key:string]:any;}[]): WebSocketClient[] {
+        return WebSocketClient.getClientsByAttribute(...attributes);
+    }
+
+    setMessage(message: string | ArrayBufferLike | Blob | ArrayBufferView): void {
+        this.#message = message;
+    }
+
+    to(clients: WebSocketClient[]): void {
+        this.#to = clients;
+    }
+
+    reply(message?: string | ArrayBufferLike | Blob | ArrayBufferView): void {
+        this.send([this], message);
     }
 
     /**
-     * メッセージを送信する。もし第二引数を指定しない場合は自分自身にのみ送信する。
-     * Send the message; If the second argument is not specified, it will be sent only to itself.
-     * @param message Message to send.
+     * メッセージを送信する。
+     * Send the message.
      * @param clients The client array to send to.
+     * @param message Message to send.
      */
-    send(message: string, clients?: WebSocketClient[]): void {
-        if(!clients) clients = [this];
-        clients.forEach(client=>client.author.send(message));
+    static send(clients: WebSocketClient[], message: string | ArrayBufferLike | Blob | ArrayBufferView): void {
+        clients.forEach(client=>client.webSocket.send(message));
+    }
+    send(clients?: WebSocketClient[], message?: string | ArrayBufferLike | Blob | ArrayBufferView): void {
+        WebSocketClient.send(clients || this.#to, message || this.#message);
     }
 
     /**
-     * メッセージを接続している全クライアントに送信する。第二引数にtrueを指定した場合は自分自身には送信しない。
-     * Send the message to all connected clients; If true is specified for the second argument, it will not be sent to itself.
+     * メッセージを接続している全クライアントに送信する。
+     * Send the message to all connected clients.
      * @param message Message to send.
-     * @param isNotMyself Isn't to send to itself.
      */
-    sendAll(message: string, isNotMyself?: boolean): void {
-        const clients: WebSocketClient[] = (isNotMyself)? this.getAllClients().filter(client=>client.id!=this.#id) : this.getAllClients();
-        clients.forEach(client=>client.send(message));
+    static sendAll(message: string | ArrayBufferLike | Blob | ArrayBufferView): void {
+        WebSocketClient.send(WebSocketClient.getAllClients(), message);
+    }
+    sendAll(message: string | ArrayBufferLike | Blob | ArrayBufferView): void {
+        WebSocketClient.sendAll(message);
     }
 
 }

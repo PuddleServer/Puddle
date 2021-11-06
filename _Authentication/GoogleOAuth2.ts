@@ -1,4 +1,4 @@
-import { System, DecodedURL, Route, SystemRequest, SystemResponse, redirect, ErrorLog } from "../mod.ts";
+import { System, SystemRequest, SystemResponse, DecodedURL, Route, redirect, ErrorLog } from "../mod.ts";
 
 /**
  * GoogleAPIのアクセストークンを取得する。
@@ -71,19 +71,14 @@ export class GoogleOAuth2 {
      * 作成できるインスタンスを一つに制限するメソッド。
      * This method limits the number of instances that can be created to one.
      */
-    static setup(): GoogleOAuth2 | null;
+    static setup(): GoogleOAuth2;
     static setup(client_id: string, client_secret: string, redirect_uri?: string, URL?: string[]): GoogleOAuth2
-    static setup(client_id?: string, client_secret?: string, redirect_uri?: string, URL?: string[]): GoogleOAuth2 | null {
+    static setup(client_id?: string, client_secret?: string, redirect_uri?: string, URL?: string[]): GoogleOAuth2 {
         if(GoogleOAuth2.client) return GoogleOAuth2.client;
-        if(!(client_id && client_secret)) return null;
+        if(!(client_id && client_secret)) throw new Error("Specify the client ID and client secret.");
+        
         return new GoogleOAuth2(client_id, client_secret, redirect_uri, URL);
     }
-
-    /**
-     * GoogleAPIからのリダイレクト先となるURLのpathname。
-     * The pathname of the URL to be redirected from the Google API.
-     */
-    #URL: string;
 
     /**
      * GoogleAPIで必要なクライアントID。
@@ -97,6 +92,10 @@ export class GoogleOAuth2 {
      */
     #client_secret: string;
 
+    #redirect_uri: string = "";
+
+    #redirect_pathname: string;
+
     /**
      * Googleでログインするためのページにリダイレクトさせるためのルート。
      * Route to redirect to the page for logging in with Google.
@@ -107,17 +106,13 @@ export class GoogleOAuth2 {
         GoogleOAuth2.client = this;
         this.#client_id = client_id;
         this.#client_secret = client_secret;
-        this.#URL = new DecodedURL(redirect_uri||`${System.baseURL}/auth_google`).pathname;
-        this.#route_login = new Route(`${this.#URL}_redirect`, URL);
-    }
-
-    /**
-     * GoogleAPIからリダイレクトさせるためのURLを設定する。
-     * Set the URL to be redirected from the Google API.
-     */
-    setRedirectURL() {
-        const redirect_URL = this.#getGoogleOAuth2_URL(this.#client_id, `${System.baseURL}${this.#URL}`);
-        this.#route_login.GET(redirect(redirect_URL));
+        this.#redirect_pathname = redirect_uri? new DecodedURL(redirect_uri).pathname : "/auth_google";
+        this.#route_login = new Route(`AUTH_${this.#redirect_pathname}`, URL)
+        .GET((reqest: SystemRequest, response: SystemResponse)=>{
+            const redirect_uri = this.#getGoogleOAuth2_URL(this.#client_id, `${reqest.getURL().origin}${this.#redirect_pathname}`);
+            this.#redirect_uri = redirect_uri;
+            response.redirect(redirect_uri);
+        });
     }
 
     /**
@@ -159,9 +154,9 @@ export class GoogleOAuth2 {
      * @returns GoogleOAuth2 object.
      */
     LOGIN(process: Function): GoogleOAuth2 {
-        new Route(`${this.#URL}`, [], async (request: SystemRequest, response: SystemResponse)=>{
+        new Route(this.#redirect_pathname, [], async (request: SystemRequest, response: SystemResponse) =>{
             try {
-				const access_token = await getAccessToken(this.#client_id, this.#client_secret, System.baseURL+this.#URL, request.getURL().searchParams.get("code")||"");
+				const access_token = await getAccessToken(this.#client_id, this.#client_secret, this.#redirect_uri, request.getURL().searchParams.get("code")||"");
 				const profile_info = await getProfileInfo(access_token);
                 process(request, response, profile_info);
 			} catch(error) {
