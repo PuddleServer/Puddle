@@ -8,7 +8,7 @@ export const errorHTML = `
     <title>{{status}} {{description}}</title>
 </head>
 <body>
-    <img id="error" src="https://github.com/PuddleDevelopers/Puddle/raw/{{version}}/default/{{status}}.png" alt="{{status}} {{description}}">
+    <img id="error" src="https://github.com/PuddleServer/Artwork/raw/main/assets/{{status}}.png" alt="{{status}} {{description}}">
     <p>Puddle Framework {{version}}</p>
     <style>
         img#error {
