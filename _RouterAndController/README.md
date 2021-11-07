@@ -27,7 +27,7 @@ Also, by specifying a directory as the Route name, you can create a root for all
 ```typescript
 System.createRoute("./images/");
 
-System.createRoutes("./styles/", "./scripts/");
+System.createRoutes("./styles/*", "./scripts/*");
 ```
 
 ### Delete a Route
@@ -44,10 +44,10 @@ You can set the URL by connecting the URL method to the created Route object.
 ```typescript
 System.createRoute("./index.html").URL("/", "/Top", "/top");
 
-System.Route("./about.html").URL(["/About", "/about"]);
+System.Route("./about.html").URL("/About", "/about");
 
 // In the Route method, you can call the Route you created.
-System.Route("./works.html").URL("/Works", "/works");
+System.Route("./works.html").URL(["/Works", "/works"]);
 ```
 
 ## Set up processing for each request method
@@ -88,19 +88,19 @@ Configure the processing for each event of the web socket.
 ```typescript
 import { System, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
 System.createRoute("/ws").WebSocket()
-.onopen((req: SystemRequest, ws: WebSocketClient) => {
+.onopen((ws: WebSocketClient) => {
     console.log("Opening new connection.");
 })
-.onmessage((req: SystemRequest, ws: WebSocketClient, msg: string) => {
-    ws.sendAll(msg);
+.onmessage((ws: WebSocketClient) => {
+    ws.sendAll(ws.message);
 })
-.onclose((req: SystemRequest, ws: WebSocketClient) => {
+.onclose((ws: WebSocketClient) => {
     console.log("Connection closed.");
 });
 ```
 
 ### About the WebSocketClient class methods
-
+<!--
 `ws: WebSocketClient`
 - `ws.id: number`  
 Client ID.
@@ -128,3 +128,4 @@ Retrieve a client that contains all of the specified tags.
  Send the message; If the second argument is not specified, it will be sent only to itself.
 - `ws.sendAll(message: string, isNotMyself?: boolean)`  
 Send the message to all connected clients; If true is specified for the second argument, it will not be sent to itself.
+-->

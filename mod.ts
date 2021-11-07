@@ -19,8 +19,8 @@ export * from "https://deno.land/std@0.113.0/fs/walk.ts";
  */
 export { lookup } from "https://deno.land/x/mime_types@1.0.0/mod.ts";
 
-export * from "./_FileOperations/FileManager.ts";
 export * from "./System.ts";
+export * from "./_FileOperations/FileManager.ts";
 export * from "./_RequestAndResponse/SystemRequest.ts";
 export * from "./_RequestAndResponse/SystemResponse.ts";
 export * from "./_RouterAndController/Router.ts";
