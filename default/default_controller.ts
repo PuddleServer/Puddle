@@ -1,4 +1,4 @@
-import { SystemRequest, SystemResponse, HandlerFunction, lookup, System, Route, WebSocketClient, errorHTML, version } from "../mod.ts";
+import { SystemRequest, SystemResponse, HandlerFunction, lookup, System, Route, WebSocketClient, errorHTML } from "../mod.ts";
 
 /**
  * リダイレクト処理を行う関数。
@@ -48,7 +48,7 @@ export function default_get(): HandlerFunction {
  */
 export function default_error(status: number, description: string): HandlerFunction {
     return async function (request: SystemRequest, response: SystemResponse) {
-        response.preset({version, status, description});
+        response.preset({status, description});
         response.setText(errorHTML, status, description).setType('text/html');
     }
 }

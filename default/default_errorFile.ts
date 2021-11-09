@@ -9,7 +9,7 @@ export const errorHTML = `
 </head>
 <body>
     <img id="error" src="https://github.com/PuddleServer/Artwork/raw/main/assets/{{status}}.png" alt="{{status}} {{description}}">
-    <p>Puddle Framework {{version}}</p>
+    <p>It is built with Deno and Puddle Framework.</p>
     <style>
         img#error {
             position: relative;
