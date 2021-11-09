@@ -1,6 +1,6 @@
 import {
     walkSync,
-    SystemRequest, SystemResponse, Route, handlerFunction, control, ConfigReader, Logger, GoogleOAuth2, FileManager, PuddleJSON, RequestLog,
+    SystemRequest, SystemResponse, Route, HandlerFunction, control, ConfigReader, Logger, GoogleOAuth2, FileManager, PuddleJSON, RequestLog,
     getHandlerFunctions, loadRoutingFiles
 } from "./mod.ts";
 
@@ -47,11 +47,11 @@ export class DecodedURL extends URL {
 export interface RouteOption {
     PATH: string;
     URL?: string[];
-    GET?: handlerFunction;
-    POST?: handlerFunction;
-    PUT?: handlerFunction;
-    DELETE?: handlerFunction;
-    PATCH?: handlerFunction;
+    GET?: HandlerFunction;
+    POST?: HandlerFunction;
+    PUT?: HandlerFunction;
+    DELETE?: HandlerFunction;
+    PATCH?: HandlerFunction;
 }
 
 export type AuthSetupFunction = {

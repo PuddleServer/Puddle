@@ -1,10 +1,9 @@
-import { walkSync, System, ConfigReader, Config, handlerFunction, Route } from "../mod.ts";
+import { walkSync, System, ConfigReader, Config, HandlerFunction, Route } from "../mod.ts";
 
 export async function getHandlerFunctions(directoryPath: string): Promise<{ [key: string]: any; }> {
 
+    console.log(">> Import controller files...");
     const handlerFunctions: { [key: string]: any; } = {};
-
-    if(directoryPath.includes("../")) return handlerFunctions;
 
     if(directoryPath?.toLowerCase().match(/\.js$|\.ts$/)) {
         await importControllerFile(directoryPath, handlerFunctions);
@@ -23,6 +22,7 @@ async function importControllerFile(filePath: string, handlerFunctions: { [key: 
     const mainPath = Deno.mainModule.split("/");
     mainPath.pop();
     if(filePath.match(/$\.\//)) filePath.replace("./", "");
+    console.log(` - ${mainPath.join("/")}/${filePath}`);
     const module = await import(`${mainPath.join("/")}/${filePath.replace(".TS", ".ts").replace(".JS", ".js")}`);
     for(let name in module) {
         handlerFunctions[name] = module[name];
@@ -31,20 +31,28 @@ async function importControllerFile(filePath: string, handlerFunctions: { [key: 
 
 export async function loadRoutingFiles(directoryPath: string, handlerFunctions: { [key: string]: any; }): Promise<void> {
 
-    if(directoryPath.includes("../")) return;
+    try {
+        console.log(">> Load routing files...");
 
-    if(directoryPath?.toLowerCase().match(/\.json$|\.env$/)) {
-        const config: Config = await ConfigReader.read(`./${directoryPath}`);
-        createRoutes(config, handlerFunctions);
-        return;
+        if(directoryPath?.toLowerCase().match(/\.json$|\.env$/)) {
+            console.log(` - ./${directoryPath}`);
+            const config: Config = await ConfigReader.read(`./${directoryPath}`);
+            createRoutes(config, handlerFunctions);
+            return;
+        }
+        
+        for(const entry of walkSync(directoryPath.replace(/\*/g, ""))) {
+            const path = entry.path.replace(/\\/g, "/");
+            if(!path?.toLowerCase().match(/\.json$|\.env$/)) continue;
+            console.log(` - ./${path}`);
+            const config: Config = await ConfigReader.read(`./${path}`);
+            createRoutes(config, handlerFunctions);
+        }
+    } finally {
+        console.log(`>> The following ${Route.list.length} routes have been created.`)
+        console.log(" ", Route.list.map(route=>route.PATH()));
     }
-    
-    for(const entry of walkSync(directoryPath.replace(/\*/g, ""))) {
-        const path = entry.path.replace(/\\/g, "/");
-        if(!path?.toLowerCase().match(/\.json$|\.env$/)) continue;
-        const config: Config = await ConfigReader.read(`./${path}`);
-        createRoutes(config, handlerFunctions);
-    }
+
 }
 
 function createRoutes(config: Config, handlerFunctions: { [key: string]: any; }): void {
@@ -71,12 +79,12 @@ function setRouteOption(route: Config, newRoute: Route, handlerFunctions: { [key
             case "DELETE":
             case "PATCH":
                 if(typeof route[key] == "string") {
-                    const handler: handlerFunction | undefined = handlerFunctions[route[key]];
+                    const handler: HandlerFunction | undefined = handlerFunctions[route[key]];
                     if(handler) newRoute[key](handler);
                 } else {
                     const nameOfController: string | undefined = route[key].ACTION;
                     if(!nameOfController) break;
-                    const handler: handlerFunction | undefined = handlerFunctions[nameOfController];
+                    const handler: HandlerFunction | undefined = handlerFunctions[nameOfController];
                     if(handler) newRoute[key](handler);
                 }
                 break;

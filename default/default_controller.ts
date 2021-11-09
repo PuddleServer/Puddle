@@ -1,4 +1,4 @@
-import { SystemRequest, SystemResponse, handlerFunction, lookup, System, Route, WebSocketClient, errorHTML, version } from "../mod.ts";
+import { SystemRequest, SystemResponse, HandlerFunction, lookup, System, Route, WebSocketClient, errorHTML, version } from "../mod.ts";
 
 /**
  * リダイレクト処理を行う関数。
@@ -6,7 +6,7 @@ import { SystemRequest, SystemResponse, handlerFunction, lookup, System, Route, 
  * @param url The URL to redirect to.
  * @returns Function.
  */
-export function redirect(url: string): handlerFunction {
+export function redirect(url: string): HandlerFunction {
     return function(request: SystemRequest, response: SystemResponse): void {
         response.redirect(url);
     }
@@ -17,7 +17,7 @@ export function redirect(url: string): handlerFunction {
  * A function that returns the file indicated in the PATH of Route.
  * @returns Function.
  */
-export function default_get(): handlerFunction {
+export function default_get(): HandlerFunction {
     return async function default_get(request: SystemRequest, response: SystemResponse): Promise<void> {
         const filePath: string | undefined = Route.getRouteByUrl(request.getURL().pathname)?.PATH();
         if(!filePath) {
@@ -46,7 +46,7 @@ export function default_get(): handlerFunction {
  * @param description Error description.
  * @returns Function.
  */
-export function default_error(status: number, description: string): handlerFunction {
+export function default_error(status: number, description: string): HandlerFunction {
     return async function (request: SystemRequest, response: SystemResponse) {
         response.preset({version, status, description});
         response.setText(errorHTML, status, description).setType('text/html');
