@@ -92,7 +92,7 @@ export class Logger {
      * ログファイルを格納するディレクトリーのパス。
      * Path of the directory where the log files are stored.
      */
-    static directoryPath: string = "./log";
+    static directoryPath: string | undefined = undefined;
 
     /**
      * ログファイルを格納するディレクトリーのパスを設定する。
@@ -110,6 +110,7 @@ export class Logger {
      * @returns Log data.
      */
     static async read(fileName: string): Promise<string> {
+        if(!Logger.directoryPath) return "";
         const filePath: string = `${Logger.directoryPath}/${fileName}`;
         const text:string = await FileManager.read(filePath);
         return text;
@@ -122,6 +123,7 @@ export class Logger {
      * @param text Data to be written.
      */
     static async write(fileName: string, text: string): Promise<void> {
+        if(!Logger.directoryPath) return;
         const filePath: string = `${Logger.directoryPath}/${fileName}`;
         await FileManager.write(filePath, text);
     }
@@ -134,6 +136,7 @@ export class Logger {
      * @param header Header of the log file.
      */
     static async insert(fileName: string, text: string, header: string): Promise<void> {
+        if(!Logger.directoryPath) return;
         const texts: string = await Logger.read(fileName);
         if(!texts.length) await Logger.write(fileName, header);
         await Logger.write(fileName, texts+text);

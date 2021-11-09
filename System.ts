@@ -378,7 +378,7 @@ async function listen(option: number | string | Deno.ListenOptions | Deno.Listen
         
     const options: Config = { hostname: "localhost", port: 8080 };
 
-    let logDirectoryPath: string = "./log";
+    let logDirectoryPath: string | undefined = undefined;
     let conf: Config;
 
     if(typeof option === "string") {
@@ -389,7 +389,7 @@ async function listen(option: number | string | Deno.ListenOptions | Deno.Listen
             options.certFile = getValueByAllKeys(conf, "certFile") || getValueByAllKeys(conf, "Server", "certFile");
             options.keyFile = getValueByAllKeys(conf, "keyFile") || getValueByAllKeys(conf, "Server", "keyFile");
         }
-        logDirectoryPath = getValueByAllKeys(conf, "Log") || getValueByAllKeys(conf, "Server", "Log") || "./log";
+        logDirectoryPath = getValueByAllKeys(conf, "Log") || getValueByAllKeys(conf, "Server", "Log") || undefined;
     
     } else if(typeof option === "number") {
             options.hostname = "localhost";
@@ -399,7 +399,7 @@ async function listen(option: number | string | Deno.ListenOptions | Deno.Listen
         conf = option;
     }
 
-    Logger.setDirectoryPath(logDirectoryPath);
+    if(logDirectoryPath) Logger.setDirectoryPath(logDirectoryPath);
     
     System.close();
 
