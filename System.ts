@@ -1,6 +1,7 @@
 import {
     walkSync,
-    SystemRequest, SystemResponse, Route, handlerFunction, control, ConfigReader, Logger, GoogleOAuth2, FileManager, PuddleJSON, RequestLog
+    SystemRequest, SystemResponse, Route, handlerFunction, control, ConfigReader, Logger, GoogleOAuth2, FileManager, PuddleJSON, RequestLog,
+    getHandlerFunctions, loadRoutingFiles
 } from "./mod.ts";
 
 /** Initial backoff delay of 5ms following a temporary accept failure. */
@@ -102,6 +103,8 @@ export class System {
      * Variable that holds the server.
      */
     static server: Server;
+
+    static controllers: { [key: string]: any; };
 
     /**
      * 開発者が追加したモジュールを保持する変数。
@@ -389,7 +392,15 @@ async function listen(option: number | string | Deno.ListenOptions | Deno.Listen
             options.certFile = getValueByAllKeys(conf, "certFile") || getValueByAllKeys(conf, "Server", "certFile");
             options.keyFile = getValueByAllKeys(conf, "keyFile") || getValueByAllKeys(conf, "Server", "keyFile");
         }
-        logDirectoryPath = getValueByAllKeys(conf, "Log") || getValueByAllKeys(conf, "Server", "Log") || undefined;
+
+        const logDirectoryPath = getValueByAllKeys(conf, "Log") || getValueByAllKeys(conf, "Server", "Log") || undefined;
+        if(logDirectoryPath) Logger.setDirectoryPath(logDirectoryPath);
+
+        const controllersPath = getValueByAllKeys(conf, "Controller") || getValueByAllKeys(conf, "Server", "Controller") || undefined;
+        if(controllersPath) System.controllers = await getHandlerFunctions(controllersPath);
+
+        const routingPath = getValueByAllKeys(conf, "Routing") || getValueByAllKeys(conf, "Server", "Routing") || undefined;
+        if(routingPath) await loadRoutingFiles(routingPath, System.controllers || {});
     
     } else if(typeof option === "number") {
             options.hostname = "localhost";
@@ -398,8 +409,6 @@ async function listen(option: number | string | Deno.ListenOptions | Deno.Listen
     } else {
         conf = option;
     }
-
-    if(logDirectoryPath) Logger.setDirectoryPath(logDirectoryPath);
     
     System.close();
 

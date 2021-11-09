@@ -28,9 +28,9 @@ export * from "./_RouterAndController/WebSocketRouter.ts";
 export * from "./_RouterAndController/Controller.ts";
 export * from "./_View/AssignToVariables.ts";
 export * from "./_FileOperations/Config.ts";
+export * from "./_FileOperations/LoadHandlerFunctions.ts";
 export * from "./_FileOperations/Logger.ts";
 export * from "./_Authentication/GoogleOAuth2.ts";
 export * from "./_Authentication/AuthDigest.ts";
-
 export * from "./default/default_errorFile.ts";
 export * from "./default/default_controller.ts";

@@ -1,8 +1,9 @@
 {
     "SERVER": {
-        "HOSTNAME": "localhost",
-        "PORT":     8080,
-        "URI":      "http://localhost"
-    },
-    "LOG": "./log"
+        "HOSTNAME":     "localhost",
+        "PORT":         8080,
+        "LOG":          "./log",
+        "CONTROLLER":   "./controller",
+        "ROUTING":      "./controller"
+    }
 }
