@@ -97,11 +97,11 @@ export class SystemResponse {
      * @param filePath The path of the file to return to the client.
      * @param status Status code (default is 200).
      */
-    async setFile(filePath: string, status?: number): Promise<SystemResponse> {
+    setFile(filePath: string, status?: number): SystemResponse {
         let file_data: string | Uint8Array;
         try {
             const extensions: false | string = lookup(filePath);
-            file_data = await Deno.readFile(filePath);
+            file_data = Deno.readFileSync(filePath);
             if(extensions && extensions.split("/")[0] === "text") {
                 file_data = new TextDecoder('utf-8').decode(file_data);
             }
