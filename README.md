@@ -14,9 +14,6 @@ Hello, I'm Puddle FrameWork.
 Puddle Framework is a web framework that runs on Deno.  
 The goal of this framework is to make it easy for even novice programmers to set up a web server.
 
-## Docs
-[Documents - PuddleFramework (Being worked on)]()
-
 
 ## How to build the environment
 
