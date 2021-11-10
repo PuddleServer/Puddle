@@ -19,11 +19,10 @@ export async function getHandlerFunctions(directoryPath: string): Promise<{ [key
 }
 
 async function importControllerFile(filePath: string, handlerFunctions: { [key: string]: any; }) {
-    const mainPath = Deno.mainModule.split("/");
-    mainPath.pop();
+    const mainPath = Deno.mainModule.split("/").slice(0, -1).join("/");
     if(filePath.match(/$\.\//)) filePath.replace("./", "");
-    console.log(` - ${mainPath.join("/")}/${filePath}`);
-    const module = await import(`${mainPath.join("/")}/${filePath.replace(".TS", ".ts").replace(".JS", ".js")}`);
+    //console.log(` - ${mainPath}/${filePath}`);
+    const module = await import(`${mainPath}/${filePath.replace(".TS", ".ts").replace(".JS", ".js")}`);
     for(let name in module) {
         handlerFunctions[name] = module[name];
     }

@@ -33,7 +33,7 @@ export class SystemResponse {
      */
     headers: Headers;
     status: number;
-    body: string | Uint8Array | undefined;
+    body: string | ReadableStream<Uint8Array> | Uint8Array | undefined;
 
     /**
      * 強制ダウンロードかどうか（初期値はfalse）。
@@ -81,7 +81,7 @@ export class SystemResponse {
      * @param status Status code (default is 200).
      * @param filePath File path.
      */
-    setText(text: string | Uint8Array, status: number = 200, filePath?: string): SystemResponse {
+    setText(text: string | ReadableStream<Uint8Array> | Uint8Array, status: number = 200, filePath?: string): SystemResponse {
         if(typeof text === "string") {
             this.body = assignToVariables(text, this.#preset, filePath);
         } else {
@@ -97,13 +97,31 @@ export class SystemResponse {
      * @param filePath The path of the file to return to the client.
      * @param status Status code (default is 200).
      */
-    setFile(filePath: string, status?: number): SystemResponse {
-        let file_data: string | Uint8Array;
+    async setFile(filePath: string, status?: number): Promise<SystemResponse> {
+        let file_data: string | ReadableStream<Uint8Array> | Uint8Array = "";
         try {
             const extensions: false | string = lookup(filePath);
-            file_data = Deno.readFileSync(filePath);
-            if(extensions && extensions.split("/")[0] === "text") {
-                file_data = new TextDecoder('utf-8').decode(file_data);
+            try { // After version 1.16.0
+                let readableStream: ReadableStream<Uint8Array> | null;
+                if(filePath.match(/^\.\/|^\//)) {
+                    const mainModule = Deno.mainModule.split("/").slice(0, -1).join("/");
+                    readableStream = (await fetch(`${mainModule}/${filePath.replace(/^\.\/|^\//, "")}`)).body;
+                } else {
+                    readableStream = (await fetch(filePath)).body;
+                }
+                if(readableStream) {
+                    if(extensions && extensions.split("/")[0] === "text") {
+                        file_data = await Deno.readFile(filePath);
+                        file_data = new TextDecoder('utf-8').decode(file_data);
+                    } else {
+                        file_data = readableStream;
+                    }
+                }
+            } catch { // Before version 1.16.0
+                file_data = await Deno.readFile(filePath);
+                if(extensions && extensions.split("/")[0] === "text") {
+                    file_data = new TextDecoder('utf-8').decode(file_data);
+                }
             }
             this.setText(file_data, status, filePath);
             if(extensions) this.setType(extensions);
@@ -163,7 +181,7 @@ export class SystemResponse {
      * クライアントにレスポンスを返して処理を終了する。
      * Return the response to the client and finish the process.
      */
-    send(response?: string | Response): void {
+    async send(response?: string | Response): Promise<void> {
         if(this.#responded) return;
         if(this.isForceDownload) {
             this.headers.set('Content-Type', 'application/octet-stream');
@@ -173,7 +191,7 @@ export class SystemResponse {
         let res: Response = new Response(this.body, this.init);
         if(typeof response == "string") this.setText(response);
         else if(response) res = response;
-        this.#respondWith(res);
+        await this.#respondWith(res);
         this.#responded = true;
     }
 
