@@ -68,9 +68,9 @@ You can also specify the response object directly.
 ```typescript
 System.createRoute("HelloWorld!").URL("/greeting")
 .GET({
-    status: 200,
-    headers: new Headers(),
-    body: "Hello world !"
+    status:     200,
+    headers:    new Headers(),
+    body:       "Hello world !"
 });
 ```
 ---
@@ -100,18 +100,20 @@ System.createRoute("/ws").WebSocket()
 ```
 
 ### About the WebSocketClient class methods
-<!--
+
 `ws: WebSocketClient`
 - `ws.id: number`  
 Client ID.
-- `ws.author: WebSocket`  
+- `ws.webSocket: WebSocket`  
 Connected client.
-- `ws.getTags(): string[]`  
-Getter for tags tied to clients.
-- `ws.setTags(...tags: string[])`  
-Getter for tags tied to clients.
-- `ws.removeTag(...tags: string[]): string[]`  
-Removes the specified tag from the client.
+- `ws.url: string`  
+The URL when the connection is opened.
+- `ws.message: : string | ArrayBufferLike | Blob | ArrayBufferView`  
+A message sent by a client.
+- `ws.concurrentConnections: number`  
+Number of clients currently connected.
+- `ws.getURL(): DecodedURL`  
+Get the decoded URL object.
 - `ws.getAttribute(key: string): any`  
 Getter of client attributes.
 - `ws.setAttribute(key: string, value: any)`  
@@ -122,10 +124,11 @@ Removes the specified attribute from the client.
 Get the client by client ID.
 - `ws.getAllClients(): WebSocketClient[]`  
 Get all connected clients.
-- `ws.getClientsByTagName(...tags: string[]): WebSocketClient[]`  
+- `ws.getClientsByAttribute(...attributes: {[key:string]:any;}[]): WebSocketClient[]`  
 Retrieve a client that contains all of the specified tags.
-- `ws.send(message: string, clients?: WebSocketClient[])`  
- Send the message; If the second argument is not specified, it will be sent only to itself.
+- `ws.reply(message: string | ArrayBufferLike | Blob | ArrayBufferView)`  
+Reply to the client who sent it.
+- `ws.send(clients: WebSocketClient[], message: string)`  
+Send the message.
 - `ws.sendAll(message: string, isNotMyself?: boolean)`  
-Send the message to all connected clients; If true is specified for the second argument, it will not be sent to itself.
--->
+Send the message to all connected clients.

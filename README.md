@@ -82,7 +82,7 @@ System.createRoute("ContactForm").URL("/Contact")
 
     // Process body data.
 
-    await res.setText("Collect.");
+    res.setText("Collect.");
 });
 
 System.listen(8080, (conf: Config) => {
@@ -99,7 +99,7 @@ System.createRoute("example1").URL("/Redirect1")
 .GET(redirect("https://www.example.com"));
 
 System.createRoute("example2").URL("/Redirect2")
-.GET(async (req: SystemRequest, res: SystemResponse) => {
+.GET((req: SystemRequest, res: SystemResponse) => {
     res.redirect("https://www.example.com");
 });
 
@@ -115,7 +115,7 @@ Websockets server routing can be done in the same way as web server routing!
 ```typescript
 import { System, Config, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
 
-System.createRoute("./webSocket.html").URL("/", "/トップ");
+System.createRoute("./webSocket.html").URL("/", "/top");
 System.createRoute("/ws").WebSocket();
 
 System.listen(8080, (conf: Config)=>{
@@ -128,7 +128,8 @@ To handle each Websocket event, set up a handler function by connecting a method
 ```typescript
 import { System, Config, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
 
-System.createRoute("./webSocket.html").URL("/", "/トップ");
+System.createRoute("./webSocket.html").URL("/", "/top");
+
 System.createRoute("/ws").WebSocket()
 .onopen((client: WebSocketClient) => {
     client.reply("Connection to server complete.");

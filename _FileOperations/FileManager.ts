@@ -120,7 +120,6 @@ export class FileManager {
      * @returns Data in the file.
      */
     static async read(filePath: string): Promise<string> {
-        await FileManager.ensureFile(filePath);
         return await Deno.readTextFile(filePath);
     }
 
@@ -131,7 +130,6 @@ export class FileManager {
      * @param text Data to be written.
      */
     static async write(filePath: string, text: string) {
-        await FileManager.ensureFile(filePath);
         await Deno.writeTextFile(filePath, text);
     }
 

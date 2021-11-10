@@ -178,10 +178,18 @@ export class WebSocketClient {
         WebSocketClient.list[this.#id] = this;
     }
 
+    /**
+     * コネクションが開かれた時のURL。
+     * The URL when the connection is opened.
+     */
     get url(): string {
         return this.#url;
     }
 
+    /**
+     * クライアントから送られてきたメッセージ。
+     * A message sent by a client.
+     */
     get message(): string | ArrayBufferLike | Blob | ArrayBufferView {
         return this.#message;
     }
@@ -202,6 +210,10 @@ export class WebSocketClient {
         return this.#webSocket;
     }
 
+    /**
+     * 現在接続しているクライアントの数。
+     * Number of clients currently connected.
+     */
     static get concurrentConnections(): number {
         return Object.keys(WebSocketClient.list).length;
     }
@@ -296,13 +308,13 @@ export class WebSocketClient {
     }
 
     /** 
-     * 指定したタグをすべて含むクライアントを取得する。
-     * Retrieve a client that contains all of the specified tags.
-     * @param tags Tag name.
+     * クライアント配列を属性から取得する。
+     * Getting the client array from attributes.
+     * @param attributes { attribute1 and attribute2 and ...} or { attributeN and attributeN+1 and ...} or ...
      * @returns Client array.
      * 
      * ```ts
-     * client.getClientsByTagName("Tag1", "Tag2", ...);
+     * client.getClientsByAttribute({group: 1, type: "A"}, {group: 2, type: "B"}, ...);
      * ```
      */
     static getClientsByAttribute(...attributes: {[key:string]:any;}[]): WebSocketClient[] {
@@ -317,14 +329,39 @@ export class WebSocketClient {
         return WebSocketClient.getClientsByAttribute(...attributes);
     }
 
+    /**
+     * メッセージを設定する。
+     * Set the message.
+     * 
+     * ```typescript
+     * ws.setMessage("Hello!");
+     * ws.to(ws.getAllClients());
+     * ws.send();
+     * ```
+     */
     setMessage(message: string | ArrayBufferLike | Blob | ArrayBufferView): void {
         this.#message = message;
     }
 
+    /**
+     * 送信するクライアントを指定する。
+     * Specify the client to send.
+     * @param clients Client array.
+     * 
+     * ```typescript
+     * ws.setMessage("Hello!");
+     * ws.to(ws.getAllClients());
+     * ws.send();
+     * ```
+     */
     to(clients: WebSocketClient[]): void {
         this.#to = clients;
     }
 
+    /**
+     * 送信したクライアントに返信する。
+     * Reply to the client who sent it.
+     */
     reply(message?: string | ArrayBufferLike | Blob | ArrayBufferView): void {
         this.send([this], message);
     }

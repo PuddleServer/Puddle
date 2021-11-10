@@ -54,10 +54,15 @@ export interface RouteOption {
     PATCH?: HandlerFunction;
 }
 
+/**
+ * 認証用の関数の型。
+ * Type of the function for authentication.
+ */
 export type AuthSetupFunction = {
     (): GoogleOAuth2;
     (client_id: string, client_secret: string, redirect_uri?: string, URL?: string[], process?: Function): GoogleOAuth2;
 }
+
 /**
  * 認証に使えるサービスを格納する型。
  * A type that stores services that can be used for authentication.
@@ -77,7 +82,7 @@ type AuthType = { "GOOGLE": AuthSetupFunction };
  * 
  * System.listenTLS(".env", (conf: Conf) => {
  *      console.log(`The server running on https://${conf.hostname}:${conf.port}`);
- *  }, "https://www.example.com");
+ *  });
  * ```
  */
 export class System {
@@ -104,6 +109,10 @@ export class System {
      */
     static server: Server;
 
+    /**
+     * コンフィグファイルで指定したコントローラーの関数を格納する変数。
+     * Variable that stores the functions of the controller specified in the configuration file.
+     */
     static controllers: { [key: string]: any; };
 
     /**
@@ -377,6 +386,13 @@ export class System {
 
 }
 
+/**
+ * サーバーを起動するための関数。
+ * Function to start the server.
+ * @param option One of port number, config file path, "Deno.ListenOptions", "Deno.ListenTlsOptions".
+ * @param isTls Whether it is a TLS server
+ * @returns Start up config.
+ */
 async function listen(option: number | string | Deno.ListenOptions | Deno.ListenTlsOptions, isTls: boolean): Promise<Config> {
         
     const options: Config = { hostname: "localhost", port: 8080 };
@@ -438,6 +454,7 @@ async function listen(option: number | string | Deno.ListenOptions | Deno.Listen
 }
 
 class Server {
+    
     #handler: Function;
     #closed = false;
     #listener: Deno.Listener;
@@ -460,7 +477,7 @@ class Server {
             try {
                 this.#listener.close();
             } catch {
-                // リスナーはすでに終了しています。
+                // The listener is already closed.
             }
         }
     }
@@ -583,7 +600,7 @@ class Server {
         try {
             httpConn.close();
         } catch {
-            // 接続はすでに終了しています。
+            // The listener is already closed.
         }
     }
 

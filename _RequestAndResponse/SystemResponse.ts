@@ -17,6 +17,10 @@ export class SystemResponse {
      */
     #respondWith: Function;
 
+    /**
+     * 応答後かどうか。
+     * After response or not.
+     */
     #responded: boolean = false;
 
     /**
@@ -25,12 +29,8 @@ export class SystemResponse {
      */
     #preset: { [key: string]: any; };
 
-    init: ResponseInit;
 
-    /**
-     * ヘッダーを格納する変数。
-     * Variable that stores the Headers object.
-     */
+    init: ResponseInit;
     headers: Headers;
     status: number;
     body: string | ReadableStream<Uint8Array> | Uint8Array | undefined;
@@ -56,6 +56,10 @@ export class SystemResponse {
         Route["500"].GET()(new SystemRequest(requestEvent.request, {}), this);
     }
 
+    /**
+     * 応答後かどうか。
+     * After response or not.
+     */
     get responded(): boolean {
         return this.#responded;
     }
