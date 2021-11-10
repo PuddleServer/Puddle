@@ -72,3 +72,7 @@ System.listen("./.env", (conf: Config)=>{
 // System.listen("./config.json", (conf: Config)=>{
 //     console.log(`The server running on http://${conf.SERVER.HOSTNAME}:${conf.SERVER.PORT}`);
 // });
+
+System.createRoute("imgTest").URL("/img").GET((req: SystemRequest, res: SystemResponse)=>{
+    res.setFile("./assets/PuddleLogo.png");
+});
