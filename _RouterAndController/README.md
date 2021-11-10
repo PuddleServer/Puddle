@@ -5,7 +5,7 @@ In the Puddle framework, a Route is created for each request, and the URL array 
 ### Basic Specifications
 `System.createRoute(routeName: string): Route`
 ```typescript
-import { System, Route } from "https://github.com/PuddleServer/Puddle/raw/v1.0.0-beta/mod.ts";
+import { System, Route } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts";
 
 // The most basic method.
 System.createRoute("example1");
@@ -53,7 +53,7 @@ System.Route("./works.html").URL(["/Works", "/works"]);
 ## Set up processing for each request method
 By connecting the request method to the Route object you have created, you can set up the process.
 ```typescript
-import { System, redirect, SystemRequest, SystemResponse } from "https://github.com/PuddleServer/Puddle/raw/v1.0.0-beta/mod.ts";
+import { System, redirect, SystemRequest, SystemResponse } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts";
 
 System.createRoute("login")
 .POST((req: SystemRequest, res: SystemResponse) => {
@@ -86,7 +86,7 @@ System.Route("/ws").isWebSocket; // true
 ## Configuring Web Socket Events
 Configure the processing for each event of the web socket.
 ```typescript
-import { System, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/v1.0.0-beta/mod.ts";
+import { System, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts";
 System.createRoute("/ws").WebSocket()
 .onopen((ws: WebSocketClient) => {
     console.log("Opening new connection.");
