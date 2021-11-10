@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="icon" href="/favicon.ico">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocketテストページ</title>
+</head>
+
+<body>
+    <div>
+        <input type="text" id="input" />
+        <button id="sendButton" disabled>送信</button>
+        <button id="enterButton" disabled>入室</button>
+        <button id="leaveButton" disabled>退室</button>
+    </div>
+    <ul id="timeline"></ul>
+    <script>
+        let ws;
+        let isConnected = false;
+        const input = document.getElementById("input");
+        const sendButton = document.getElementById("sendButton");
+        const enterButton = document.getElementById("enterButton");
+        const leaveButton = document.getElementById("leaveButton");
+        const timeline = document.getElementById("timeline");
+        input.addEventListener("keydown", sendMessageByEnterKey);
+        sendButton.onclick = sendMessage;
+        enterButton.onclick = connectWebSocket;
+        leaveButton.onclick = leaveRoom;
+        applyButtonState();
+        connectWebSocket();
+        function connectWebSocket() {
+            if (ws) ws.close();
+            ws = new WebSocket(`ws://${location.host}/ws`);
+            ws.addEventListener("open", () => {
+                isConnected = true;
+                applyButtonState();
+            });
+            ws.addEventListener("message", ({ data }) => {
+                timeline.appendChild(messageDom(data));
+            });
+            ws.addEventListener("close", () => {
+                isConnected = false;
+                applyButtonState();
+            });
+        }
+        function sendMessageByEnterKey(e) {
+            if (e.keyCode === 13) sendMessage();
+        }
+        function sendMessage() {
+            const msg = input.value;
+            ws.send(msg);
+            input.value = "";
+        }
+        function messageDom(msg) {
+            const li = document.createElement("li");
+            li.className = "message";
+            li.innerText = msg;
+            return li;
+        }
+        function leaveRoom() {
+            ws.close();
+            isConnected = false;
+            applyButtonState();
+        }
+        function applyButtonState() {
+            sendButton.disabled = isConnected ? false : true;
+            enterButton.disabled = isConnected ? true : false;
+            leaveButton.disabled = isConnected ? false : true;
+        }
+    </script>
+</body>
+
+</html>

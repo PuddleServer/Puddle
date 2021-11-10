@@ -1,0 +1,9 @@
+{
+    "SERVER": {
+        "HOSTNAME":     "localhost",
+        "PORT":         8080,
+        "LOG":          "./log",
+        "CONTROLLER":   "./controller",
+        "ROUTING":      "./controller"
+    }
+}
