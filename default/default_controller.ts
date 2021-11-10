@@ -25,6 +25,7 @@ export function default_get(): HandlerFunction {
             return;
         }
         try {
+            let file_data: string | ReadableStream<Uint8Array> | Uint8Array = "";
             const extensions: false | string = lookup(filePath);
             try { // After version 1.16.0
                 let readableStream: ReadableStream<Uint8Array> | null;
@@ -48,8 +49,8 @@ export function default_get(): HandlerFunction {
                     file_data = new TextDecoder('utf-8').decode(file_data);
                 }
             }
-            this.setText(file_data, status, filePath);
-            if(extensions) this.setType(extensions);
+            response.setText(file_data, 200, filePath);
+            if(extensions) response.setType(extensions);
             console.log(`>> [${new Date().toLocaleString()}] Send the "${filePath}" file to the client.`);
         } catch (e) {
             Route["404"].GET()(request, response);
