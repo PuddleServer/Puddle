@@ -44,8 +44,8 @@ async function controller(requestEvent: Deno.RequestEvent, variables: { [key: st
     const request = new SystemRequest(requestEvent.request, variables);
     const response = new SystemResponse(requestEvent);
     const res = await process(request, response);
-    if(res) response.send(res);
-    else response.send();
+    if(res) await response.send(res);
+    else await response.send();
 }
 
 /**

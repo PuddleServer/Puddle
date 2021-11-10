@@ -70,7 +70,7 @@ import { System, Config, SystemRequest, SystemResponse } from "https://github.co
 
 System.createRoute("ContactForm").URL("/Contact")
 .GET(async (req: SystemRequest, res: SystemResponse) => {
-    res.setFile("./contact_form.html");
+    await res.setFile("./contact_form.html");
 })
 .POST(async (req: SystemRequest, res: SystemResponse) => {
     const body: string = await req.readBody();
