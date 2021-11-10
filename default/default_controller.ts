@@ -25,10 +25,29 @@ export function default_get(): HandlerFunction {
             return;
         }
         try {
+            let file_data: string | ReadableStream<Uint8Array> | Uint8Array = "";
             const extensions: false | string = lookup(filePath);
-            let file_data: string | Uint8Array = await Deno.readFile(filePath);
-            if(extensions && extensions.split("/")[0] === "text") {
-                file_data = new TextDecoder('utf-8').decode(file_data);
+            try { // After version 1.16.0
+                let readableStream: ReadableStream<Uint8Array> | null;
+                if(filePath.match(/^\.\/|^\//)) {
+                    const mainModule = Deno.mainModule.split("/").slice(0, -1).join("/");
+                    readableStream = (await fetch(`${mainModule}/${filePath.replace(/^\.\/|^\//, "")}`)).body;
+                } else {
+                    readableStream = (await fetch(filePath)).body;
+                }
+                if(readableStream) {
+                    if(extensions && extensions.split("/")[0] === "text") {
+                        file_data = await Deno.readFile(filePath);
+                        file_data = new TextDecoder('utf-8').decode(file_data);
+                    } else {
+                        file_data = readableStream;
+                    }
+                }
+            } catch { // Before version 1.16.0
+                file_data = await Deno.readFile(filePath);
+                if(extensions && extensions.split("/")[0] === "text") {
+                    file_data = new TextDecoder('utf-8').decode(file_data);
+                }
             }
             response.setText(file_data, 200, filePath);
             if(extensions) response.setType(extensions);
