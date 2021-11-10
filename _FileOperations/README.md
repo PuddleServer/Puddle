@@ -1,7 +1,7 @@
 # Reading and writing text files
 Methods for reading and writing text files.
 ```typescript
-import { System, FileManager } from "https://github.com/PuddleServer/Puddle/raw/v1.0.0-beta/mod.ts"
+import { System, FileManager } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts"
 
 await System.fm.read("./filePath");
 await System.fm.write("./filePath", "text");
@@ -13,7 +13,7 @@ await FileManager.write("./filePath", "text");
 ## Manipulate JSON files
 It provides functions to easily manipulate data in JSON files.
 ```typescript
-import { System, PuddleJSON } from "https://github.com/PuddleServer/Puddle/raw/v1.0.0-beta/mod.ts";
+import { System, PuddleJSON } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts";
 
 // Specify the JSON file to be manipulated and its schema.
 const USERS = PuddleJSON.USE("./users.json", {
