@@ -1,5 +1,11 @@
 import { walkSync, System, ConfigReader, Config, HandlerFunction, Route } from "../mod.ts";
 
+/**
+ * リクエスト時の処理を記述した関数を含んだスクリプトファイルを動的に読み込む。
+ * Dynamically loads a script file that contains a function describing the processing at the time of a request.
+ * @param directoryPath Directory path or file path.
+ * @returns Associative array of functions with function names as keys.
+ */
 export async function getHandlerFunctions(directoryPath: string): Promise<{ [key: string]: any; }> {
 
     console.log(">> Import controller files...");
@@ -18,6 +24,10 @@ export async function getHandlerFunctions(directoryPath: string): Promise<{ [key
     return handlerFunctions;
 }
 
+/**
+ * スクリプトファイルの動的インポートを行う。
+ * Perform dynamic import of script files.
+ */
 async function importControllerFile(filePath: string, handlerFunctions: { [key: string]: any; }) {
     const mainPath = Deno.mainModule.split("/").slice(0, -1).join("/");
     if(filePath.match(/$\.\//)) filePath.replace("./", "");
@@ -28,6 +38,12 @@ async function importControllerFile(filePath: string, handlerFunctions: { [key: 
     }
 }
 
+/**
+ * サーバーのルーティングを記述したファイルを読み込み、Routeを作成する。
+ * Read the file describing the server's routing and create a Route.
+ * @param directoryPath Directory path or file path.
+ * @param handlerFunctions Associative array of functions with function names as keys.
+ */
 export async function loadRoutingFiles(directoryPath: string, handlerFunctions: { [key: string]: any; }): Promise<void> {
 
     try {
@@ -54,6 +70,10 @@ export async function loadRoutingFiles(directoryPath: string, handlerFunctions: 
 
 }
 
+/**
+ * Routeを作成する。
+ * Create Routes.
+ */
 function createRoutes(config: Config, handlerFunctions: { [key: string]: any; }): void {
     for(let PATH in config) {
         const route: Config = config[PATH];
@@ -66,6 +86,10 @@ function createRoutes(config: Config, handlerFunctions: { [key: string]: any; })
     }
 }
 
+/**
+ * Routeのオプションを設定する。
+ * Set the options for the route.
+ */
 function setRouteOption(route: Config, newRoute: Route, handlerFunctions: { [key: string]: any; }) {
     Object.keys(route).forEach( key => {
         switch (key) {

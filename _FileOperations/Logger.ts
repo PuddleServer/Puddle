@@ -112,6 +112,7 @@ export class Logger {
     static async read(fileName: string): Promise<string> {
         if(!Logger.directoryPath) return "";
         const filePath: string = `${Logger.directoryPath}/${fileName}`;
+        await FileManager.ensureFile(filePath);
         const text:string = await FileManager.read(filePath);
         return text;
     }
@@ -125,6 +126,7 @@ export class Logger {
     static async write(fileName: string, text: string): Promise<void> {
         if(!Logger.directoryPath) return;
         const filePath: string = `${Logger.directoryPath}/${fileName}`;
+        await FileManager.ensureFile(filePath);
         await FileManager.write(filePath, text);
     }
 

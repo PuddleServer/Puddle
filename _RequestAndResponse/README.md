@@ -13,7 +13,9 @@ System.createRoute("ExampleRoute").URL("/example")
 ```
 You can return a response without using SystemRequest and SystemResponse.
 ```typescript
-const response: Response = { 200, new Headers(), "Collect." };
+const response: Response = new Response("Collect!", {
+    headers: new Headers(),
+});
 
 System.createRoute("ExampleRoute1").URL("/example1")
 .GET(response);
@@ -55,6 +57,7 @@ Decoded URL object
 Data sent by the client via POST request, etc.
 - `req.getCookie(key: string): string | undefined`  
 The cookie given to the client
+
 ## SystemResponse
 An object to set the response to be returned to the client.
 ### Methods
