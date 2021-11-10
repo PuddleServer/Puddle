@@ -70,7 +70,7 @@ import { System, Config, SystemRequest, SystemResponse } from "https://github.co
 
 System.createRoute("ContactForm").URL("/Contact")
 .GET(async (req: SystemRequest, res: SystemResponse) => {
-    await res.setFile("./contact_form.html");
+    res.setFile("./contact_form.html");
 })
 .POST(async (req: SystemRequest, res: SystemResponse) => {
     const body: string = await req.readBody();
@@ -130,15 +130,11 @@ import { System, Config, SystemRequest, WebSocketClient } from "https://github.c
 
 System.createRoute("./webSocket.html").URL("/", "/トップ");
 System.createRoute("/ws").WebSocket()
-.onopen((req: SystemRequest, client: WebSocketClient) => {
-    client.send("Connection to server complete.");
+.onopen((client: WebSocketClient) => {
+    client.reply("Connection to server complete.");
 })
-.onmessage((
-    req:    SystemRequest,
-    client: WebSocketClient,
-    message:    string
-) => {
-    client.sendAll(message);
+.onmessage((client: WebSocketClient) => {
+    client.sendAll(client.message);
 });
 
 System.listen(8080, (conf: Config)=>{

@@ -1,5 +1,3 @@
-export const version = "develop";
-
 /*!
  * Copyright 2018-2021 the Deno authors
  * Released under the MIT license

@@ -1,5 +1,5 @@
 import {
-    SystemRequest, SystemResponse, handlerFunction, Route, WebSocketRoute, WebSocketClient, authDigest
+    SystemRequest, SystemResponse, HandlerFunction, Route, WebSocketRoute, WebSocketClient, authDigest
 } from "../mod.ts";
 
 /**
@@ -40,7 +40,7 @@ export async function control(requestEvent: Deno.RequestEvent, variables: {[key:
  * @param respondWidth Function for response
  * @param process Function.
  */
-async function controller(requestEvent: Deno.RequestEvent, variables: { [key: string]: string; }, process: handlerFunction) {
+async function controller(requestEvent: Deno.RequestEvent, variables: { [key: string]: string; }, process: HandlerFunction) {
     const request = new SystemRequest(requestEvent.request, variables);
     const response = new SystemResponse(requestEvent);
     const res = await process(request, response);
