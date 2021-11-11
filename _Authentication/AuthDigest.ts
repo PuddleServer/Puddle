@@ -5,20 +5,20 @@ import {
 /**
  * ダイジェスト認証を使用する場合に呼び出す関数。
  * Function to call when digest authentication is used.
- * @param request SystemRequest object.
+ * @param respondWidth Function for response
  * @param route Route object.
  */
-export function authDigest(request: SystemRequest, route: Route) {
-    const response = new SystemResponse(request.request)
+export function authDigest(requestEvent: Deno.RequestEvent, route: Route) {
+    const response = new SystemResponse(requestEvent);
     const auth: {[key:string]:string;} = {};
-    (request.headers.get("authorization")||"").replace("Digest ","").replace(/\"/g,"").split(/\,\s*/g).forEach(v=>{
+    (requestEvent.request.headers.get("authorization")||"").replace("Digest ","").replace(/\"/g,"").split(/\,\s*/g).forEach(v=>{
         const tmp = v.split("=");
         auth[tmp[0]] = tmp.slice(1).join("=");
     });
     const _A1: string[] = route.AUTH() || [];
     const res: string[] = [];
     for(let A1 of _A1) {
-        const A2 = createHash("md5").update(`${request.method}:${request.getURL().pathname}`).toString();
+        const A2 = createHash("md5").update(`${requestEvent.request.method}:${new URL(requestEvent.request.url).pathname}`).toString();
         res.push(createHash("md5").update( `${A1}:${auth?.nonce}:${auth?.nc}:${auth?.cnonce}:${auth?.qop}:${A2}` ).toString());
     }
     if(res.includes(auth?.response)) return;

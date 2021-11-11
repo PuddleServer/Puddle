@@ -1,6 +1,5 @@
 import {
-    System, RequestLog, SystemRequest, SystemResponse, Response, Route, WebSocketRoute, WebSocketClient,
-    acceptWebSocket, isWebSocketCloseEvent, WebSocket, acceptable, DecodedURL, authDigest
+    SystemRequest, SystemResponse, HandlerFunction, Route, WebSocketRoute, WebSocketClient, authDigest
 } from "../mod.ts";
 
 /**
@@ -9,44 +8,28 @@ import {
  * @param request SystemRequest object.
  * @param route Route object.
  */
-export function control(request: SystemRequest, route: Route): void {
-
-    let url = "";
-    try {
-        url = new DecodedURL(request.url, System.baseURL).toString();
-    } catch {
-        url = "url_error";
-    }
-    new RequestLog(
-        route.PATH(),
-        request.method,
-        url,
-        (request.headers.get("Forwarded")||"").replace("Forwarded: ", "")
-        .split(/\,\s*/g).filter(param=>param.toLowerCase().includes("for"))
-        .concat([(request.conn.remoteAddr as Deno.NetAddr).hostname]).join(" ").replace(/for\s*\=\s*/g, "")
-    );
-    
-    if(route.AUTH()) authDigest(request, route);
-    switch (request.method) {
+export async function control(requestEvent: Deno.RequestEvent, variables: {[key:string]:string;}, route: Route) {
+    if(route.AUTH()) await authDigest(requestEvent, route);
+    switch (requestEvent.request.method) {
         case "GET":
-            if(route.isWebSocket) webSocketController(request, route.WebSocket());
-            else controller(request, route.GET());
+            if(route.isWebSocket) await webSocketController(requestEvent, variables, route.WebSocket());
+            else await controller(requestEvent, variables, route.GET());
             break;
         case "PUT":
-            controller(request, route.PUT());
+            await controller(requestEvent, variables, route.PUT());
             break;
         case "POST":
-            controller(request, route.POST());
+            await controller(requestEvent, variables, route.POST());
             break;
         case "DELETE":
-            controller(request, route.DELETE());
+            await controller(requestEvent, variables, route.DELETE());
             break;
         case "PATCH":
-            controller(request, route.PATCH());
+            await controller(requestEvent, variables, route.PATCH());
             break;
 
         default:
-            controller(request, Route["502"].GET());
+            await controller(requestEvent, variables, Route["500"].GET());
             break;
     }
 }
@@ -54,14 +37,15 @@ export function control(request: SystemRequest, route: Route): void {
 /**
  * リクエスト時の処理を実行する。
  * Execute the process at the time of the request.
- * @param request SystemRequest object.
+ * @param respondWidth Function for response
  * @param process Function.
  */
-async function controller(request: SystemRequest, process: Function) {
-    const response = new SystemResponse(request.request);
-    const res: Response | undefined = await process(request, response);
-    if(res) response.send(res);
-    else response.send();
+async function controller(requestEvent: Deno.RequestEvent, variables: { [key: string]: string; }, process: HandlerFunction) {
+    const request = new SystemRequest(requestEvent.request, variables);
+    const response = new SystemResponse(requestEvent);
+    const res = await process(request, response);
+    if(res) await response.send(res);
+    else await response.send();
 }
 
 /**
@@ -70,25 +54,34 @@ async function controller(request: SystemRequest, process: Function) {
  * @param request SystemRequest object.
  * @param wsRoute WebSocketRoute object.
  */
-async function webSocketController(request: SystemRequest, wsRoute: WebSocketRoute) {
-    if (acceptable(request)) {
-        const webSocket: WebSocket = await acceptWebSocket({
-            conn: request.conn,
-            bufReader: request.request.r,
-            bufWriter: request.request.w,
-            headers: request.headers,
-        });
-        const client: WebSocketClient = new WebSocketClient(webSocket);
-        wsRoute.onopen()(request, client);
-        for await (const message of webSocket) {
-            if (typeof message === "string") {
-                wsRoute.onmessage()(request, client, message);
-            } else if (isWebSocketCloseEvent(message)) {
-                wsRoute.onclose()(request, client);
-                delete WebSocketClient.list[client.id];
-                break;
-            }
-        }
-    
-    }
+async function webSocketController(requestEvent: Deno.RequestEvent, variables: { [key: string]: string; }, wsRoute: WebSocketRoute) {
+
+    const { socket, response } = Deno.upgradeWebSocket(requestEvent.request);
+    const client = new WebSocketClient(socket, requestEvent.request.url, variables);
+
+    socket.onopen = (ev) => {
+        wsRoute.onopen()(client, ev);
+    };
+
+    socket.onmessage = (ev) => {
+        client.setMessage(ev.data);
+        client.to([]);
+        wsRoute.onmessage()(client, ev);
+    };
+
+    socket.onerror = (ev) => {
+        client.setMessage("");
+        client.to([]);
+        wsRoute.onerror()(client, ev);
+    };
+
+    socket.onclose = (ev) => {
+        client.setMessage("");
+        client.to([]);
+        wsRoute.onclose()(client, ev);
+        delete WebSocketClient.list[client.id];
+    };
+
+    requestEvent.respondWith(response);
+
 }

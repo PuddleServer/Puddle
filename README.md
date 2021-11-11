@@ -14,9 +14,6 @@ Hello, I'm Puddle FrameWork.
 Puddle Framework is a web framework that runs on Deno.  
 The goal of this framework is to make it easy for even novice programmers to set up a web server.
 
-## Docs
-[Documents - PuddleFramework (Being worked on)]()
-
 
 ## How to build the environment
 
@@ -42,7 +39,7 @@ See [deno.land](https://deno.land/#installation) for more installation options.
 ### Start the server
 You can start the server with the command "deno run -A . /server.ts".
 ```typescript
-import { System, Config } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
+import { System, Config } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts";
 
 System.listen(8080, (conf: Config) => {
     console.log(`The server running on http://${conf.hostname}:${conf.port}`);
@@ -52,7 +49,7 @@ System.listen(8080, (conf: Config) => {
 ### Configuring Routing
 You can host a static server by simply specifying the file path!
 ```typescript
-import { System, Config } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
+import { System, Config } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts";
 
 System.createRoute("./index.html").URL("/", "/Top");
 
@@ -66,7 +63,7 @@ System.listen(8080, (conf: Config) => {
 ### Configuring Controller
 If you want to set up dynamic processing, connect the method to the route you created and specify the handler function.
 ```typescript
-import { System, Config, SystemRequest, SystemResponse } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
+import { System, Config, SystemRequest, SystemResponse } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts";
 
 System.createRoute("ContactForm").URL("/Contact")
 .GET(async (req: SystemRequest, res: SystemResponse) => {
@@ -82,7 +79,7 @@ System.createRoute("ContactForm").URL("/Contact")
 
     // Process body data.
 
-    await res.setText("Collect.");
+    res.setText("Collect.");
 });
 
 System.listen(8080, (conf: Config) => {
@@ -93,13 +90,13 @@ System.listen(8080, (conf: Config) => {
 ### How to set up the redirection process
 The Puddle Framework provides two ways to redirect clients.
 ```typescript
-import { System, Config, SystemRequest, SystemResponse, redirect } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
+import { System, Config, SystemRequest, SystemResponse, redirect } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts";
 
 System.createRoute("example1").URL("/Redirect1")
 .GET(redirect("https://www.example.com"));
 
 System.createRoute("example2").URL("/Redirect2")
-.GET(async (req: SystemRequest, res: SystemResponse) => {
+.GET((req: SystemRequest, res: SystemResponse) => {
     res.redirect("https://www.example.com");
 });
 
@@ -113,9 +110,9 @@ System.listen(8080, (conf: Config) => {
 ### Start the Websocket server
 Websockets server routing can be done in the same way as web server routing!
 ```typescript
-import { System, Config, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
+import { System, Config, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts";
 
-System.createRoute("./webSocket.html").URL("/", "/トップ");
+System.createRoute("./webSocket.html").URL("/", "/top");
 System.createRoute("/ws").WebSocket();
 
 System.listen(8080, (conf: Config)=>{
@@ -126,19 +123,16 @@ System.listen(8080, (conf: Config)=>{
 ### How to set up Websockets events
 To handle each Websocket event, set up a handler function by connecting a method to the created Websocket route.
 ```typescript
-import { System, Config, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
+import { System, Config, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts";
 
-System.createRoute("./webSocket.html").URL("/", "/トップ");
+System.createRoute("./webSocket.html").URL("/", "/top");
+
 System.createRoute("/ws").WebSocket()
-.onopen((req: SystemRequest, client: WebSocketClient) => {
-    client.send("Connection to server complete.");
+.onopen((client: WebSocketClient) => {
+    client.reply("Connection to server complete.");
 })
-.onmessage((
-    req:    SystemRequest,
-    client: WebSocketClient,
-    message:    string
-) => {
-    client.sendAll(message);
+.onmessage((client: WebSocketClient) => {
+    client.sendAll(client.message);
 });
 
 System.listen(8080, (conf: Config)=>{
@@ -176,7 +170,7 @@ System.AUTH.GOOGLE(client_id, client_secret, redirect_url).URL("/Login")
 ## Easily manipulate JSON files
 It provides functions to easily manipulate data in JSON files!
 ```typescript
-import { PuddleJSON } from "https://github.com/PuddleServer/Puddle/raw/develop/mod.ts";
+import { PuddleJSON } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts";
 
 const USERS = PuddleJSON.USE("./users.json", {
     id:     ["UNIQUE", "NOT NULL", "AUTO INCREMENT"],

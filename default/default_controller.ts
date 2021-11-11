@@ -1,4 +1,4 @@
-import { SystemRequest, SystemResponse, lookup, System, Route, WebSocketClient, errorHTML, version } from "../mod.ts";
+import { SystemRequest, SystemResponse, HandlerFunction, lookup, System, Route, WebSocketClient, errorHTML } from "../mod.ts";
 
 /**
  * リダイレクト処理を行う関数。
@@ -6,7 +6,7 @@ import { SystemRequest, SystemResponse, lookup, System, Route, WebSocketClient, 
  * @param url The URL to redirect to.
  * @returns Function.
  */
-export function redirect(url: string): Function {
+export function redirect(url: string): HandlerFunction {
     return function(request: SystemRequest, response: SystemResponse): void {
         response.redirect(url);
     }
@@ -17,21 +17,43 @@ export function redirect(url: string): Function {
  * A function that returns the file indicated in the PATH of Route.
  * @returns Function.
  */
-export function default_get(): Function {
+export function default_get(): HandlerFunction {
     return async function default_get(request: SystemRequest, response: SystemResponse): Promise<void> {
         const filePath: string | undefined = Route.getRouteByUrl(request.getURL().pathname)?.PATH();
-        if(!filePath) return Route["404"].GET()(request, response);
+        if(!filePath) {
+            Route["404"].GET()(request, response);
+            return;
+        }
         try {
+            let file_data: string | ReadableStream<Uint8Array> | Uint8Array = "";
             const extensions: false | string = lookup(filePath);
-            let file_data: string | Uint8Array = await Deno.readFile(filePath);
-            if(extensions && extensions.split("/")[0] === "text") {
-                file_data = new TextDecoder('utf-8').decode(file_data);
+            try { // After version 1.16.0
+                let readableStream: ReadableStream<Uint8Array> | null;
+                if(filePath.match(/^\.\/|^\//)) {
+                    const mainModule = Deno.mainModule.split("/").slice(0, -1).join("/");
+                    readableStream = (await fetch(`${mainModule}/${filePath.replace(/^\.\/|^\//, "")}`)).body;
+                } else {
+                    readableStream = (await fetch(filePath)).body;
+                }
+                if(readableStream) {
+                    if(extensions && extensions.split("/")[0] === "text") {
+                        file_data = await Deno.readFile(filePath);
+                        file_data = new TextDecoder('utf-8').decode(file_data);
+                    } else {
+                        file_data = readableStream;
+                    }
+                }
+            } catch { // Before version 1.16.0
+                file_data = await Deno.readFile(filePath);
+                if(extensions && extensions.split("/")[0] === "text") {
+                    file_data = new TextDecoder('utf-8').decode(file_data);
+                }
             }
-            response.setText(file_data, 200, null, filePath);
+            response.setText(file_data, 200, filePath);
             if(extensions) response.setType(extensions);
             console.log(`>> [${new Date().toLocaleString()}] Send the "${filePath}" file to the client.`);
         } catch (e) {
-            return Route["404"].GET()(request, response);
+            Route["404"].GET()(request, response);
         }
     }
 }
@@ -43,9 +65,9 @@ export function default_get(): Function {
  * @param description Error description.
  * @returns Function.
  */
-export function default_error(status: number, description: string): Function {
-    return async function (request: SystemRequest | null, response: SystemResponse): Promise<void> {
-        response.preset({version, status, description});
+export function default_error(status: number, description: string): HandlerFunction {
+    return async function (request: SystemRequest, response: SystemResponse) {
+        response.preset({status, description});
         response.setText(errorHTML, status, description).setType('text/html');
     }
 }
@@ -56,8 +78,8 @@ export function default_error(status: number, description: string): Function {
  * @param request SystemRequest object.
  * @param client WebSocketClient object.
  */
-export function default_onopen(request: SystemRequest, client: WebSocketClient): void {
-    console.log(`>> WebSocket opened with "${request.url}". Connections ${client.getAllClients().length}`);
+export function default_onopen(client: WebSocketClient): void {
+    console.log(`>> [${new Date().toLocaleString()}] WebSocket opened. Concurrent connections: ${client.concurrentConnections}`);
 }
 
 /**
@@ -67,6 +89,6 @@ export function default_onopen(request: SystemRequest, client: WebSocketClient):
  * @param client WebSocketClient object.
  * @param message Message received.
  */
-export function default_onmessage(request: SystemRequest, client: WebSocketClient, message: string): void {
-    client.sendAll(message);
+export function default_onmessage(client: WebSocketClient): void {
+    client.sendAll(client.message || "");
 }
