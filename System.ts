@@ -1,14 +1,8 @@
 import {
-    walkSync,
-    SystemRequest, SystemResponse, Route, HandlerFunction, control, ConfigReader, Logger, GoogleOAuth2, FileManager, PuddleJSON, RequestLog,
+    Server, Handler, ConnInfo, walkSync,
+    Route, HandlerFunction, control, ConfigReader, Logger, GoogleOAuth2, FileManager, PuddleJSON, RequestLog,
     getHandlerFunctions, loadRoutingFiles
 } from "./mod.ts";
-
-/** Initial backoff delay of 5ms following a temporary accept failure. */
-const INITIAL_ACCEPT_BACKOFF_DELAY = 5;
-
-/** Max backoff delay of 1s following a temporary accept failure. */
-const MAX_ACCEPT_BACKOFF_DELAY = 1000;
 
 /**
  * System.listenの第二引数のコールバック関数に使う引数の型。
@@ -395,7 +389,7 @@ export class System {
  */
 async function listen(option: number | string | Deno.ListenOptions | Deno.ListenTlsOptions, isTls: boolean): Promise<Config> {
         
-    const options: Config = { hostname: "localhost", port: 8080 };
+    const options: Config = { hostname: "0.0.0.0", port: 8080 };
 
     let logDirectoryPath: string | undefined = undefined;
     let conf: Config;
@@ -419,198 +413,39 @@ async function listen(option: number | string | Deno.ListenOptions | Deno.Listen
         if(routingPath) await loadRoutingFiles(routingPath, System.controllers || {});
     
     } else if(typeof option === "number") {
-            options.hostname = "localhost";
             options.port = option;
             conf = options;
     } else {
         conf = option;
     }
-    
-    System.close();
+    const addr: string = `${options?.hostname}:${options?.port}`;
 
-    options.transport = "tcp";
-
-    const listener = isTls? Deno.listenTls(options as Deno.ListenTlsOptions) : Deno.listen(options as Deno.ListenOptions);
-    System.server = new Server(listener, async function(requestEvent: Deno.RequestEvent, remoteAddr: Deno.NetAddr) {
+    const handler: Handler  = async (request: Request, connInfo: ConnInfo) => {
         const variables: {[key:string]:string;} = {};
         let url;
         try {
-            url = new DecodedURL(requestEvent.request.url);
+            url = new DecodedURL(request.url);
         } catch {
             url = new DecodedURL("http://error");
         }
         const route: Route = Route.getRouteByUrl(url.pathname, variables) || Route["404"];
+        const remoteAddr = connInfo.remoteAddr as Deno.NetAddr;
         new RequestLog(
             route.PATH(),
-            requestEvent.request.method,
-            decodeURIComponent(requestEvent.request.url),
-            (requestEvent.request.headers.get("Forwarded")||"").replace("Forwarded: ", "")
+            request.method,
+            decodeURIComponent(request.url),
+            (request.headers.get("Forwarded")||"").replace("Forwarded: ", "")
             .split(/\,\s*/g).filter(param=>param.toLowerCase().includes("for"))
             .concat([remoteAddr.hostname]).join(" ").replace(/for\s*\=\s*/g, "")
         );
-        await control(requestEvent, variables, route);
-    });
-    return conf;
-}
+        return await control(request, variables, route);
+    };
 
-class Server {
+    System.server = new Server({addr, handler});
+    if(isTls) System.server.listenAndServeTls(options?.certFile, options?.keyFile);
+    else System.server.listenAndServe();
     
-    #handler: Function;
-    #closed = false;
-    #listener: Deno.Listener;
-    #httpConnections: Set<Deno.HttpConn> = new Set();
-
-    constructor(listener: Deno.Listener, handler: Function) {
-        this.#listener = listener;
-        this.#handler = handler;
-        this.serve();
-    }
-
-    async serve(): Promise<void> {
-        if(this.#closed) {
-            throw new Deno.errors.Http("Server closed");
-        }
-
-        try {
-            return await this.#accept(this.#listener);
-        } finally {
-            try {
-                this.#listener.close();
-            } catch {
-                // The listener is already closed.
-            }
-        }
-    }
-
-    close(): void {
-        if(this.#closed) {
-            throw new Deno.errors.Http("Server closed");
-        }
-
-        this.#closed = true;
-        this.#listener.close();
-
-        for(const httpConn of this.#httpConnections) {
-            this.#closeHttpConn(httpConn);
-        }
-
-        this.#httpConnections.clear();
-    }
-
-    get closed(): boolean {
-        return this.#closed;
-    }
-
-    get addrs(): Deno.Addr {
-        return this.#listener.addr;
-    }
-
-    async #respond(
-        requestEvent: Deno.RequestEvent,
-        httpConn: Deno.HttpConn,
-        remoteAddr: Deno.NetAddr,
-    ): Promise<void> {
-        try {
-            await this.#handler(requestEvent, remoteAddr);
-        } catch {
-            return this.#closeHttpConn(httpConn);
-        }
-    }
-
-    async #serveHttp(
-        httpConn: Deno.HttpConn,
-        remoteAddr: Deno.NetAddr,
-    ): Promise<void> {
-        while (!this.#closed) {
-            let requestEvent: Deno.RequestEvent | null;
-
-            try {
-                requestEvent = await httpConn.nextRequest();
-            } catch {
-                break;
-            }
-
-            if(requestEvent === null) {
-                break;
-            }
-
-            this.#respond(requestEvent, httpConn, remoteAddr);
-        }
-
-        this.#closeHttpConn(httpConn);
-    }
-
-    async #accept(
-        listener: Deno.Listener,
-    ): Promise<void> {
-        let acceptBackoffDelay: number | undefined;
-
-        while (!this.#closed) {
-            let conn: Deno.Conn;
-
-            try {
-                conn = await listener.accept();
-            } catch (error) {
-                if(
-                    error instanceof Deno.errors.BadResource ||
-                    error instanceof Deno.errors.InvalidData ||
-                    error instanceof Deno.errors.UnexpectedEof ||
-                    error instanceof Deno.errors.ConnectionReset ||
-                    error instanceof Deno.errors.NotConnected
-                ) {
-
-                    if(!acceptBackoffDelay) {
-                        acceptBackoffDelay = INITIAL_ACCEPT_BACKOFF_DELAY;
-                    } else {
-                        acceptBackoffDelay *= 2;
-                    }
-
-                    if(acceptBackoffDelay >= MAX_ACCEPT_BACKOFF_DELAY) {
-                        acceptBackoffDelay = MAX_ACCEPT_BACKOFF_DELAY;
-                    }
-
-                    // delay
-                    await new Promise(resolve=>setTimeout(resolve, acceptBackoffDelay));
-
-                    continue;
-                }
-
-                throw error;
-            }
-
-            acceptBackoffDelay = undefined;
-
-            let httpConn: Deno.HttpConn;
-
-            try {
-                httpConn = Deno.serveHttp(conn);
-            } catch {
-                continue;
-            }
-
-            this.#trackHttpConnection(httpConn);
-
-            this.#serveHttp(httpConn, conn.remoteAddr as Deno.NetAddr);
-        }
-    }
-
-    #closeHttpConn(httpConn: Deno.HttpConn): void {
-        this.#untrackHttpConnection(httpConn);
-
-        try {
-            httpConn.close();
-        } catch {
-            // The listener is already closed.
-        }
-    }
-
-    #trackHttpConnection(httpConn: Deno.HttpConn): void {
-        this.#httpConnections.add(httpConn);
-    }
-
-    #untrackHttpConnection(httpConn: Deno.HttpConn): void {
-        this.#httpConnections.delete(httpConn);
-    }
+    return conf;
 }
 
 /**

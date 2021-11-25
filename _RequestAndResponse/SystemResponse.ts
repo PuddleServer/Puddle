@@ -11,17 +11,7 @@ import {
  */
 export class SystemResponse {
 
-    /**
-     * リクエストイベントオブジェクトを格納する変数。
-     * Variable that stores the RequestEvent object.
-     */
-    #respondWith: Function;
-
-    /**
-     * 応答後かどうか。
-     * After response or not.
-     */
-    #responded: boolean = false;
+    #response: Response | undefined = undefined;
 
     /**
      * HTML内の変数に挿入するテキストを格納する連想配列。
@@ -30,7 +20,7 @@ export class SystemResponse {
     #preset: { [key: string]: any; };
 
 
-    init: ResponseInit;
+    #init: ResponseInit;
     headers: Headers;
     status: number;
     body: string | ReadableStream<Uint8Array> | Uint8Array | undefined;
@@ -41,19 +31,18 @@ export class SystemResponse {
      */
     isForceDownload: boolean;
 
-    constructor(requestEvent: Deno.RequestEvent) {
-        this.#respondWith = requestEvent.respondWith;
+    constructor(request: Request) {
 
         this.headers = new Headers();
         this.status = 500;
         this.body = "500 Internal Server Error";
-        this.init = {headers: this.headers};
+        this.#init = {headers: this.headers};
         this.setType('text/plain');
 
         this.#preset = {};
 
         this.isForceDownload = false;
-        Route["500"].GET()(new SystemRequest(requestEvent.request, {}), this);
+        Route["500"].GET()(new SystemRequest(request, {}), this);
     }
 
     /**
@@ -61,7 +50,12 @@ export class SystemResponse {
      * After response or not.
      */
     get responded(): boolean {
-        return this.#responded;
+        return Boolean(this.#response);
+    }
+
+    get response(): Response {
+        if(!this.#response) return new Response();
+        return this.#response;
     }
 
     /**
@@ -185,18 +179,16 @@ export class SystemResponse {
      * クライアントにレスポンスを返して処理を終了する。
      * Return the response to the client and finish the process.
      */
-    async send(response?: string | Response): Promise<void> {
-        if(this.#responded) return;
+    send(response?: string | Response): void {
+        if(this.responded) return;
         if(this.isForceDownload) {
             this.headers.set('Content-Type', 'application/octet-stream');
         }
-        this.init.status = this.status;
-        if(this.init.statusText) this.init.statusText = encodeURIComponent(this.init.statusText);
-        let res: Response = new Response(this.body, this.init);
+        this.#init.status = this.status;
+        if(this.#init.statusText) this.#init.statusText = encodeURIComponent(this.#init.statusText);
+        this.#response = new Response(this.body, this.#init);
         if(typeof response == "string") this.setText(response);
-        else if(response) res = response;
-        await this.#respondWith(res);
-        this.#responded = true;
+        else if(response) this.#response = response;
     }
 
     /**
@@ -208,6 +200,5 @@ export class SystemResponse {
         this.status = 302;
         this.body = "";
         this.headers.set('Location', url);
-        this.send();
     }
 }
