@@ -1,4 +1,8 @@
-import { Config } from "../mod.ts";
+/**
+ * System.listenの第二引数のコールバック関数に使う引数の型。
+ * The type of argument to use for the second argument callback function of "System.listen".
+ */
+export type Config = {[key:string]: any; };
 
 /**
  * コンフィグファイルを読み込むためのクラス。
