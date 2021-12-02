@@ -43,7 +43,7 @@
 > **Test**  
 > Preparation
 > ```typescript
-> const url = new DecodedURL("http://example.com/サンプル?параметр#hash");
+> const url = new DecodedURL("/サンプル?параметр#hash", "http://example.com");
 > ```
 > 
 > Implementation  
