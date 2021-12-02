@@ -76,14 +76,6 @@ type AuthType = { "GOOGLE": AuthSetupFunction };
 export class System {
 
     /**
-     * ファイルマネージャーのゲッター。
-     * Getter of FileManager class.
-     */
-    static get fm(): typeof FileManager {
-        return FileManager;
-    }
-
-    /**
      * PuddleJSONのゲッター。
      * Getter of PuddleJSON class.
      */
