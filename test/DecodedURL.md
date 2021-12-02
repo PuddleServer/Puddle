@@ -106,7 +106,7 @@
 > **Test**  
 > Preparation
 > ```typescript
-> const url = new DecodedURL("http://example.com/サンプル?параметр#hash");
+> const url = new DecodedURL("http://example.com:4097/サンプル?параметр#hash");
 > ```
 > 
 > Implementation  
