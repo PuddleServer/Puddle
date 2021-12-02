@@ -396,7 +396,8 @@
 > ```typescript
 > let error, host;
 > try {
->     System.listen(8080, (conf: Config)=>host=`${conf.hostname}:${conf.port}`);
+>     await System.listen(8080, (conf: Config)=>host=`${conf.hostname}:${conf.port}`);
+>     System.server.close();
 > } catch (e) {
 >     error = e;
 > }
