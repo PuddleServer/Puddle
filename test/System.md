@@ -10,7 +10,7 @@
 >
 > **Test**  
 > Implementation  
-> `System.JSON() === PuddleJSON`
+> `System.JSON === PuddleJSON`
 > ```typescript
 > true
 > ```
@@ -209,12 +209,12 @@
 > **Test**  
 > Preparation
 > ```typescript
-> System.createRoutes("test_route3", {PATH: "test_route4"});
+> System.createRoutes("test_route3.test", {PATH: "test_route4"});
 > const path_list = Route.list.map(route=>route.PATH());
 > ```
 > 
 > Implementation  
-> `path_list.includes("test_route3")`
+> `path_list.includes("test_route3.test")`
 > ```typescript
 > true
 > ```
@@ -379,3 +379,38 @@
 > true
 > ```
 <br>
+
+### static async listen(option: number | string | Deno.ListenOptions, startFunction?: Function)
+> #### **Case 1**
+> **Arguments**
+> | name | Type |
+> | :- | :- |
+> | option | number |
+> 
+> **Return**  
+> Type  
+> *&emsp;Promise<void>*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> let error, host;
+> try {
+>     System.listen(8080, (conf: Config)=>host=`${conf.hostname}:${conf.port}`);
+> } catch (e) {
+>     error = e;
+> }
+> ```
+> 
+> Implementation  
+> `Boolean(error)`
+> ```typescript
+> false
+> ```
+> `host`
+> ```typescript
+> "localhost:8080"
+> ```
+<br>
+
+### static async listenTLS(option: string | Deno.ListenTlsOptions, startFunction?: Function)
