@@ -139,7 +139,7 @@
 > ```
 <br>
 
-### createRoute(pathOrRouteOption: string | RouteOption)
+### static createRoute(pathOrRouteOption: string | RouteOption)
 > #### **Case 1**
 > **Arguments**
 > | name | Type |
@@ -194,7 +194,7 @@
 > ```
 <br>
 
-### createRoutes(...pathsOrRouteOptions: (string | RouteOption)[])
+### static createRoutes(...pathsOrRouteOptions: (string | RouteOption)[])
 > #### **Case 1**
 > **Arguments**
 > | name | Type |
@@ -247,6 +247,134 @@
 > true
 > ```
 > `path_list.includes("./system_test/assets/style.css")`
+> ```typescript
+> true
+> ```
+<br>
+
+### static deleteRoute(...path: string[])
+> #### **Case 1**
+> **Arguments**
+> | name | Type |
+> | :- | :- |
+> | arguments[0] | string |
+> 
+> **Return**  
+> Type  
+> *&emsp;void*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> new Route("test_route_tmp");
+> System.deleteRoute("test_route_tmp")
+> const path_list = Route.list.map(route=>route.PATH());
+> ```
+> 
+> Implementation  
+> `path_list.includes("test_route_tmp")`
+> ```typescript
+> false
+> ```
+<br>
+
+### static deleteRoutes(paths: string[])
+> #### **Case 1**
+> **Arguments**
+> | name | Type |
+> | :- | :- |
+> | paths | string[] |
+> 
+> **Return**  
+> Type  
+> *&emsp;void*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const tmp_list = ["test_route_tmp1", "test_route_tmp2"];
+> new Route(tmp_list[0]);
+> new Route(tmp_list[1]);
+> System.deleteRoutes(tmp_list)
+> const path_list = Route.list.map(route=>route.PATH());
+> ```
+> 
+> Implementation  
+> `path_list.includes(tmp_list[0])`
+> ```typescript
+> false
+> ```
+> `path_list.includes(tmp_list[1])`
+> ```typescript
+> false
+> ```
+<br>
+
+### static Route(path: string)
+> #### **Case 1**
+> **Arguments**
+> | name | Type |
+> | :- | :- |
+> | path | string |
+> 
+> **Return**  
+> Type  
+> *&emsp;void*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const route = new Route("test_route5");
+> ```
+> 
+> Implementation  
+> `System.Route("test_route5") === route`
+> ```typescript
+> true
+> ```
+<br>
+
+> #### **Case 2**
+> **Arguments**
+> | name | Type |
+> | :- | :- |
+> | path | string |
+> 
+> **Return**  
+> Type  
+> *&emsp;void*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const route = System.Route("test_route6")
+> ```
+> 
+> Implementation  
+> `route instanceof Route`
+> ```typescript
+> true
+> ```
+> `route.PATH()`
+> ```typescript
+> "test_route6"
+> ```
+<br>
+
+### static get AUTH()
+> #### **Case 1**
+> **Return**  
+> Type  
+> *&emsp;AuthType*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const auth = System.AUTH;
+> ```
+> 
+> Implementation  
+> `"GOOGLE" in auth && typeof auth.GOOGLE === "function"`
 > ```typescript
 > true
 > ```
