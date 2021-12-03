@@ -452,3 +452,36 @@
 > "localhost:8080"
 > ```
 <br>
+
+### static close()
+> #### **Case 1**
+> 
+> **Return**  
+> Type  
+> *&emsp;void*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const handler = () => new Response();
+> System.server = new Server({ handler });
+> let check_before: null | boolean = null;
+> let check_after: null | boolean = null;
+> try {
+>   check_before = server.closed;
+> } finally {
+>   System.close();
+>   check_after = server.closed;
+> }
+> ```
+> 
+> Implementation  
+> `check_before`
+> ```typescript
+> false
+> ```
+> `check_after`
+> ```typescript
+> true
+> ```
+<br>
