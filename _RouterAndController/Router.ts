@@ -229,6 +229,7 @@ export class Route {
      */
     DELETE(): HandlerFunction;
     DELETE(process: HandlerFunction): Route;
+    DELETE(process: Response): Route;
     DELETE(process?: HandlerFunction | Response): HandlerFunction | Route {
 
         if(!process) return this.#DELETE;
