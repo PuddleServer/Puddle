@@ -5,7 +5,7 @@
 > #### **Case 1**
 > **Arguments**
 > | name | Type |
-> | - | - |
+> | :- | :- |
 > | url | USVString |
 > 
 > **Return**  
