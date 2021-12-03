@@ -431,7 +431,7 @@ async function listen(option: number | string | Deno.ListenOptions | Deno.Listen
     if(isTls) System.server.listenAndServeTls(options?.certFile, options?.keyFile);
     else System.server.listenAndServe();
     
-    if(!conf.hostname.length) conf.hostname = "localhost";
+    if(!conf.hostname?.length) conf.hostname = "localhost";
     return conf;
 }
 
