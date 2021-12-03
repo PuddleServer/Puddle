@@ -468,10 +468,10 @@
 > let check_before: null | boolean = null;
 > let check_after: null | boolean = null;
 > try {
->   check_before = server.closed;
+>   check_before = System.server.closed;
 > } finally {
 >   System.close();
->   check_after = server.closed;
+>   check_after = System.server.closed;
 > }
 > ```
 > 
