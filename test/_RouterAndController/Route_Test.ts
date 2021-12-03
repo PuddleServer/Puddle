@@ -16,7 +16,7 @@ import {
 } from "../../mod.ts";
 
 Deno.test({
-    name: "constructor",
+    name: "constructor1",
     fn(): void {
         const route = new Route("test_route1");
         const process_404 = default_error(404, `Not Found. 見つかりません。`);
@@ -29,5 +29,16 @@ Deno.test({
         assertStrictEquals(process_404.toString(), route.POST().toString());
         assertStrictEquals(process_404.toString(), route.DELETE().toString());
         assertStrictEquals(process_404.toString(), route.PATCH().toString());
+    },
+});
+
+Deno.test({
+    name: "constructor2",
+    fn(): void {
+        const route = new Route("test_route2", [], null);
+        const process_404 = default_error(404, `Not Found. 見つかりません。`);
+
+        assertEquals(true, route instanceof Route);
+        assertStrictEquals(process_404.toString(), route.GET().toString());
     },
 });
