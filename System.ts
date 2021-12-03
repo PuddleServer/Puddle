@@ -375,14 +375,14 @@ export class System {
  */
 async function listen(option: number | string | Deno.ListenOptions | Deno.ListenTlsOptions, isTls: boolean): Promise<Config> {
         
-    const options: Config = { hostname: "0.0.0.0", port: 8080 };
+    const options: Config = { hostname: "", port: 8080 };
 
     let logDirectoryPath: string | undefined = undefined;
     let conf: Config;
 
     if(typeof option === "string") {
         conf = await ConfigReader.read(option);
-        options.hostname = getValueByAllKeys(conf, "HostName") || getValueByAllKeys(conf, "Server", "HostName");
+        options.hostname = getValueByAllKeys(conf, "HostName") || getValueByAllKeys(conf, "Server", "HostName") || "";
         options.port = getValueByAllKeys(conf, "Port") || getValueByAllKeys(conf, "Server", "Port") || 80;
         if(isTls) {
             options.certFile = getValueByAllKeys(conf, "certFile") || getValueByAllKeys(conf, "Server", "certFile");
@@ -431,7 +431,7 @@ async function listen(option: number | string | Deno.ListenOptions | Deno.Listen
     if(isTls) System.server.listenAndServeTls(options?.certFile, options?.keyFile);
     else System.server.listenAndServe();
     
-    if(conf.hostname === "0.0.0.0") conf.hostname = "localhost";
+    if(!conf.hostname.length) conf.hostname = "localhost";
     return conf;
 }
 
