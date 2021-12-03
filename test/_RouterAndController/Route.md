@@ -278,7 +278,7 @@
 > 
 > **Return**  
 > Type  
-> *&emsp;HandlerFunction*  
+> *&emsp;Route*  
 >
 > **Test**  
 > Preparation
@@ -305,7 +305,7 @@
 > 
 > **Return**  
 > Type  
-> *&emsp;HandlerFunction*  
+> *&emsp;Route*  
 >
 > **Test**  
 > Preparation
@@ -352,7 +352,7 @@
 > 
 > **Return**  
 > Type  
-> *&emsp;HandlerFunction*  
+> *&emsp;Route*  
 >
 > **Test**  
 > Preparation
@@ -379,7 +379,7 @@
 > 
 > **Return**  
 > Type  
-> *&emsp;HandlerFunction*  
+> *&emsp;Route*  
 >
 > **Test**  
 > Preparation
@@ -426,7 +426,7 @@
 > 
 > **Return**  
 > Type  
-> *&emsp;HandlerFunction*  
+> *&emsp;Route*  
 >
 > **Test**  
 > Preparation
@@ -453,7 +453,7 @@
 > 
 > **Return**  
 > Type  
-> *&emsp;HandlerFunction*  
+> *&emsp;Route*  
 >
 > **Test**  
 > Preparation
@@ -500,7 +500,7 @@
 > 
 > **Return**  
 > Type  
-> *&emsp;HandlerFunction*  
+> *&emsp;Route*  
 >
 > **Test**  
 > Preparation
@@ -527,7 +527,7 @@
 > 
 > **Return**  
 > Type  
-> *&emsp;HandlerFunction*  
+> *&emsp;Route*  
 >
 > **Test**  
 > Preparation
