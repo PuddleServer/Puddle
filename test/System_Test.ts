@@ -1,5 +1,5 @@
 /**
- * System.tsのSystemクラステストファイル
+ * System.tsのSystemクラステスト
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
  * @Date   2021-12-01
@@ -15,12 +15,10 @@ import {
     System,
     PuddleJSON,
     Route,
-    Config
+    Config,
+    Server
 } from "../mod.ts";
 
-/**
- * static get JSON()
- */
 Deno.test({
   name: "get_JSON",
     fn(): void {
@@ -28,9 +26,6 @@ Deno.test({
     },
 });
 
-/**
- * static getModule
- */
 Deno.test({
     name: "getModule",
     fn(): void {
@@ -42,9 +37,6 @@ Deno.test({
     },
 });
 
-/**
- * static setModule
- */
 Deno.test({
     name: "setModule",
     fn(): void {
@@ -55,9 +47,6 @@ Deno.test({
     },
 });
 
-/**
- * static setModules
- */
 Deno.test({
     name: "setModules",
     fn(): void {
@@ -69,9 +58,6 @@ Deno.test({
     },
 });
 
-/**
- * static deleteModules
- */
 Deno.test({
     name: "deleteModules",
     fn(): void {
@@ -88,9 +74,6 @@ Deno.test({
     },
 });
 
-/**
- * static createRoute(case1)
- */
 Deno.test({
     name: "createRoute1",
     fn(): void {
@@ -101,9 +84,6 @@ Deno.test({
     },
 });
 
-/**
- * static createRoute(case2)
- */
 Deno.test({
     name: "createRoute2",
     fn(): void {
@@ -114,9 +94,6 @@ Deno.test({
     },
 });
 
-/**
- * static createRoutes(case1)
- */
 Deno.test({
     name: "createRoutes1",
     fn(): void {
@@ -128,23 +105,17 @@ Deno.test({
     },
 });
 
-/**
- * static createRoutes(case2)
- */
 Deno.test({
     name: "createRoutes2",
     fn(): void {
-        System.createRoutes("./system_test/assets/*");
+        System.createRoutes("./testdata/assets/*");
         const path_list = Route.list.map(route=>route.PATH());
 
-        assertEquals(true, path_list.includes("./system_test/assets/script.js"));
-        assertEquals(true, path_list.includes("./system_test/assets/style.css"));
+        assertEquals(true, path_list.includes("./testdata/assets/script.js"));
+        assertEquals(true, path_list.includes("./testdata/assets/style.css"));
     },
 });
 
-/**
- * static deleteRoute
- */
 Deno.test({
     name: "deleteRoute",
     fn(): void {
@@ -156,9 +127,6 @@ Deno.test({
     },
 });
 
-/**
- * static deleteRoutes
- */
 Deno.test({
     name: "deleteRoutes",
     fn(): void {
@@ -173,9 +141,6 @@ Deno.test({
     },
 });
 
-/**
- * static Route(case1)
- */
 Deno.test({
     name: "Route1",
     fn(): void {
@@ -185,9 +150,6 @@ Deno.test({
     },
 });
 
-/**
- * static Route(case2)
- */
 Deno.test({
     name: "Route2",
     fn(): void {
@@ -198,9 +160,6 @@ Deno.test({
     },
 });
 
-/**
- * static AUTH(case1)
- */
 Deno.test({
     name: "AUTH",
     fn(): void {
@@ -211,9 +170,6 @@ Deno.test({
     },
 });
 
-/**
- * static listen
- */
 Deno.test({
     name: "listen",
     async fn(): Promise<void> {
@@ -227,6 +183,52 @@ Deno.test({
 
         assertEquals(false, Boolean(error));
         assertEquals("localhost:8080", host);
+    },
+    sanitizeResources: false,
+    sanitizeOps: false,
+});
+
+Deno.test({
+    name: "listenTLS",
+    async fn(): Promise<void> {
+        const option = {
+            port:       8080,
+            certFile:   "./testdata/tls/localhost.crt",
+            keyFile:    "./testdata/tls/localhost.key"
+        }
+        let error, host;
+        try {
+            await System.listenTLS(option, (conf: Config)=>host=`${conf.hostname}:${conf.port}`);
+            System.server.close();
+        } catch (e) {
+            error = e;
+        }
+
+        //console.log(error);
+
+        assertEquals(false, Boolean(error));
+        assertEquals("localhost:8080", host);
+    },
+    sanitizeResources: false,
+    sanitizeOps: false,
+});
+
+Deno.test({
+    name: "close",
+    async fn(): Promise<void> {
+        const handler = () => new Response();
+        System.server = new Server({ handler });
+        let check_before: null | boolean = null;
+        let check_after: null | boolean = null;
+        try {
+          check_before = System.server.closed;
+        } finally {
+          System.close();
+          check_after = System.server.closed;
+        }
+
+        assertEquals(false, check_before);
+        assertEquals(true, check_after);
     },
     sanitizeResources: false,
     sanitizeOps: false,
