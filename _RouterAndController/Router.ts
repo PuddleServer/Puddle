@@ -124,8 +124,8 @@ export class Route {
         this.URL.apply(this, URL);
         this.#GET = GET || default_get();
         const process_404: HandlerFunction = (this.#PATH == "404")? this.#GET : Route["404"].GET();
-        if(GET==undefined) this.#GET = default_get();
-        else if(GET==null) this.#GET = process_404;
+        if(GET === undefined) this.#GET = default_get();
+        else if(GET === null) this.#GET = process_404;
         this.#PUT = PUT || process_404;
         this.#POST = POST || process_404;
         this.#DELETE = DELETE || process_404;
