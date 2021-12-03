@@ -237,7 +237,7 @@
 > **Test**  
 > Preparation
 > ```typescript
-> System.createRoutes("./system_test/assets/*");
+> System.createRoutes("./testdata/assets/*");
 > const path_list = Route.list.map(route=>route.PATH());
 > ```
 > 
@@ -415,3 +415,40 @@
 <br>
 
 ### static async listenTLS(option: string | Deno.ListenTlsOptions, startFunction?: Function)
+> #### **Case 1**
+> **Arguments**
+> | name | Type |
+> | :- | :- |
+> | option | Deno.ListenOptions |
+> 
+> **Return**  
+> Type  
+> *&emsp;Promise<void>*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const option = {
+>   port:       8080,
+>   certFile:   "./testdata/tls/localhost.crt",
+>   keyFile:    "./testdata/tls/localhost.key"
+> }
+> let error, host;
+> try {
+>     await System.listenTLS(option, (conf: Config)=>host=`${conf.hostname}:${conf.port}`);
+>     System.server.close();
+> } catch (e) {
+>     error = e;
+> }
+> ```
+> 
+> Implementation  
+> `Boolean(error)`
+> ```typescript
+> false
+> ```
+> `host`
+> ```typescript
+> "localhost:8080"
+> ```
+<br>
