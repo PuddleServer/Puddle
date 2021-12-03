@@ -42,3 +42,43 @@ Deno.test({
         assertStrictEquals(process_404.toString(), route.GET().toString());
     },
 });
+
+Deno.test({
+    name: "PATH",
+    fn(): void {
+        const route = new Route("test_PATH");
+        assertEquals("test_PATH", route.PATH());
+    }
+});
+
+Deno.test({
+    name: "URL1",
+    fn(): void {
+        const route = new Route("test_URL1");
+
+        assertStrictEquals(JSON.stringify(["/test_URL1"]), JSON.stringify(route.URL()));
+    }
+});
+
+Deno.test({
+    name: "URL2",
+    fn(): void {
+        const route = new Route("test_URL2");
+        const urls = ["/url1", "/url2"];
+        route.URL(urls);
+
+        assertStrictEquals(JSON.stringify(urls.sort()), JSON.stringify(route.URL().sort()));
+    }
+});
+
+Deno.test({
+    name: "URL3",
+    fn(): void {
+        const route = new Route("test_URL3");
+        const urls = ["/url3", "/url4"];
+        route.URL(urls[0], urls[1]);
+
+        assertStrictEquals(JSON.stringify(urls.sort()), JSON.stringify(route.URL().sort()));
+    }
+});
+
