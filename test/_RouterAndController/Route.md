@@ -649,20 +649,128 @@
 
 ### WebSocket(event?: WebSocketEvent)
 > #### **Case 1**
+> | name | Type |
+> | :- | :- |
+> | event | WebSocketEvent |
 > 
 > **Return**  
 > Type  
-> *&emsp;undefined*  
+> *&emsp;WebSocketRoute*  
 >
 > **Test**  
 > Preparation
 > ```typescript
-> const route = new Route("test_AUTH1");
+> const route = new Route("test_WebSocket1");
 > ```
 > 
 > Implementation  
-> `route.AUTH()`  
+> `route.WebSocket() instanceof WebSocketRoute`  
 > ```typescript
-> undefined
+> true
+> ```
+<br>
+
+> #### **Case 2**
+> 
+> **Return**  
+> Type  
+> *&emsp;WebSocketRoute*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const handler = (client: WebSocketClient)=>console.log(client);
+> const route = new Route("test_WebSocket2");
+> const ws = route.WebSocket({onerror: handler});
+> ```
+> 
+> Implementation  
+> `ws instanceof WebSocketRoute`  
+> ```typescript
+> true
+> ```
+> `ws.onerror().toString() === handler.toString()`  
+> ```typescript
+> true
+> ```
+<br>
+
+### getUniqueUrlArray(urls: string[])
+> #### **Case 1**
+> | name | Type |
+> | :- | :- |
+> | urls | string[] |
+> 
+> **Return**  
+> Type  
+> *&emsp;string[]*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const uniqueUrlArray = ["/url1", "/url2"];
+> const route = new Route("test_getUniqueUrlArray", uniqueUrlArray);
+> ```
+> 
+> Implementation  
+> `route.getUniqueUrlArray(uniqueUrlArray)`  
+> ```typescript
+> []
+> ```
+<br>
+
+### static isThePathInUse(path: string)
+> #### **Case 1**
+> | name | Type |
+> | :- | :- |
+> | path | string |
+> 
+> **Return**  
+> Type  
+> *&emsp;boolean*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const path = "test_isThePathInUse1";
+> new Route(path);
+> ```
+> 
+> Implementation  
+> `Route.isThePathInUse(path)`  
+> ```typescript
+> true
+> ```
+> `Route.isThePathInUse("test_isThePathInUse2")`  
+> ```typescript
+> false
+> ```
+<br>
+
+### static isTheUrlAlreadyInUse(...urls: string[])
+> #### **Case 1**
+> | name | Type |
+> | :- | :- |
+> | arguments[0] | string |
+> 
+> **Return**  
+> Type  
+> *&emsp;boolean*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const url = "/test_isTheUrlAlreadyInUse1";
+> new Route(path, [url]);
+> ```
+> 
+> Implementation  
+> `Route.isTheUrlAlreadyInUse(url)`  
+> ```typescript
+> true
+> ```
+> `Route.isTheUrlAlreadyInUse("/test_isTheUrlAlreadyInUse2")`  
+> ```typescript
+> false
 > ```
 <br>
