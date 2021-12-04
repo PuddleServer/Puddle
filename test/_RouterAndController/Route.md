@@ -237,9 +237,9 @@
 > Preparation
 > ```typescript
 > const route = new Route("test_GET3");
-> const response = new Response();
-> const handler = ()=>response;
-> route.GET(response);
+> const process = new Response();
+> const handler = ()=>process;
+> route.GET(process);
 > ```
 > 
 > Implementation  
@@ -287,7 +287,7 @@
 > const handler: HandlerFunction = (req: SystemRequest, res: SystemResponse) => {
 >    res.setText("Collect!"); 
 > }
-> route.GET(handler);
+> route.PUT(handler);
 > ```
 > 
 > Implementation  
@@ -311,9 +311,9 @@
 > Preparation
 > ```typescript
 > const route = new Route("test_PUT3");
-> const response = new Response();
-> const handler = ()=>response;
-> route.PUT(response);
+> const process = new Response();
+> const handler = ()=>process;
+> route.PUT(process);
 > ```
 > 
 > Implementation  
@@ -385,9 +385,9 @@
 > Preparation
 > ```typescript
 > const route = new Route("test_POST3");
-> const response = new Response();
-> const handler = ()=>response;
-> route.POST(response);
+> const process = new Response();
+> const handler = ()=>process;
+> route.POST(process);
 > ```
 > 
 > Implementation  
@@ -439,7 +439,7 @@
 > ```
 > 
 > Implementation  
-> `route.POST().toString() === handler.toString()`  
+> `route.DELETE().toString() === handler.toString()`  
 > ```typescript
 > true
 > ```
@@ -459,9 +459,9 @@
 > Preparation
 > ```typescript
 > const route = new Route("test_DELETE3");
-> const response = new Response();
-> const handler = ()=>response;
-> route.DELETE(response);
+> const process = new Response();
+> const handler = ()=>process;
+> route.DELETE(process);
 > ```
 > 
 > Implementation  
@@ -533,13 +533,141 @@
 > Preparation
 > ```typescript
 > const route = new Route("test_PATCH3");
-> const response = new Response();
-> const handler = ()=>response;
-> route.PATCH(response);
+> const process = new Response();
+> const handler = ()=>process;
+> route.PATCH(process);
 > ```
 > 
 > Implementation  
 > `route.PATCH().toString() === handler.toString()`  
+> ```typescript
+> true
+> ```
+<br>
+
+### AUTH(...param: ( string | { [key:string]: string; })[] )
+> #### **Case 1**
+> 
+> **Return**  
+> Type  
+> *&emsp;undefined*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const route = new Route("test_AUTH1");
+> ```
+> 
+> Implementation  
+> `route.AUTH()`  
+> ```typescript
+> undefined
+> ```
+<br>
+
+> #### **Case 3**
+> **Arguments**
+> | name | Type |
+> | :- | :- |
+> | hash | string |
+> 
+> **Return**  
+> Type  
+> *&emsp;Route*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const route = new Route("test_AUTH2");
+> const hash = createHash("md5").update(`user_name:${route.PATH()}:password`).toString();
+> route.AUTH(hash);
+> ```
+> 
+> Implementation  
+> `route.AUTH()[0] === hash`  
+> ```typescript
+> true
+> ```
+<br>
+
+> #### **Case 2**
+> **Arguments**
+> | name | Type |
+> | :- | :- |
+> | name | string |
+> | password | string |
+> 
+> **Return**  
+> Type  
+> *&emsp;Route*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const route = new Route("test_AUTH3");
+> const hash = createHash("md5").update(`user_name:${route.PATH()}:password`).toString();
+> route.AUTH("user_name", "password");
+> ```
+> 
+> Implementation  
+> `route.AUTH()[0] === hash`   
+> ```typescript
+> true
+> ```
+<br>
+
+> #### **Case 3**
+> **Arguments**
+> | name | Type |
+> | :- | :- |
+> | name | string |
+> | password | string |
+> 
+> **Return**  
+> Type  
+> *&emsp;Route*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const route = new Route("test_AUTH3");
+> const hash = createHash("md5").update(`user_name:${route.PATH()}:password`).toString();
+> route.AUTH("user_name", "password");
+> ```
+> 
+> Implementation  
+> `route.AUTH()[0] === hash`   
+> ```typescript
+> true
+> ```
+<br>
+
+> #### **Case 4**
+> **Arguments**
+> | name | Type |
+> | :- | :- |
+> | arguments[0] | string |
+> | arguments[1] | string |
+> 
+> **Return**  
+> Type  
+> *&emsp;Route*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const name = "user_name", password = "password";
+> const route = new Route("test_AUTH4");
+> const hash = createHash("md5").update(`${name}:${route.PATH()}:${password}`).toString();
+> route.AUTH({name, password}, {hash});
+> ```
+> 
+> Implementation  
+> `route.AUTH()[0] === hash`   
+> ```typescript
+> true
+> ```
+> `route.AUTH()[1] === hash`   
 > ```typescript
 > true
 > ```
