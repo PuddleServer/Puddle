@@ -422,18 +422,18 @@ export class Route {
             for(let registeredURL of urls) {
                 const span = `${registeredURL}/`.replace(/\/+/g, "/").split("/");
                 if(targets.length != span.length) continue;
-                let flug = true;
+                let flag = true;
                 for(let i in span) {
                     if(span[i][0] == ":") {
                         variables[span[i].slice(1)] = targets[i];
                         continue;
                     }
                     if(span[i] != targets[i]) {
-                        flug = false;
+                        flag = false;
                         break;
                     }
                 }
-                if(flug) {
+                if(flag) {
                     result = Route.getRouteByPath(route.PATH());
                     break;
                 }
