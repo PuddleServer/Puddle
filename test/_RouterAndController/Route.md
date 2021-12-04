@@ -655,7 +655,7 @@
 > Preparation
 > ```typescript
 > const route = new Route("test_isWebSocket");
-> const before, after;
+> let before, after;
 > before = route.isWebSocket;
 > route.WebSocket();
 > after = route.isWebSocket;
@@ -865,7 +865,7 @@
 > Preparation
 > ```typescript
 > const route = new Route("/test_getRouteByUrl/:var");
-> const variables = {};
+> const variables: {[key: string]: string;} = {};
 > const _route = Route.getRouteByUrl("/test_getRouteByUrl/test", variables);
 > ```
 > 
@@ -874,7 +874,7 @@
 > ```typescript
 > true
 > ```
-> `variables?.var`
+> `variables["var"]`
 > ```typescript
 > "test"
 > ```
