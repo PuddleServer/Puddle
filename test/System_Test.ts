@@ -22,7 +22,7 @@ import {
 Deno.test({
   name: "get_JSON",
     fn(): void {
-        assertStrictEquals(PuddleJSON, System.JSON);
+        assertStrictEquals(System.JSON, PuddleJSON);
     },
 });
 
@@ -32,8 +32,8 @@ Deno.test({
         const module = { result: "OK" };
         System.modules.set("test", module);
 
-        assertStrictEquals(module, System.getModule("test"));
-        assertNotStrictEquals(module, {result: "OK"})
+        assertStrictEquals(System.getModule("test"), module);
+        assertNotStrictEquals({result: "OK"}, module)
     },
 });
 
@@ -43,7 +43,7 @@ Deno.test({
         const module = { result: "OK" };
         System.setModule("test", module);
 
-        assertStrictEquals(module, System.modules.get("test"));
+        assertStrictEquals(System.modules.get("test"), module);
     },
 });
 
@@ -53,8 +53,8 @@ Deno.test({
         const modules = { module1: { result: 1 }, module2: { result: 2 } };
         System.setModules(modules);
 
-        assertStrictEquals(modules.module1, System.modules.get("module1"));
-        assertStrictEquals(modules.module2, System.modules.get("module2"));
+        assertStrictEquals(System.modules.get("module1"), modules.module1);
+        assertStrictEquals(System.modules.get("module2"), modules.module2);
     },
 });
 
@@ -68,9 +68,9 @@ Deno.test({
 
         System.deleteModule("module2", "module3");
 
-        assertStrictEquals(module1, System.modules.get("module1"));
-        assertStrictEquals(undefined, System.modules.get("module2"));
-        assertStrictEquals(undefined, System.modules.get("module3"));
+        assertStrictEquals(System.modules.get("module1"), module1);
+        assertStrictEquals(System.modules.get("module2"), undefined);
+        assertStrictEquals(System.modules.get("module3"), undefined);
     },
 });
 
@@ -79,8 +79,8 @@ Deno.test({
     fn(): void {
         const test_route = System.createRoute("test_route1");
 
-        assertEquals(true, test_route instanceof Route);
-        assertEquals(["/test_route1"], test_route.URL());
+        assertEquals(test_route instanceof Route, true);
+        assertEquals(test_route.URL(), ["/test_route1"]);
     },
 });
 
@@ -89,8 +89,8 @@ Deno.test({
     fn(): void {
         const test_route = System.createRoute({PATH: "test_route2"});
         
-        assertEquals(true, test_route instanceof Route);
-        assertEquals(["/test_route2"], test_route.URL());
+        assertEquals(test_route instanceof Route, true);
+        assertEquals(test_route.URL(), ["/test_route2"]);
     },
 });
 
@@ -100,8 +100,8 @@ Deno.test({
         System.createRoutes("test_route3.test", {PATH: "test_route4"});
         const path_list = Route.list.map(route=>route.PATH());
 
-        assertEquals(true, path_list.includes("test_route3.test"));
-        assertEquals(true, path_list.includes("test_route4"));
+        assertEquals(path_list.includes("test_route3.test"), true);
+        assertEquals(path_list.includes("test_route4"), true);
     },
 });
 
@@ -111,8 +111,8 @@ Deno.test({
         System.createRoutes("./testdata/assets/*");
         const path_list = Route.list.map(route=>route.PATH());
 
-        assertEquals(true, path_list.includes("./testdata/assets/script.js"));
-        assertEquals(true, path_list.includes("./testdata/assets/style.css"));
+        assertEquals(path_list.includes("./testdata/assets/script.js"), true);
+        assertEquals(path_list.includes("./testdata/assets/style.css"), true);
     },
 });
 
@@ -123,7 +123,7 @@ Deno.test({
         System.deleteRoute("test_route_tmp");
         const path_list = Route.list.map(route=>route.PATH());
 
-        assertEquals(false, path_list.includes("test_route_tmp"));
+        assertEquals(path_list.includes("test_route_tmp"), false);
     },
 });
 
@@ -136,8 +136,8 @@ Deno.test({
         System.deleteRoutes(tmp_list);
         const path_list = Route.list.map(route=>route.PATH());
 
-        assertEquals(false, path_list.includes(tmp_list[0]));
-        assertEquals(false, path_list.includes(tmp_list[1]));
+        assertEquals(path_list.includes(tmp_list[0]), false);
+        assertEquals(path_list.includes(tmp_list[1]), false);
     },
 });
 
@@ -146,7 +146,7 @@ Deno.test({
     fn(): void {
         const route = new Route("test_route5");
 
-        assertStrictEquals(route, System.Route("test_route5"));
+        assertStrictEquals(System.Route("test_route5"), route);
     },
 });
 
@@ -155,7 +155,7 @@ Deno.test({
     fn(): void {
         const route = System.Route("test_route6");
 
-        assertEquals(true, route instanceof Route);
+        assertEquals(route instanceof Route, true);
         assertEquals(route.PATH(), "test_route6");
     },
 });
@@ -165,8 +165,8 @@ Deno.test({
     fn(): void {
         const auth = System.AUTH;
 
-        assertEquals(true, "GOOGLE" in auth);
-        assertStrictEquals("function", typeof auth.GOOGLE);
+        assertEquals("GOOGLE" in auth, true);
+        assertStrictEquals(typeof auth.GOOGLE, "function");
     },
 });
 
@@ -181,8 +181,8 @@ Deno.test({
             error = e;
         }
 
-        assertEquals(false, Boolean(error));
-        assertEquals("localhost:8080", host);
+        assertEquals(Boolean(error), false);
+        assertEquals(host, "localhost:8080");
     },
     sanitizeResources: false,
     sanitizeOps: false,
@@ -206,8 +206,8 @@ Deno.test({
 
         //console.log(error);
 
-        assertEquals(false, Boolean(error));
-        assertEquals("localhost:8080", host);
+        assertEquals(Boolean(error), false);
+        assertEquals(host, "localhost:8080");
     },
     sanitizeResources: false,
     sanitizeOps: false,
@@ -227,8 +227,8 @@ Deno.test({
           check_after = System.server.closed;
         }
 
-        assertEquals(false, check_before);
-        assertEquals(true, check_after);
+        assertEquals(check_before, false);
+        assertEquals(check_after, true);
     },
     sanitizeResources: false,
     sanitizeOps: false,
