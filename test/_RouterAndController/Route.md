@@ -709,7 +709,8 @@
 > Preparation
 > ```typescript
 > const uniqueUrlArray = ["/url1", "/url2"];
-> const route = new Route("test_getUniqueUrlArray", uniqueUrlArray);
+> const route = new Route("test_getUniqueUrlArray");
+> route.URL(uniqueUrlArray);
 > ```
 > 
 > Implementation  
