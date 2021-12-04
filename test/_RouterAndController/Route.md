@@ -762,7 +762,7 @@
 > Preparation
 > ```typescript
 > const url = "/test_isTheUrlAlreadyInUse1";
-> new Route(path, [url]);
+> new Route("test_isTheUrlAlreadyInUse1", [url]);
 > ```
 > 
 > Implementation  
@@ -773,5 +773,53 @@
 > `Route.isTheUrlAlreadyInUse("/test_isTheUrlAlreadyInUse2")`  
 > ```typescript
 > false
+> ```
+<br>
+
+### static getRouteByPath(path: string)
+> #### **Case 1**
+> | name | Type |
+> | :- | :- |
+> | path | string |
+> 
+> **Return**  
+> Type  
+> *&emsp;boolean*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const path = "test_getRouteByPath1";
+> const route = new Route(path);
+> ```
+> 
+> Implementation  
+> `Route.getRouteByPath(path) === route`  
+> ```typescript
+> true
+> ```
+> #### **Case 2**
+> | name | Type |
+> | :- | :- |
+> | path | string |
+> 
+> **Return**  
+> Type  
+> *&emsp;boolean*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const path = "test_getRouteByPath2";
+> ```
+> 
+> Implementation  
+> `Route.getRouteByPath(path) instanceof Route`  
+> ```typescript
+> true
+> ```
+> `Route.getRouteByPath(path).PATH()`  
+> ```typescript
+> "test_getRouteByPath2"
 > ```
 <br>
