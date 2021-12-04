@@ -411,7 +411,9 @@ export class Route {
 
     /**
      * 指定したURLを含むルートオブジェクトを取得する。
-     * @param url Get a Route object containing the specified URL.
+     * Get a Route object containing the specified URL.
+     * @param url URL to be used to identify the Route.
+     * @param variables An object that stores the variables contained in a URL.
      * @returns Route object.
      */
     static getRouteByUrl(url: string, variables: {[key: string]: string;} = {}): Route | undefined {
