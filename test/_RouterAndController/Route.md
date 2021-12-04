@@ -643,6 +643,35 @@
 > ```
 <br>
 
+
+### isWebSocket()
+> #### **Case 1**
+> 
+> **Return**  
+> Type  
+> *&emsp;boolean*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const route = new Route("test_isWebSocket");
+> const before, after;
+> before = route.isWebSocket;
+> route.WebSocket();
+> after = route.isWebSocket;
+> ```
+> 
+> Implementation  
+> `before`  
+> ```typescript
+> false
+> ```
+> `after`  
+> ```typescript
+> true
+> ```
+<br>
+
 ### WebSocket(event?: WebSocketEvent)
 > #### **Case 1**
 > | name | Type |
@@ -794,6 +823,7 @@
 > ```typescript
 > true
 > ```
+
 > #### **Case 2**
 > | name | Type |
 > | :- | :- |
@@ -817,5 +847,35 @@
 > `Route.getRouteByPath(path).PATH()`  
 > ```typescript
 > "test_getRouteByPath2"
+> ```
+<br>
+
+### static getRouteByUrl(url: string, variables: {[key: string]: string;} = {})
+> #### **Case 1**
+> | name | Type |
+> | :- | :- |
+> | url | string |
+> | variables | {[key: string]: string;} |
+> 
+> **Return**  
+> Type  
+> *&emsp;boolean*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const route = new Route("/test_getRouteByUrl/:var");
+> const variables = {};
+> const _route = Route.getRouteByUrl("/test_getRouteByUrl/test", variables);
+> ```
+> 
+> Implementation  
+> `_route === route`  
+> ```typescript
+> true
+> ```
+> `variables?.var`
+> ```typescript
+> "test"
 > ```
 <br>
