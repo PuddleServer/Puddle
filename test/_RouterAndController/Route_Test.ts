@@ -15,7 +15,10 @@ import {
     default_error,
     SystemRequest,
     SystemResponse,
-    HandlerFunction
+    HandlerFunction,
+    createHash,
+    WebSocketRoute,
+    WebSocketClient
 } from "../../mod.ts";
 
 Deno.test({
@@ -24,14 +27,14 @@ Deno.test({
         const route = new Route("test_route1");
         const process_404 = default_error(404, `Not Found. 見つかりません。`);
 
-        assertEquals(true, route instanceof Route);
-        assertStrictEquals("test_route1", route.PATH());
-        assertStrictEquals(JSON.stringify(["/test_route1"]), JSON.stringify(route.URL()));
-        assertStrictEquals(default_get().toString(), route.GET().toString());
-        assertStrictEquals(process_404.toString(), route.PUT().toString());
-        assertStrictEquals(process_404.toString(), route.POST().toString());
-        assertStrictEquals(process_404.toString(), route.DELETE().toString());
-        assertStrictEquals(process_404.toString(), route.PATCH().toString());
+        assertEquals(route instanceof Route, true);
+        assertStrictEquals(route.PATH(), "test_route1");
+        assertStrictEquals(JSON.stringify(route.URL()), JSON.stringify(["/test_route1"]));
+        assertStrictEquals(route.GET().toString(), default_get().toString())
+        assertStrictEquals(route.PUT().toString(), process_404.toString());
+        assertStrictEquals(route.POST().toString(), process_404.toString());
+        assertStrictEquals(route.DELETE().toString(), process_404.toString());
+        assertStrictEquals(route.PATCH().toString(), process_404.toString());
     },
 });
 
@@ -41,8 +44,8 @@ Deno.test({
         const route = new Route("test_route2", [], null);
         const process_404 = default_error(404, `Not Found. 見つかりません。`);
 
-        assertEquals(true, route instanceof Route);
-        assertStrictEquals(process_404.toString(), route.GET().toString());
+        assertEquals(route instanceof Route, true);
+        assertStrictEquals(route.GET().toString(), process_404.toString());
     },
 });
 
@@ -50,7 +53,7 @@ Deno.test({
     name: "PATH",
     fn(): void {
         const route = new Route("test_PATH");
-        assertEquals("test_PATH", route.PATH());
+        assertEquals(route.PATH(), "test_PATH");
     }
 });
 
@@ -59,7 +62,7 @@ Deno.test({
     fn(): void {
         const route = new Route("test_URL1");
 
-        assertStrictEquals(JSON.stringify(["/test_URL1"]), JSON.stringify(route.URL()));
+        assertStrictEquals(JSON.stringify(route.URL()), JSON.stringify(["/test_URL1"]));
     }
 });
 
@@ -70,7 +73,7 @@ Deno.test({
         const urls = ["/url1", "/url2"];
         route.URL(urls);
 
-        assertStrictEquals(JSON.stringify(urls.sort()), JSON.stringify(route.URL().sort()));
+        assertStrictEquals(JSON.stringify(route.URL().sort()), JSON.stringify(urls.sort()));
     }
 });
 
@@ -81,7 +84,7 @@ Deno.test({
         const urls = ["/url3", "/url4"];
         route.URL(urls[0], urls[1]);
 
-        assertStrictEquals(JSON.stringify(urls.sort()), JSON.stringify(route.URL().sort()));
+        assertStrictEquals(JSON.stringify(route.URL().sort()), JSON.stringify(urls.sort()));
     }
 });
 
@@ -90,7 +93,7 @@ Deno.test({
     fn(): void {
         const route = new Route("test_GET1");
 
-        assertStrictEquals(default_get().toString(), route.GET().toString());
+        assertStrictEquals(route.GET().toString(), default_get().toString());
     },
 });
 
@@ -103,7 +106,7 @@ Deno.test({
         }
         route.GET(handler);
 
-        assertStrictEquals(handler.toString(), route.GET().toString());
+        assertStrictEquals(route.GET().toString(), handler.toString());
     },
 });
 
@@ -115,7 +118,7 @@ Deno.test({
         const handler = ()=>process;
         route.GET(process);
 
-        assertStrictEquals(handler.toString(), route.GET().toString());
+        assertStrictEquals(route.GET().toString(), handler.toString());
     },
 });
 
@@ -125,7 +128,7 @@ Deno.test({
         const route = new Route("test_PUT1");
         const process_404 = default_error(404, `Not Found. 見つかりません。`);
 
-        assertStrictEquals(process_404.toString(), route.PUT().toString());
+        assertStrictEquals(route.PUT().toString(), process_404.toString());
     },
 });
 
@@ -138,7 +141,7 @@ Deno.test({
         }
         route.PUT(handler);
 
-        assertStrictEquals(handler.toString(), route.PUT().toString());
+        assertStrictEquals(route.PUT().toString(), handler.toString());
     },
 });
 
@@ -150,7 +153,7 @@ Deno.test({
         const handler = ()=>process;
         route.PUT(process);
 
-        assertStrictEquals(handler.toString(), route.PUT().toString());
+        assertStrictEquals(route.PUT().toString(), handler.toString());
     },
 });
 
@@ -160,7 +163,7 @@ Deno.test({
         const route = new Route("test_POST1");
         const process_404 = default_error(404, `Not Found. 見つかりません。`);
 
-        assertStrictEquals(process_404.toString(), route.POST().toString());
+        assertStrictEquals(route.POST().toString(), process_404.toString());
     },
 });
 
@@ -173,7 +176,7 @@ Deno.test({
         }
         route.POST(handler);
 
-        assertStrictEquals(handler.toString(), route.POST().toString());
+        assertStrictEquals(route.POST().toString(), handler.toString());
     },
 });
 
@@ -185,7 +188,7 @@ Deno.test({
         const handler = ()=>process;
         route.POST(process);
 
-        assertStrictEquals(handler.toString(), route.POST().toString());
+        assertStrictEquals(route.POST().toString(), handler.toString());
     },
 });
 
@@ -195,7 +198,7 @@ Deno.test({
         const route = new Route("test_DELETE1");
         const process_404 = default_error(404, `Not Found. 見つかりません。`);
 
-        assertStrictEquals(process_404.toString(), route.DELETE().toString());
+        assertStrictEquals(route.DELETE().toString(), process_404.toString());
     },
 });
 
@@ -208,7 +211,7 @@ Deno.test({
         }
         route.DELETE(handler);
 
-        assertStrictEquals(handler.toString(), route.DELETE().toString());
+        assertStrictEquals(route.DELETE().toString(), handler.toString());
     },
 });
 
@@ -220,7 +223,7 @@ Deno.test({
         const handler = ()=>process;
         route.DELETE(process);
 
-        assertStrictEquals(handler.toString(), route.DELETE().toString());
+        assertStrictEquals(route.DELETE().toString(), handler.toString());
     },
 });
 
@@ -230,7 +233,7 @@ Deno.test({
         const route = new Route("test_PATCH1");
         const process_404 = default_error(404, `Not Found. 見つかりません。`);
 
-        assertStrictEquals(process_404.toString(), route.PATCH().toString());
+        assertStrictEquals(route.PATCH().toString(), process_404.toString());
     },
 });
 
@@ -243,7 +246,7 @@ Deno.test({
         }
         route.PATCH(handler);
 
-        assertStrictEquals(handler.toString(), route.PATCH().toString());
+        assertStrictEquals(route.PATCH().toString(), handler.toString());
     },
 });
 
@@ -255,6 +258,149 @@ Deno.test({
         const handler = ()=>process;
         route.PATCH(process);
 
-        assertStrictEquals(handler.toString(), route.PATCH().toString());
+        assertStrictEquals(route.PATCH().toString(), handler.toString());
+    },
+});
+
+Deno.test({
+    name: "AUTH1",
+    fn(): void {
+        const route = new Route("test_AUTH1");
+
+        assertEquals(route.AUTH(), undefined);
+    },
+});
+
+Deno.test({
+    name: "AUTH2",
+    fn(): void {
+        const route = new Route("test_AUTH2");
+        const hash = createHash("md5").update(`user_name:${route.PATH()}:password`).toString();
+        route.AUTH(hash);
+        
+        assertEquals(JSON.stringify(route.AUTH()) ,JSON.stringify([hash]));
+    },
+});
+
+Deno.test({
+    name: "AUTH3",
+    fn(): void {
+        const route = new Route("test_AUTH3");
+        const hash = createHash("md5").update(`user_name:${route.PATH()}:password`).toString();
+        route.AUTH("user_name", "password");
+
+        assertStrictEquals(JSON.stringify(route.AUTH()) ,JSON.stringify([hash]));
+    },
+});
+
+Deno.test({
+    name: "AUTH4",
+    fn(): void {
+        const name = "user_name", password = "password";
+        const route = new Route("test_AUTH4");
+        const hash = createHash("md5").update(`${name}:${route.PATH()}:${password}`).toString();
+        route.AUTH({name, password}, {hash});
+
+        assertStrictEquals(JSON.stringify(route.AUTH()) ,JSON.stringify([hash, hash]));
+    },
+});
+
+Deno.test({
+    name: "isWebSocket",
+    fn(): void {
+        const route = new Route("test_isWebSocket");
+        let before, after;
+        before = route.isWebSocket;
+        route.WebSocket();
+        after = route.isWebSocket;
+
+        assertEquals(before, false);
+        assertEquals(after, true);
+    },
+});
+
+Deno.test({
+    name: "WebSocket1",
+    fn(): void {
+        const route = new Route("test_WebSocket1");
+
+        assertStrictEquals(route.WebSocket() instanceof WebSocketRoute, true);
+    },
+});
+
+Deno.test({
+    name: "WebSocket2",
+    fn(): void {
+        const handler = (client: WebSocketClient)=>console.log(client);
+        const route = new Route("test_WebSocket2");
+        const ws = route.WebSocket({onerror: handler});
+
+        assertEquals(ws instanceof WebSocketRoute, true);
+        assertStrictEquals(ws.onerror().toString(), handler.toString());
+    },
+});
+
+Deno.test({
+    name: "getUniqueUrlArray",
+    fn(): void {
+        const uniqueUrlArray = ["/url1", "/url2"];
+        const route = new Route("test_getUniqueUrlArray");
+        route.URL(uniqueUrlArray);
+
+        assertEquals(route.getUniqueUrlArray(uniqueUrlArray), []);
+    },
+});
+
+Deno.test({
+    name: "isThePathInUse",
+    fn(): void {
+        const path = "test_isThePathInUse1";
+        new Route(path);
+
+        assertEquals(Route.isThePathInUse(path), true);
+        assertEquals(Route.isThePathInUse("test_isThePathInUse2"), false);
+    },
+});
+
+Deno.test({
+    name: "isTheUrlAlreadyInUse",
+    fn(): void {
+        const url = "/test_isTheUrlAlreadyInUse1";
+        new Route("test_isTheUrlAlreadyInUse1", [url]);
+
+        assertEquals(Route.isTheUrlAlreadyInUse(url), true);
+        assertEquals(Route.isTheUrlAlreadyInUse("/test_isTheUrlAlreadyInUse2"), false);
+    },
+});
+
+Deno.test({
+    name: "getRouteByPath1",
+    fn(): void {
+        const path = "test_getRouteByPath1";
+        const route = new Route(path);
+
+        assertStrictEquals(Route.getRouteByPath(path) ,route);
+    },
+});
+
+Deno.test({
+    name: "getRouteByPath2",
+    fn(): void {
+        const path = "test_getRouteByPath2";
+
+        assertEquals(Route.getRouteByPath(path) instanceof Route, true);
+        assertEquals(Route.getRouteByPath(path).PATH(), "test_getRouteByPath2");
+    },
+});
+
+Deno.test({
+    name: "getRouteByUrl",
+    fn(): void {
+        const route = new Route("/test_getRouteByUrl/:var");
+        const variables: {[key: string]: string;} = {};
+        const _route = Route.getRouteByUrl("/test_getRouteByUrl/test", variables);
+
+        assertStrictEquals(_route ,route);
+        assertEquals(variables["var"], "test");
     },
 });
