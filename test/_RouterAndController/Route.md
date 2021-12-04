@@ -565,7 +565,7 @@
 > ```
 <br>
 
-> #### **Case 3**
+> #### **Case 2**
 > **Arguments**
 > | name | Type |
 > | :- | :- |
@@ -584,33 +584,7 @@
 > ```
 > 
 > Implementation  
-> `route.AUTH()[0] === hash`  
-> ```typescript
-> true
-> ```
-<br>
-
-> #### **Case 2**
-> **Arguments**
-> | name | Type |
-> | :- | :- |
-> | name | string |
-> | password | string |
-> 
-> **Return**  
-> Type  
-> *&emsp;Route*  
->
-> **Test**  
-> Preparation
-> ```typescript
-> const route = new Route("test_AUTH3");
-> const hash = createHash("md5").update(`user_name:${route.PATH()}:password`).toString();
-> route.AUTH("user_name", "password");
-> ```
-> 
-> Implementation  
-> `route.AUTH()[0] === hash`   
+> `route.AUTH() && route.AUTH()[0] === hash`  
 > ```typescript
 > true
 > ```
@@ -636,7 +610,7 @@
 > ```
 > 
 > Implementation  
-> `route.AUTH()[0] === hash`   
+> `route.AUTH() && route.AUTH()[0] === hash`   
 > ```typescript
 > true
 > ```
@@ -663,12 +637,32 @@
 > ```
 > 
 > Implementation  
-> `route.AUTH()[0] === hash`   
+> `route.AUTH() && route.AUTH()[0] === hash`   
 > ```typescript
 > true
 > ```
-> `route.AUTH()[1] === hash`   
+> `route.AUTH() && route.AUTH()[1] === hash`   
 > ```typescript
 > true
+> ```
+<br>
+
+### WebSocket(event?: WebSocketEvent)
+> #### **Case 1**
+> 
+> **Return**  
+> Type  
+> *&emsp;undefined*  
+>
+> **Test**  
+> Preparation
+> ```typescript
+> const route = new Route("test_AUTH1");
+> ```
+> 
+> Implementation  
+> `route.AUTH()`  
+> ```typescript
+> undefined
 > ```
 <br>
