@@ -584,7 +584,7 @@
 > ```
 > 
 > Implementation  
-> `route.AUTH() && route.AUTH()[0] === hash`  
+> `JSON.stringify(route.AUTH()) === JSON.stringify([hash])`  
 > ```typescript
 > true
 > ```
@@ -610,7 +610,7 @@
 > ```
 > 
 > Implementation  
-> `route.AUTH() && route.AUTH()[0] === hash`   
+> `JSON.stringify(route.AUTH()) === JSON.stringify([hash])`   
 > ```typescript
 > true
 > ```
@@ -637,11 +637,7 @@
 > ```
 > 
 > Implementation  
-> `route.AUTH() && route.AUTH()[0] === hash`   
-> ```typescript
-> true
-> ```
-> `route.AUTH() && route.AUTH()[1] === hash`   
+> `JSON.stringify(route.AUTH()) === JSON.stringify([hash, hash])`  
 > ```typescript
 > true
 > ```
