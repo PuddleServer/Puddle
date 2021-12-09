@@ -1,6 +1,8 @@
 
 # class DecodedURL extends URL
+
 ## Unit Test
+
 ### constructor
 > #### **Case 1**
 > **Arguments**
@@ -19,6 +21,10 @@
 > ```
 > 
 > Implementation  
+> `url instanceof DecodedURL`
+> ```typescript
+> true
+> ```
 > `url.toJSON()`
 > ```typescript
 > `http://example.com/%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB?%D0%BF%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80#hash`
