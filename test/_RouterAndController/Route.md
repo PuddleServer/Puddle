@@ -85,6 +85,8 @@
 > ```
 <br>
 
+---
+
 ### PATH()
 > #### **Case 1**
 > 
@@ -104,6 +106,8 @@
 > "test_PATH"
 > ```
 <br>
+
+---
 
 ### URL(...urls: string[] | string[][])
 > #### **Case 1**
@@ -175,6 +179,8 @@
 > true
 > ```
 <br>
+
+---
 
 ### GET(process?: HandlerFunction | Response)
 > #### **Case 1**
@@ -248,6 +254,8 @@
 > true
 > ```
 <br>
+
+---
 
 ### PUT(process?: HandlerFunction | Response)
 > #### **Case 1**
@@ -323,6 +331,8 @@
 > ```
 <br>
 
+---
+
 ### POST(process?: HandlerFunction | Response)
 > #### **Case 1**
 > 
@@ -396,6 +406,8 @@
 > true
 > ```
 <br>
+
+---
 
 ### DELETE(process?: HandlerFunction | Response)
 > #### **Case 1**
@@ -471,6 +483,8 @@
 > ```
 <br>
 
+---
+
 ### PATCH(process?: HandlerFunction | Response)
 > #### **Case 1**
 > 
@@ -544,6 +558,8 @@
 > true
 > ```
 <br>
+
+---
 
 ### AUTH(...param: ( string | { [key:string]: string; })[] )
 > #### **Case 1**
@@ -643,6 +659,7 @@
 > ```
 <br>
 
+---
 
 ### isWebSocket()
 > #### **Case 1**
@@ -671,6 +688,8 @@
 > true
 > ```
 <br>
+
+---
 
 ### WebSocket(event?: WebSocketEvent)
 > #### **Case 1**
@@ -720,6 +739,8 @@
 > ```
 <br>
 
+---
+
 ### getUniqueUrlArray(urls: string[])
 > #### **Case 1**
 > | name | Type |
@@ -744,6 +765,8 @@
 > []
 > ```
 <br>
+
+---
 
 ### static isThePathInUse(path: string)
 > #### **Case 1**
@@ -773,6 +796,8 @@
 > ```
 <br>
 
+---
+
 ### static isTheUrlAlreadyInUse(...urls: string[])
 > #### **Case 1**
 > | name | Type |
@@ -800,6 +825,8 @@
 > false
 > ```
 <br>
+
+---
 
 ### static getRouteByPath(path: string)
 > #### **Case 1**
@@ -849,6 +876,8 @@
 > "test_getRouteByPath2"
 > ```
 <br>
+
+---
 
 ### static getRouteByUrl(url: string, variables: {[key: string]: string;} = {})
 > #### **Case 1**
