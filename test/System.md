@@ -16,6 +16,8 @@
 > ```
 <br>
 
+---
+
 ### static getModule(key: string)
 > #### **Case 1**
 > **Arguments**
@@ -45,6 +47,8 @@
 > ```
 <br>
 
+---
+
 ### static setModule(key: string, value: any)
 > #### **Case 1**
 > **Arguments**
@@ -70,6 +74,8 @@
 > true
 > ```
 <br>
+
+---
 
 ### static setModules(modules: { [key: string]: any; })
 > #### **Case 1**
@@ -99,6 +105,8 @@
 > true
 > ```
 <br>
+
+---
 
 ### static deleteModule(...key: string[])
 > #### **Case 1**
@@ -138,6 +146,8 @@
 > true
 > ```
 <br>
+
+---
 
 ### static createRoute(pathOrRouteOption: string | RouteOption)
 > #### **Case 1**
@@ -193,6 +203,8 @@
 > ["/test_route2"]
 > ```
 <br>
+
+---
 
 ### static createRoutes(...pathsOrRouteOptions: (string | RouteOption)[])
 > #### **Case 1**
@@ -252,6 +264,8 @@
 > ```
 <br>
 
+---
+
 ### static deleteRoute(...path: string[])
 > #### **Case 1**
 > **Arguments**
@@ -277,6 +291,8 @@
 > false
 > ```
 <br>
+
+---
 
 ### static deleteRoutes(paths: string[])
 > #### **Case 1**
@@ -309,6 +325,8 @@
 > false
 > ```
 <br>
+
+---
 
 ### static Route(path: string)
 > #### **Case 1**
@@ -361,6 +379,8 @@
 > ```
 <br>
 
+---
+
 ### static get AUTH()
 > #### **Case 1**
 > **Return**  
@@ -379,6 +399,8 @@
 > true
 > ```
 <br>
+
+---
 
 ### static async listen(option: number | string | Deno.ListenOptions, startFunction?: Function)
 > #### **Case 1**
@@ -413,6 +435,8 @@
 > "localhost:8080"
 > ```
 <br>
+
+---
 
 ### static async listenTLS(option: string | Deno.ListenTlsOptions, startFunction?: Function)
 > #### **Case 1**
@@ -452,6 +476,8 @@
 > "localhost:8080"
 > ```
 <br>
+
+---
 
 ### static close()
 > #### **Case 1**
