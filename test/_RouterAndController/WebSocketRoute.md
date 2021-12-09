@@ -86,7 +86,7 @@
 > Preparation
 > ```typescript
 > const event = (client: WebSocketClient)=>console.log(client);
-> const websocketRoute = new WebSocketRoute({onope: event});
+> const websocketRoute = new WebSocketRoute({onopen: event});
 > ```
 > 
 > Implementation  
@@ -137,7 +137,7 @@
 > Preparation
 > ```typescript
 > const event = (client: WebSocketClient)=>console.log(client);
-> const websocketRoute = new WebSocketRoute({onope: event});
+> const websocketRoute = new WebSocketRoute({onclose: event});
 > ```
 > 
 > Implementation  
@@ -188,7 +188,7 @@
 > Preparation
 > ```typescript
 > const event = (client: WebSocketClient)=>console.log(client);
-> const websocketRoute = new WebSocketRoute({onope: event});
+> const websocketRoute = new WebSocketRoute({onmessage: event});
 > ```
 > 
 > Implementation  
@@ -239,7 +239,7 @@
 > Preparation
 > ```typescript
 > const event = (client: WebSocketClient)=>console.log(client);
-> const websocketRoute = new WebSocketRoute({onope: event});
+> const websocketRoute = new WebSocketRoute({onerror: event});
 > ```
 > 
 > Implementation  
