@@ -344,7 +344,7 @@
 > **Arguments**
 > | name | Type |
 > | :- | :- |
-> | decodeURI | boolean=true |
+> | decodeURI | boolean |
 >
 > **Return**  
 > Type  
