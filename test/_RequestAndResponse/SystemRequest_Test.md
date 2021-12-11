@@ -37,7 +37,7 @@
 
 ---
 
-### get request
+### get request()
 > #### **Case 1**
 >
 > **Return**  
@@ -71,7 +71,7 @@
 
 ---
 
-### get url
+### get url()
 > #### **Case 1**
 >
 > **Return**  
@@ -166,7 +166,7 @@
 
 ---
 
-### getCookie()
+### getCookie(key: string)
 > #### **Case 1**
 > **Arguments**
 > | name | Type |
@@ -209,7 +209,7 @@
 
 ---
 
-### get method
+### get method()
 > #### **Case 1**
 >
 > **Return**  
@@ -239,7 +239,7 @@
 
 ---
 
-### get headers
+### get headers()
 > #### **Case 1**
 >
 > **Return**  
@@ -269,7 +269,7 @@
 
 ---
 
-### get body
+### get body()
 > #### **Case 1**
 >
 > **Return**  
@@ -303,12 +303,12 @@
 
 ---
 
-### readBody()
+### async readBody(decodeURI: boolean)
 > #### **Case 1**
 > **Arguments**
 > | name | Type |
 > | :- | :- |
-> | decodeURI | boolean=true |
+> | decodeURI | boolean |
 >
 > **Return**  
 > Type  
@@ -329,13 +329,12 @@
 >         }
 >         const request = new Request("http://example.com/index.html", initData);
 >         const sRequest = new SystemRequest(request, { key: `value` });
->         const body = await sRequest.readBody();
 >     }
 > });
 > ```
 > 
 > Implementation  
-> `body`
+> `await sRequest.readBody()`
 > ```typescript
 > "初音ミク"
 > ```
@@ -366,13 +365,12 @@
 >         }
 >         const request = new Request("http://example.com/index.html", initData);
 >         const sRequest = new SystemRequest(request, { key: `value` });
->         const body = await sRequest.readBody(false);
 >     }
 > });
 > ```
 > 
-> Implementation  
-> `body`
+> Implementation
+> `await sRequest.readBody(false)`
 > ```typescript
 > "%E5%88%9D%E9%9F%B3%E3%83%9F%E3%82%AF"
 > ```
