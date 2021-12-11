@@ -63,7 +63,9 @@
 > ```
 <br>
 
-### hash
+---
+
+### get hash()
 > #### **Case 1**
 > 
 > **Return**  
@@ -83,7 +85,9 @@
 > ```
 <br>
 
-### host
+---
+
+### get host()
 > #### **Case 1**
 > 
 > **Return**  
@@ -122,7 +126,9 @@
 > ```
 <br>
 
-### href
+---
+
+### get href()
 > #### **Case 1**
 > 
 > **Return**  
@@ -142,7 +148,9 @@
 > ```
 <br>
 
-### origin
+---
+
+### get origin()
 > #### **Case 1**
 > 
 > **Return**  
@@ -162,7 +170,9 @@
 > ```
 <br>
 
-### password
+---
+
+### get password()
 > #### **Case 1**
 > 
 > **Return**  
@@ -182,7 +192,9 @@
 > ```
 <br>
 
-### pathname
+---
+
+### get pathname()
 > #### **Case 1**
 > 
 > **Return**  
@@ -202,7 +214,9 @@
 > ```
 <br>
 
-### port
+---
+
+### get port()
 > #### **Case 1**
 > 
 > **Return**  
@@ -241,7 +255,9 @@
 > ```
 <br>
 
-### protocol
+---
+
+### get protocol()
 > #### **Case 1**
 > 
 > **Return**  
@@ -261,7 +277,9 @@
 > ```
 <br>
 
-### search
+---
+
+### get search()
 > #### **Case 1**
 > 
 > **Return**  
@@ -281,7 +299,9 @@
 > ```
 <br>
 
-### searchParams
+---
+
+### get searchParams()
 > #### **Case 1**
 > 
 > **Return**  
@@ -311,7 +331,9 @@
 > ```
 <br>
 
-### username
+---
+
+### get username()
 > #### **Case 1**
 > 
 > **Return**  
@@ -330,6 +352,8 @@
 > `ユーザー`
 > ```
 <br>
+
+---
 
 ### toString()
 > #### **Case 1**
@@ -350,6 +374,8 @@
 > `http://example.com/サンプル?параметр#hash`
 > ```
 <br>
+
+---
 
 ### toJSON()
 > #### **Case 1**
