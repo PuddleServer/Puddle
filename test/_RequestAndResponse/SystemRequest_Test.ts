@@ -170,9 +170,8 @@ Deno.test({
         }
         const request = new Request("http://example.com/index.html", initData);
         const sRequest = new SystemRequest(request, { key: `value` });
-        const body = await sRequest.readBody();
         
-        assertEquals(body, "初音ミク");
+        assertEquals(await sRequest.readBody(), "初音ミク");
     }
 });
 
@@ -188,8 +187,7 @@ Deno.test({
         }
         const request = new Request("http://example.com/index.html", initData);
         const sRequest = new SystemRequest(request, { key: `value` });
-        const body = await sRequest.readBody(false);
-        
-        assertEquals(body, "%E5%88%9D%E9%9F%B3%E3%83%9F%E3%82%AF");
+
+        assertEquals(await sRequest.readBody(false), "%E5%88%9D%E9%9F%B3%E3%83%9F%E3%82%AF");
     }
 });

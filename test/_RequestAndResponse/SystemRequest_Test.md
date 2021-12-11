@@ -353,20 +353,15 @@
 > **Test**  
 > Preparation
 > ```typescript
-> Deno.test({
->     name: "readBody",
->     async fn(): Promise<void> {
->         const headers = new Headers();
->         headers.append('Content-Type', 'text/html');
->         const initData = {
->             method: `POST`,
->             headers: headers,
->             body: `%E5%88%9D%E9%9F%B3%E3%83%9F%E3%82%AF`,
->         }
->         const request = new Request("http://example.com/index.html", initData);
->         const sRequest = new SystemRequest(request, { key: `value` });
->     }
-> });
+> const headers = new Headers();
+> headers.append('Content-Type', 'text/html');
+> const initData = {
+>     method: `POST`,
+>     headers: headers,
+>     body: `%E5%88%9D%E9%9F%B3%E3%83%9F%E3%82%AF`,
+> }
+> const request = new Request("http://example.com/index.html", initData);
+> const sRequest = new SystemRequest(request, { key: `value` });
 > ```
 > 
 > Implementation
