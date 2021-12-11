@@ -113,7 +113,7 @@
 > ```typescript
 > "http://example.com/index.html"
 > ```
-> `sRequest.getURL().valiable`
+> `sRequest.getURL()["key"].valiable`
 > ```typescript
 > "value"
 > ```
