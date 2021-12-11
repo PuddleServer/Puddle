@@ -27,6 +27,24 @@ Deno.test({
 });
 
 Deno.test({
+    name: "request",
+    fn(): void {
+        const headers = new Headers();
+        headers.append('Content-Type', 'text/html');
+        const initData = {
+            method: `POST`,
+            headers: headers,
+            body: `Hello World`,
+        }
+        const request = new Request("http://example.com/index.html", initData);
+        const sRequest = new SystemRequest(request, { key: `value` });
+
+        assertStrictEquals(JSON.stringify(sRequest.request), JSON.stringify(request));
+        assertEquals(sRequest.request instanceof Request, true);
+    }
+});
+
+Deno.test({
     name: "url",
     fn(): void {
         const request = new Request("http://example.com/index.html");

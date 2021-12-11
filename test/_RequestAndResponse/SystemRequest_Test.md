@@ -59,7 +59,11 @@
 > ```
 > 
 > Implementation  
-> `JSON.stringify(sRequest.request()) === JSON.stringify(request)`
+> `JSON.stringify(sRequest.request) === JSON.stringify(request)`
+> ```typescript
+> true
+> ```
+> `sRequest.request instanceof Request`
 > ```typescript
 > true
 > ```
@@ -82,7 +86,7 @@
 > ```
 > 
 > Implementation  
-> `sRequest.url()`
+> `sRequest.url`
 > ```typescript
 > "http://example.com/index.html"
 > ```
@@ -111,7 +115,7 @@
 > ```
 > `sRequest.getURL().valiable`
 > ```typescript
-> "http://example.com/index.html"
+> "value"
 > ```
 > `sRequest.getURL() instanceof DecodedURL`
 > ```typescript
@@ -132,22 +136,17 @@
 > **Test**  
 > Preparation
 > ```typescript
-> Deno.test({
->     name: "getCookies()",
->     fn(): void {
->         const headers = new Headers();
->         headers.append('Content-Type', 'text/html');
->         headers.set('Cookie', 'name=HatsuneMiku;age=16;like=leek');
->         const initData = {
->             method: `POST`,
->             headers: headers,
->             body: `Hello World`,
->         }
->         const request = new Request("http://example.com/index.html", initData);
->         const sRequest = new SystemRequest(request, { key: `value` });
->         const cookies = sRequest.getCookies();
->     }
-> });
+> const headers = new Headers();
+> headers.append('Content-Type', 'text/html');
+> headers.set('Cookie', 'name=HatsuneMiku;age=16;like=leek');
+> const initData = {
+>     method: `POST`,
+>     headers: headers,
+>     body: `Hello World`,
+> }
+> const request = new Request("http://example.com/index.html", initData);
+> const sRequest = new SystemRequest(request, { key: `value` });
+> const cookies = sRequest.getCookies();
 > ```
 > 
 > Implementation  
@@ -181,21 +180,16 @@
 > **Test**  
 > Preparation
 > ```typescript
-> Deno.test({
->     name: "getCookies()",
->     fn(): void {
->         const headers = new Headers();
->         headers.append('Content-Type', 'text/html');
->         headers.set('Cookie', 'name=HatsuneMiku;age=16;like=leek');
->         const initData = {
->             method: `POST`,
->             headers: headers,
->             body: `Hello World`,
->         }
->         const request = new Request("http://example.com/index.html", initData);
->         const sRequest = new SystemRequest(request, { key: `value` });
->     }
-> });
+> const headers = new Headers();
+> headers.append('Content-Type', 'text/html');
+> headers.set('Cookie', 'name=HatsuneMiku;age=16;like=leek');
+> const initData = {
+>     method: `POST`,
+>     headers: headers,
+>     body: `Hello World`,
+> }
+> const request = new Request("http://example.com/index.html", initData);
+> const sRequest = new SystemRequest(request, { key: `value` });
 > ```
 > 
 > Implementation  
