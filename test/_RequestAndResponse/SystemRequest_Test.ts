@@ -3,7 +3,8 @@ import {
     assertStrictEquals
 } from "../mod_test.ts";
 import {
-    SystemRequest
+    SystemRequest,
+    DecodedURL
 } from "../../mod.ts";
 
 Deno.test({
@@ -41,17 +42,9 @@ Deno.test({
         const request = new Request("http://example.com/index.html");
         const sRequest = new SystemRequest(request, { key: `value` });
 
-        assertEquals(sRequest.getURL().href, "http://example.com/index.html");
-        assertEquals(sRequest.getURL().origin, "http://example.com");
-        assertEquals(sRequest.getURL().protocol, "http:");
-        assertEquals(sRequest.getURL().username, "");
-        assertEquals(sRequest.getURL().password, "");
-        assertEquals(sRequest.getURL().host, "example.com");
-        assertEquals(sRequest.getURL().hostname, "example.com");
-        assertEquals(sRequest.getURL().port, "");
-        assertEquals(sRequest.getURL().pathname, "/index.html");
-        assertEquals(sRequest.getURL().hash, "");
-        assertEquals(sRequest.getURL().search, "");
+        assertEquals(sRequest.getURL().toString(), "http://example.com/index.html");
+        assertEquals(sRequest.getURL().valiable["key"], "value");
+        assertEquals(sRequest.getURL() instanceof DecodedURL, true);
     }
 });
 

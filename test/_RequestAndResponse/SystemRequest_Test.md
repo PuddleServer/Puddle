@@ -37,7 +37,7 @@
 
 ---
 
-### request()
+### get request
 > #### **Case 1**
 >
 > **Return**  
@@ -67,7 +67,7 @@
 
 ---
 
-### url()
+### get url
 > #### **Case 1**
 >
 > **Return**  
@@ -82,7 +82,7 @@
 > ```
 > 
 > Implementation  
-> `JSON.stringify(sRequest.url())`
+> `sRequest.url()`
 > ```typescript
 > "http://example.com/index.html"
 > ```
@@ -105,10 +105,19 @@
 > ```
 > 
 > Implementation  
-> `JSON.stringify(sRequest.getURL())`
+> `sRequest.getURL().toString()`
 > ```typescript
 > "http://example.com/index.html"
 > ```
+> `sRequest.getURL().valiable`
+> ```typescript
+> "http://example.com/index.html"
+> ```
+> `sRequest.getURL() instanceof DecodedURL`
+> ```typescript
+> "true"
+> ```
+
 <br>
 
 ---
@@ -206,7 +215,7 @@
 
 ---
 
-### method()
+### get method
 > #### **Case 1**
 >
 > **Return**  
@@ -236,7 +245,7 @@
 
 ---
 
-### headers()
+### get headers
 > #### **Case 1**
 >
 > **Return**  
@@ -266,7 +275,7 @@
 
 ---
 
-### body()
+### get body
 > #### **Case 1**
 >
 > **Return**  
