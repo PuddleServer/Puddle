@@ -198,19 +198,19 @@ export class PuddleJSON {
      * データとスキーマを照合する。
      * Collate data and schemas.
      * @param data The data to be collated.
-     * @param SCHEMA Schema of data.
+     * @param schema Schema of data.
      */
-    static checkSchema(data: ROW[], SCHEMA: SCHEMA): ROW[] {
-        for(let key in SCHEMA) {
-            const isUnique = SCHEMA[key].includes("UNIQUE");
-            const isNotNull = SCHEMA[key].includes("NOT NULL");
+    static checkSchema(data: ROW[], schema: SCHEMA): ROW[] {
+        for(let key in schema) {
+            const isUnique = schema[key].includes("UNIQUE");
+            const isNotNull = schema[key].includes("NOT NULL");
             if(!isUnique && !isNotNull) continue;
             const rows = data.map(column=>column[key]);
             if(isUnique && new Set(rows).size != rows.length) throw Error(`\n[PuddleJSON]\nSchema error. There is a duplicate element in the "${key}" field.\nスキーマエラーです。"${key}"に重複があります。`);
             if(isNotNull && rows.filter(v=>v).length != rows.length) throw Error(`\n[PuddleJSON]\nSchema error. "${key}" has null object.\nスキーマエラーです。"${key}"はNULLオブジェクトを持っています。`);
         }
         data = data.map(row=>{
-            for(let key in SCHEMA) if(!row[key]) row[key] = null;
+            for(let key in schema) if(!row[key]) row[key] = null;
             return row;
         })
         return data;
@@ -221,12 +221,12 @@ export class PuddleJSON {
      * Execute auto-increment.
      * @param data Data already added.
      * @param KeyAndValue Data to be added
-     * @param SCHEMA Schema of data.
+     * @param schema Schema of data.
      * @returns Data for which auto-incrementing was performed.
      */
-    static autoIncrement(data: ROW[], KeyAndValue: ROW, SCHEMA: SCHEMA): ROW {
-        for(let key in SCHEMA) {
-            const isAutoIncrement = SCHEMA[key].includes("AUTO INCREMENT");
+    static autoIncrement(data: ROW[], KeyAndValue: ROW, schema: SCHEMA): ROW {
+        for(let key in schema) {
+            const isAutoIncrement = schema[key].includes("AUTO INCREMENT");
             if(!isAutoIncrement) continue;
             let max = 0;
             data.forEach(columns=>{
@@ -241,7 +241,7 @@ export class PuddleJSON {
      * JSONファイルの作成。
      * Create a JSON file.
      * @param filePath File path.
-     * @param SCHEMA Schema of data.
+     * @param schema Schema of data.
      * @returns PuddleJSON object.
      * 
      * ```ts
@@ -252,15 +252,15 @@ export class PuddleJSON {
      * });
      * ```
      */
-    static CREATE(filePath: string, SCHEMA?: SCHEMA): PuddleJSON {
-        return PuddleJSON.USE(filePath, SCHEMA || {});
+    static CREATE(filePath: string, schema?: SCHEMA): PuddleJSON {
+        return PuddleJSON.USE(filePath, schema || {});
     }
 
     /**
      * JSONファイルの読み込み。
      * Read JSON file.
      * @param filePath File path.
-     * @param SCHEMA Schema of data.
+     * @param schema Schema of data.
      * @returns PuddleJSON object.
      * 
      * ```ts
@@ -271,16 +271,16 @@ export class PuddleJSON {
      * });
      * ```
      */
-    static USE(filePath: string, SCHEMA?: SCHEMA): PuddleJSON {
+    static USE(filePath: string, schema?: SCHEMA): PuddleJSON {
         if(Object.keys(PuddleJSON.TABLE).includes(filePath)) return PuddleJSON.TABLE[filePath];
-        return new PuddleJSON(filePath, SCHEMA || {});
+        return new PuddleJSON(filePath, schema || {});
     }
 
     /**
      * データのスキーマ。
      * Schema of data.
      */
-    #SCHEMA: SCHEMA;
+    #schema: SCHEMA;
 
     /**
      * データの参照元のファイルパス。
@@ -288,11 +288,11 @@ export class PuddleJSON {
      */
     #filePath: string = "";
 
-    constructor(filePath: string, SCHEMA: SCHEMA) {
+    constructor(filePath: string, schema: SCHEMA) {
         FileManager.ensureFileSync(filePath);
         this.#filePath = filePath;
-        this.#SCHEMA = SCHEMA;
-        PuddleJSON.checkSchema(this.#parse, SCHEMA);
+        this.#schema = schema;
+        PuddleJSON.checkSchema(this.#parse, schema);
         PuddleJSON.TABLE[filePath] = this;
     }
 
@@ -318,9 +318,9 @@ export class PuddleJSON {
      */
     INSERT(KeyAndValue:  ROW): ROW {
         const data = this.#parse;
-        KeyAndValue = PuddleJSON.autoIncrement(data, KeyAndValue, this.#SCHEMA);
+        KeyAndValue = PuddleJSON.autoIncrement(data, KeyAndValue, this.#schema);
         data.unshift(KeyAndValue);
-        const checkedData = PuddleJSON.checkSchema(data, this.#SCHEMA);
+        const checkedData = PuddleJSON.checkSchema(data, this.#schema);
         Deno.writeTextFileSync(this.#filePath, PuddleJSON.stringify(checkedData));
         return KeyAndValue;
     }
@@ -330,13 +330,13 @@ export class PuddleJSON {
      * Select the data to be manipulated.
      * @param WHERE Selection criteria.
      * @param LIMIT Upper limit of selection.
-     * @returns ResultOfPuddleJSON object.
+     * @returns SelectedRows object.
      * 
      * ```ts
      * USERS.SELECT({ id: 1 }, 1).RESULT();
      * ```
      */
-    SELECT(WHERE: ROW = {}, LIMIT: number = Infinity): ResultOfPuddleJSON {
+    SELECT(WHERE: ROW = {}, LIMIT: number = Infinity): SelectedRows {
         return this.SELECTIF(row=>{
             for(let key in WHERE) {
                 if(row[key] !== WHERE[key]) return {result: false};
@@ -350,7 +350,7 @@ export class PuddleJSON {
      * Select the data to be manipulated.
      * @param criteria Selection criteria.
      * @param LIMIT Upper limit of selection.
-     * @returns ResultOfPuddleJSON object.
+     * @returns SelectedRows object.
      * 
      * ```ts
      * USERS.SELECTIF(row=>({ age: Number(row.age) >= 18 })).RESULT();
@@ -359,14 +359,14 @@ export class PuddleJSON {
     SELECTIF(criteria: SelectCriteria, LIMIT: number = Infinity) {
         let count = 0;
         const rows = this.#parse;
-        const selectedRows: ROW[] = [];
+        const list: ROW[] = [];
         for(let row of rows) {
             if(!Object.values(criteria(row)).filter(column=>!column).length) {
-                selectedRows.push(row);
+                list.push(row);
                 if(++count >= LIMIT) break;
             }
         };
-        return new ResultOfPuddleJSON(selectedRows, this.#filePath, this.#SCHEMA);
+        return new SelectedRows(list, this.#filePath, this.#schema);
     }
 }
 
@@ -374,7 +374,7 @@ export class PuddleJSON {
  * PuddleJSONでセレクトされたデータの操作を行うクラス。
  * A class that performs operations on data selected with PuddleJSON.
  */
-export class ResultOfPuddleJSON {
+export class SelectedRows {
 
     /**
      * データの参照元のファイルパス。
@@ -386,18 +386,18 @@ export class ResultOfPuddleJSON {
      * データのスキーマ。
      * Schema of data.
      */
-    #SCHEMA: SCHEMA;
+    #schema: SCHEMA;
 
     /**
      * 選択されているデータ。
      * The data that has been selected.
      */
-    selectedRows: ROW[];
+    list: ROW[];
 
-    constructor(selectedRows: ROW[], filePath: string, SCHEMA: SCHEMA) {
-        this.selectedRows = selectedRows;
+    constructor(selectedRows: ROW[], filePath: string, schema: SCHEMA) {
+        this.list = selectedRows;
         this.#filePath = filePath;
-        this.#SCHEMA = SCHEMA;
+        this.#schema = schema;
     }
 
     /**
@@ -413,9 +413,9 @@ export class ResultOfPuddleJSON {
      */
     RESULT(...keys: string[]): ROW[] {
 
-        if(!keys.length) return this.selectedRows;
+        if(!keys.length) return this.list;
 
-        return this.selectedRows.map(column=>{
+        return this.list.map(column=>{
             const result: ROW = {};
             keys.forEach(key=>result[key] = column[key]);
             return result;
@@ -434,12 +434,12 @@ export class ResultOfPuddleJSON {
      */
     UPDATE(KeyAndValue: ROW): ROW[] {
         let data = JSON.stringify(JSON.parse(Deno.readTextFileSync(this.#filePath)));
-        for(let row of this.selectedRows) {
+        for(let row of this.list) {
             const updatedRow = {...row};
             Object.keys(KeyAndValue).forEach(key=>updatedRow[key] = KeyAndValue[key]);
             data = data.replace(JSON.stringify(row), JSON.stringify(updatedRow));
         }
-        const checkedData = PuddleJSON.checkSchema(JSON.parse(data), this.#SCHEMA);
+        const checkedData = PuddleJSON.checkSchema(JSON.parse(data), this.#schema);
         Deno.writeTextFileSync(this.#filePath, PuddleJSON.stringify(checkedData));
         return checkedData;
     }
@@ -456,13 +456,13 @@ export class ResultOfPuddleJSON {
     REMOVE(): ROW[] {
         const removedColumn = [];
         let data = JSON.stringify(JSON.parse(Deno.readTextFileSync(this.#filePath)));
-        for(let column of this.selectedRows) {
+        for(let column of this.list) {
             const _data = data.replace(JSON.stringify(column), "");
             if(data.length != _data.length) removedColumn.push(column);
             data = _data;
         }
         data = data.replace(/\,+/g, ",").replace(/\[\,/g, "[").replace(/\,\]/g, "]");
-        data = JSON.stringify(PuddleJSON.checkSchema(JSON.parse(data), this.#SCHEMA));
+        data = JSON.stringify(PuddleJSON.checkSchema(JSON.parse(data), this.#schema));
         Deno.writeTextFileSync(this.#filePath, PuddleJSON.stringify(data));
         return removedColumn;
     }
