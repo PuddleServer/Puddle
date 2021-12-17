@@ -403,6 +403,14 @@ export class SelectedRows {
     /**
      * データを取得する。
      * Get the data.
+     */
+    get rows(): ROW[] {
+        return this.RESULT();
+    }
+
+    /**
+     * データを取得する。
+     * Get the data.
      * @param keys The column to retrieve. (If not specified, all columns)
      * @returns Selected data.
      * 
