@@ -248,8 +248,8 @@ export class PuddleJSON {
      * const USERS = PuddleJSON.CREATE("./users.json", {
      *      id:["UNIQUE", "AUTO INCREMENT", "NOT NULL"], 
      *      name:"NOT NULL", 
-     *      age:[]}
-     * );
+     *      age:[]
+     * });
      * ```
      */
     static CREATE(filePath: string, SCHEMA?: SCHEMA): PuddleJSON {
@@ -267,8 +267,8 @@ export class PuddleJSON {
      * const USERS = PuddleJSON.USE("./users.json", {
      *      id:["UNIQUE", "AUTO INCREMENT", "NOT NULL"], 
      *      name:"NOT NULL", 
-     *      age:[]}
-     * );
+     *      age:[]
+     * });
      * ```
      */
     static USE(filePath: string, SCHEMA?: SCHEMA): PuddleJSON {
