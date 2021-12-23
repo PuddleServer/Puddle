@@ -53,13 +53,13 @@
 
 ---
 
-### static checkSchema(data: ROW[], SCHEMA: SCHEMA)
+### static checkSchema(data: ROW[], schema: SCHEMA)
 > #### **Case 1**
 > **Arguments**
 > | name | Type |
 > | :- | :- |
 > | data | ROW[] |
-> | SCHEMA | SCHEMA |
+> | schema | SCHEMA |
 > 
 > **Return**  
 > Type  
@@ -69,12 +69,12 @@
 > Preparation
 > ```typescript
 > const data = [{id:1}];
-> const SCHEMA: SCHEMA = {id: ["UNIQUE", "NOT NULL"], name: []};
+> const schema: SCHEMA = {id: ["UNIQUE", "NOT NULL"], name: []};
 > const answer = [{id:1,name:null}]
 > ```
 > 
 > Implementation  
-> `JSON.stringify(PuddleJSON.checkSchema(data, SCHEMA)) === JSON.stringify(answer)`
+> `JSON.stringify(PuddleJSON.checkSchema(data, schema)) === JSON.stringify(answer)`
 > ```typescript
 > true
 > ```
@@ -85,7 +85,7 @@
 > | name | Type |
 > | :- | :- |
 > | data | ROW[] |
-> | SCHEMA | SCHEMA |
+> | schema | SCHEMA |
 > 
 > **Return**  
 > Type  
@@ -95,11 +95,11 @@
 > Preparation
 > ```typescript
 > const data = [{id:1}];
-> const SCHEMA: SCHEMA = {id: ["NOT NULL"], name: "NOT NULL"};
+> const schema: SCHEMA = {id: ["NOT NULL"], name: "NOT NULL"};
 > ```
 > 
 > Implementation  
-> `PuddleJSON.checkSchema(data, SCHEMA)`
+> `PuddleJSON.checkSchema(data, schema)`
 > ```bash
 > [PuddleJSON] Schema error.
 > ```
@@ -110,7 +110,7 @@
 > | name | Type |
 > | :- | :- |
 > | data | ROW[] |
-> | SCHEMA | SCHEMA |
+> | schema | SCHEMA |
 > 
 > **Return**  
 > Type  
@@ -120,11 +120,11 @@
 > Preparation
 > ```typescript
 > const data = [{id:1}, {id:1}];
-> const SCHEMA: SCHEMA = {id: "UNIQUE"};
+> const schema: SCHEMA = {id: "UNIQUE"};
 > ```
 > 
 > Implementation  
-> `PuddleJSON.checkSchema(data, SCHEMA)`
+> `PuddleJSON.checkSchema(data, schema)`
 > ```bash
 > [PuddleJSON] Schema error.
 > ```
@@ -132,14 +132,14 @@
 
 ---
 
-### static autoIncrement(data: ROW[], KeyAndValue: ROW, SCHEMA: SCHEMA)
+### static autoIncrement(data: ROW[], KeyAndValue: ROW, schema: SCHEMA)
 > #### **Case 1**
 > **Arguments**
 > | name | Type |
 > | :- | :- |
 > | data | ROW[] |
 > | KeyAndValue | ROW |
-> | SCHEMA | SCHEMA |
+> | schema | SCHEMA |
 > 
 > **Return**  
 > Type  
@@ -148,19 +148,19 @@
 > **Test**  
 > Preparation
 > ```typescript
-> const SCHEMA: SCHEMA = {id: "AUTO INCREMENT"};
+> const schema: SCHEMA = {id: "AUTO INCREMENT"};
 > ```
 > 
 > Implementation  
-> `PuddleJSON.autoIncrement([], {}, SCHEMA).id`
+> `PuddleJSON.autoIncrement([], {}, schema).id`
 > ```typescript
 > 1
 > ```
-> `PuddleJSON.autoIncrement([{id:1}], {}, SCHEMA).id`
+> `PuddleJSON.autoIncrement([{id:1}], {}, schema).id`
 > ```typescript
 > 2
 > ```
-> `PuddleJSON.autoIncrement([{id:1}], {id:10}, SCHEMA).id`
+> `PuddleJSON.autoIncrement([{id:1}], {id:10}, schema).id`
 > ```typescript
 > 10
 > ```
@@ -168,13 +168,13 @@
 
 ---
 
-### static CREATE(filePath: string, SCHEMA?: SCHEMA)
+### static CREATE(filePath: string, schema?: SCHEMA)
 > #### **Case 1**
 > **Arguments**
 > | name | Type |
 > | :- | :- |
 > | filePath | string |
-> | SCHEMA | SCHEMA |
+> | schema | SCHEMA |
 > 
 > **Return**  
 > Type  
@@ -185,12 +185,12 @@
 > ```typescript
 > FileManager.ensureFileSync("../testdata/assets/users.json");
 > await FileManager.write("../testdata/assets/users.json", "");
-> const SCHEMA: SCHEMA = {
+> const schema: SCHEMA = {
 >      id:["UNIQUE", "AUTO INCREMENT", "NOT NULL"], 
 >      name:"NOT NULL", 
 >      age:[]
 > };
-> const result = PuddleJSON.CREATE("../testdata/assets/users.json", SCHEMA);
+> const result = PuddleJSON.CREATE("../testdata/assets/users.json", schema);
 > ```
 > 
 > Implementation  
@@ -206,13 +206,13 @@
 
 ---
 
-### static USE(filePath: string, SCHEMA?: SCHEMA)
+### static USE(filePath: string, schema?: SCHEMA)
 > #### **Case 1**
 > **Arguments**
 > | name | Type |
 > | :- | :- |
 > | filePath | string |
-> | SCHEMA | SCHEMA |
+> | schema | SCHEMA |
 > 
 > **Return**  
 > Type  
@@ -223,12 +223,12 @@
 > ```typescript
 > FileManager.ensureFileSync("../testdata/assets/users.json");
 > await FileManager.write("../testdata/assets/users.json", "");
-> const SCHEMA: SCHEMA = {
+> const schema: SCHEMA = {
 >      id:["UNIQUE", "AUTO INCREMENT", "NOT NULL"], 
 >      name:"NOT NULL", 
 >      age:[]
 > };
-> const users = PuddleJSON.USE("../testdata/assets/users.json", SCHEMA);
+> const users = PuddleJSON.USE("../testdata/assets/users.json", schema);
 > ```
 > 
 > Implementation  
@@ -250,7 +250,7 @@
 > | name | Type |
 > | :- | :- |
 > | filePath | string |
-> | SCHEMA | SCHEMA |
+> | schema | SCHEMA |
 > 
 > **Return**  
 > Type  
@@ -261,12 +261,12 @@
 > ```typescript
 > FileManager.ensureFileSync("../testdata/assets/users.json");
 > await FileManager.write("../testdata/assets/users.json", "");
-> const SCHEMA: SCHEMA = {
+> const schema: SCHEMA = {
 >      id:["UNIQUE", "AUTO INCREMENT", "NOT NULL"], 
 >      name:"NOT NULL", 
 >      age:[]
 > };
-> const users = new PuddleJSON("../testdata/assets/users.json", SCHEMA);
+> const users = new PuddleJSON("../testdata/assets/users.json", schema);
 > ```
 > 
 > Implementation  
@@ -288,7 +288,7 @@
 > | name | Type |
 > | :- | :- |
 > | filePath | string |
-> | SCHEMA | SCHEMA |
+> | schema | SCHEMA |
 > 
 > **Return**  
 > Type  
@@ -299,12 +299,12 @@
 > ```typescript
 > FileManager.ensureFileSync("../testdata/assets/users.json");
 > await FileManager.write("../testdata/assets/users.json", "");
-> const SCHEMA: SCHEMA = {
+> const schema: SCHEMA = {
 >      id:["UNIQUE", "AUTO INCREMENT", "NOT NULL"], 
 >      name:"NOT NULL", 
 >      age:[]
 > };
-> const users = PuddleJSON.USE("../testdata/assets/users.json", SCHEMA);
+> const users = PuddleJSON.USE("../testdata/assets/users.json", schema);
 > const inserted_data = users.INSERT({name: "John", age: 20});
 > ```
 > 
@@ -327,25 +327,25 @@
 > 
 > **Return**  
 > Type  
-> *&emsp;ResultOfPuddleJSON*  
+> *&emsp;SelectedRows*  
 >
 > **Test**  
 > Preparation
 > ```typescript
 > FileManager.ensureFileSync("../testdata/assets/users.json");
 > await FileManager.write("../testdata/assets/users.json", "");
-> const SCHEMA: SCHEMA = {
+> const schema: SCHEMA = {
 >      id:["UNIQUE", "AUTO INCREMENT", "NOT NULL"], 
 >      name:"NOT NULL", 
 >      age:[]
 > };
-> const users = PuddleJSON.USE("../testdata/assets/users.json", SCHEMA);
+> const users = PuddleJSON.USE("../testdata/assets/users.json", schema);
 > const inserted_data = users.INSERT({name: "select_test"});
 > users.INSERT({name: "select_test"});
 > ```
 > 
 > Implementation  
-> ``PuddleJSON.SELECT({name: "select_test"}) instanceof ResultOfPuddleJSON`
+> ``PuddleJSON.SELECT({name: "select_test"}) instanceof SelectedRows`
 > ```typescript
 > true
 > ```
@@ -375,19 +375,19 @@
 > 
 > **Return**  
 > Type  
-> *&emsp;ResultOfPuddleJSON*  
+> *&emsp;SelectedRows*  
 >
 > **Test**  
 > Preparation
 > ```typescript
 > FileManager.ensureFileSync("../testdata/assets/users.json");
 > await FileManager.write("../testdata/assets/users.json", "");
-> const SCHEMA: SCHEMA = {
+> const schema: SCHEMA = {
 >      id:["UNIQUE", "AUTO INCREMENT", "NOT NULL"], 
 >      name:"NOT NULL", 
 >      age:[]
 > };
-> const users = PuddleJSON.USE("../testdata/assets/users.json", SCHEMA);
+> const users = PuddleJSON.USE("../testdata/assets/users.json", schema);
 > users.INSERT({name: "selectif_test", age: 18});
 > users.INSERT({name: "selectif_test", age: 18});
 > users.INSERT({name: "selectif_test", age: 20});
@@ -396,7 +396,7 @@
 > ```
 > 
 > Implementation  
-> `PuddleJSON.SELECTIF(row=>({ id: Number(row.age) >= 20 })) instanceof ResultOfPuddleJSON`
+> `PuddleJSON.SELECTIF(row=>({ id: Number(row.age) >= 20 })) instanceof SelectedRows`
 > ```typescript
 > true
 > ```
