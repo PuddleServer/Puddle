@@ -52,10 +52,10 @@
 > const sResponse = new SystemResponse(request);
 > let before, after;
 > try {
->     before = sResponse.responded();
+>     before = sResponse.responded;
 > } finally {
 >     sResponse.send();
->     after = sResponse.responded();
+>     after = sResponse.responded;
 > }
 > ```
 > 
@@ -202,8 +202,8 @@
 > Preparation
 > ```typescript
 > const request   = new Request("http://example.com");
-> const sResponse = new SystemResponse(request, 404);
-> const unit8     = new Uint8Array(10);
+> const sResponse = new SystemResponse(request);
+> const unit8     = new Uint8Array(10, 404);
 > sResponse.setText(unit8);
 > ```
 > 
@@ -301,7 +301,8 @@
 > ```typescript
 > const request   = new Request("http://example.com");
 > const sResponse = new SystemResponse(request);
-> const result    = sResponse.setFile("../testdata/assets/PuddleLogo.png");
+> const filePath = "../testdata/assets/PuddleLogo.png";
+> const result    = sResponse.setFile(filePath);
 > const RS_unit8  = (await fetch(filePath)).body;
 > ```
 > 
