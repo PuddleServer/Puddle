@@ -186,7 +186,7 @@ export class WebSocketClient {
         const allClients: WebSocketClient[] = WebSocketClient.getAllClients();
         return allClients.filter(client=>{
             return Boolean(attributes.filter(attribute=>{
-                return !Object.keys(attribute).filter(key=>!client.getAttribute(key)).length
+                return !Object.keys(attribute).filter(key=>attribute[key] !== client.getAttribute(key)).length
             }).length);
         });
     }
