@@ -3,7 +3,7 @@
 ## Configuring Web Socket Events
 Configure the processing for each event of the web socket.
 ```typescript
-import { System, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/v1.1.0-beta/mod.ts";
+import { System, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/v1.1.1-beta/mod.ts";
 System.createRoute("/ws").WebSocket()
 .onopen((ws: WebSocketClient) => {
     console.log("Opening new connection.");
