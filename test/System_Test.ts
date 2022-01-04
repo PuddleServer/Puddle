@@ -1,167 +1,235 @@
 /**
- * System.tsのSystemクラステストファイル
+ * System.tsのSystemクラステスト
  * @author Daruo(KINGVOXY)
  * @author AO2324(AO2324-00)
- * @Date   2021-08-31
+ * @Date   2021-12-01
  */
 
-import { assertEquals, assertNotEquals }        from "https://deno.land/std@0.88.0/testing/asserts.ts";
-import { System, Route, RouteOption }           from "../mod.ts";
+import {
+    assertEquals,
+    assertNotEquals,
+    assertStrictEquals,
+    assertNotStrictEquals
+} from "./mod_test.ts";
+import {
+    System,
+    PuddleJSON,
+    Route,
+    Config,
+    Server
+} from "../mod.ts";
 
-class Fruit {
-
-    #variety: string;
-    #prise: number;
-
-    constructor(variety: string, prise: number) {
-        this.#variety = variety;
-        this.#prise = prise;
-    }
-
-    getVariety(): string {
-        return this.#variety;
-    }
-
-    getPrise(): number {
-        return this.#prise;
-    }
-}
-
-/**
- * setModuleテスト
- */
 Deno.test({
-    name: "setModuleテスト",
+  name: "get_JSON",
     fn(): void {
-        const apple: Fruit = new Fruit("apple", 200);
-        System.setModule("リンゴ", apple);
+        assertStrictEquals(System.JSON, PuddleJSON);
     },
 });
 
-/**
- * setModulesテスト
- */
 Deno.test({
-    name: "setModulesテスト",
+    name: "getModule",
     fn(): void {
-        const orange: Fruit = new Fruit("orange", 20);
-        const grape : Fruit = new Fruit("grape", 3000);
-        System.setModules({"オレンジ": orange, "ブドウ": grape});
+        const module = { result: "OK" };
+        System.modules.set("test", module);
+
+        assertStrictEquals(System.getModule("test"), module);
+        assertNotStrictEquals({result: "OK"}, module)
     },
 });
 
-/**
- * getModuleテスト
- */
 Deno.test({
-    name: "getModuleテスト",
+    name: "setModule",
     fn(): void {
-        assertEquals(200, System.getModule("リンゴ").getPrise(), "getModuleメソッド内の処理を見直してください");
-        assertEquals(3000, System.getModule("ブドウ").getPrise(), "getModuleメソッド内の処理を見直してください");
+        const module = { result: "OK" };
+        System.setModule("test", module);
+
+        assertStrictEquals(System.modules.get("test"), module);
     },
 });
 
-/**
- * deleteModuleテスト
- */
 Deno.test({
-    name: "deleteModuleテスト",
+    name: "setModules",
     fn(): void {
-        System.setModule("林檎", new Fruit("apple", 200))
-        assertNotEquals(undefined, System.getModule("林檎"), "setModuleの時点で失敗しています");
-        System.deleteModule("林檎");
-        assertEquals(undefined, System.getModule("林檎"), "deleteModuleの処理を見直してください");
+        const modules = { module1: { result: 1 }, module2: { result: 2 } };
+        System.setModules(modules);
+
+        assertStrictEquals(System.modules.get("module1"), modules.module1);
+        assertStrictEquals(System.modules.get("module2"), modules.module2);
     },
 });
 
-/**
- * createRouteテスト
- */
 Deno.test({
-    name: "createRouteテスト",
+    name: "deleteModules",
     fn(): void {
-        // 引数がstringの場合
-        const route1: Route = System.createRoute("/index.html");
-        assertEquals("/index.html", route1.PATH());
+        const module1 = { result: 1 };
+        System.modules.set("module1", module1)
+        .set("module2", { result: 2 })
+        .set("module3", { result: 3 });
 
-        // 引数がRouteの場合
-        const r: Route = new Route("ro代入用");
-        const ro: RouteOption = {
-            PATH:   "/about.html",
-            URL:    ["/about"],
+        System.deleteModule("module2", "module3");
+
+        assertStrictEquals(System.modules.get("module1"), module1);
+        assertStrictEquals(System.modules.get("module2"), undefined);
+        assertStrictEquals(System.modules.get("module3"), undefined);
+    },
+});
+
+Deno.test({
+    name: "createRoute1",
+    fn(): void {
+        const test_route = System.createRoute("test_route1");
+
+        assertEquals(test_route instanceof Route, true);
+        assertEquals(test_route.URL(), ["/test_route1"]);
+    },
+});
+
+Deno.test({
+    name: "createRoute2",
+    fn(): void {
+        const test_route = System.createRoute({PATH: "test_route2"});
+        
+        assertEquals(test_route instanceof Route, true);
+        assertEquals(test_route.URL(), ["/test_route2"]);
+    },
+});
+
+Deno.test({
+    name: "createRoutes1",
+    fn(): void {
+        System.createRoutes("test_route3.test", {PATH: "test_route4"});
+        const path_list = Route.list.map(route=>route.PATH());
+
+        assertEquals(path_list.includes("test_route3.test"), true);
+        assertEquals(path_list.includes("test_route4"), true);
+    },
+});
+
+Deno.test({
+    name: "createRoutes2",
+    fn(): void {
+        System.createRoutes("./testdata/assets/*");
+        const path_list = Route.list.map(route=>route.PATH());
+
+        assertEquals(path_list.includes("./testdata/assets/script.js"), true);
+        assertEquals(path_list.includes("./testdata/assets/style.css"), true);
+    },
+});
+
+Deno.test({
+    name: "deleteRoute",
+    fn(): void {
+        new Route("test_route_tmp");
+        System.deleteRoute("test_route_tmp");
+        const path_list = Route.list.map(route=>route.PATH());
+
+        assertEquals(path_list.includes("test_route_tmp"), false);
+    },
+});
+
+Deno.test({
+    name: "deleteRoutes",
+    fn(): void {
+        const tmp_list = ["test_route_tmp1", "test_route_tmp2"];
+        new Route(tmp_list[0]);
+        new Route(tmp_list[1]);
+        System.deleteRoutes(tmp_list);
+        const path_list = Route.list.map(route=>route.PATH());
+
+        assertEquals(path_list.includes(tmp_list[0]), false);
+        assertEquals(path_list.includes(tmp_list[1]), false);
+    },
+});
+
+Deno.test({
+    name: "Route1",
+    fn(): void {
+        const route = new Route("test_route5");
+
+        assertStrictEquals(System.Route("test_route5"), route);
+    },
+});
+
+Deno.test({
+    name: "Route2",
+    fn(): void {
+        const route = System.Route("test_route6");
+
+        assertEquals(route instanceof Route, true);
+        assertEquals(route.PATH(), "test_route6");
+    },
+});
+
+Deno.test({
+    name: "AUTH",
+    fn(): void {
+        const auth = System.AUTH;
+
+        assertEquals("GOOGLE" in auth, true);
+        assertStrictEquals(typeof auth.GOOGLE, "function");
+    },
+});
+
+Deno.test({
+    name: "listen",
+    async fn(): Promise<void> {
+        let error, host;
+        try {
+            await System.listen(8080, (conf: Config)=>host=`${conf.hostname}:${conf.port}`);
+            System.server.close();
+        } catch (e) {
+            error = e;
         }
 
-        const route2 = System.createRoute(ro);
-        assertEquals("/about.html", route2.PATH())
-        
+        assertEquals(Boolean(error), false);
+        assertEquals(host, "localhost:8080");
     },
+    sanitizeResources: false,
+    sanitizeOps: false,
 });
 
-/**
- * createRoutesテスト
- * 変更の可能性からコメントアウト
- *//*
 Deno.test({
-    name: "createRoutesテスト",
+    name: "listenTLS",
     async fn(): Promise<void> {
-        // const result;
+        const option = {
+            port:       8080,
+            certFile:   "./testdata/tls/localhost.crt",
+            keyFile:    "./testdata/tls/localhost.key"
+        }
+        let error, host;
+        try {
+            await System.listenTLS(option, (conf: Config)=>host=`${conf.hostname}:${conf.port}`);
+            System.server.close();
+        } catch (e) {
+            error = e;
+        }
 
-        const r1: RouteOption = { PATH:"/crs1.html" }
-        const r2: RouteOption = { PATH:"/crs2.html" }
-        
-        const routes: Route[]       = await System.createRoutes(r1, r2, "/crs3.html");
-        const routes_none: Route[]  = await System.createRoutes();
+        //console.log(error);
 
-        // for(let i of routes) console.log(i.PATH());
-        // assertEquals("/crs1.html", routes[0].PATH());
-        // assertEquals("/crs2.html", routes["/crs2.html"].PATH());
-        // assertEquals("/crs3.html", routes["/crs3.html"].PATH());
-        // assertEquals({}, routes_none);
+        assertEquals(Boolean(error), false);
+        assertEquals(host, "localhost:8080");
     },
+    sanitizeResources: false,
+    sanitizeOps: false,
 });
 
-/**
- * Routeテスト
- */
 Deno.test({
-    name: "Routeテスト",
-    fn(): void {
-        const get: Function = () => {};
-        System.createRoute("/crs4.html");
-        System.Route("/crs4.html").GET(get); 
-        assertEquals(false, System.Route("/crs4.html").isWebSocket);
-    },
-});
+    name: "close",
+    async fn(): Promise<void> {
+        const handler = () => new Response();
+        System.server = new Server({ handler });
+        let check_before: null | boolean = null;
+        let check_after: null | boolean = null;
+        try {
+          check_before = System.server.closed;
+        } finally {
+          System.close();
+          check_after = System.server.closed;
+        }
 
-/**
- * deleteRouteテスト
- */
-Deno.test({
-    name: "deleteRouteテスト",
-    fn(): void {
-        System.createRoute("/crs5.html");
-        
-        assertNotEquals(undefined, Route.getRouteByUrl("/crs5.html"));
-        
-        System.deleteRoute("/crs5.html");
-        assertEquals(undefined, Route.getRouteByUrl("/crs5.html"));
+        assertEquals(check_before, false);
+        assertEquals(check_after, true);
     },
-});
-
-/**
- * deleteRoutesテスト
- */
-Deno.test({
-    name: "deleteRoutesテスト",
-    fn(): void {
-        System.createRoute("/crs6.html");
-        System.createRoute("/crs7.html");
-        
-        assertNotEquals(undefined, Route.getRouteByUrl("/crs6.html"));
-        assertNotEquals(undefined, Route.getRouteByUrl("/crs7.html"));
-
-        System.deleteRoutes(["/crs6.html", "/crs7.html"]);
-        assertEquals(undefined, Route.getRouteByUrl("/crs6.html"));
-        assertEquals(undefined, Route.getRouteByUrl("/crs7.html"));
-    },
+    sanitizeResources: false,
+    sanitizeOps: false,
 });

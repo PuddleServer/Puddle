@@ -124,8 +124,8 @@ export class Route {
         this.URL.apply(this, URL);
         this.#GET = GET || default_get();
         const process_404: HandlerFunction = (this.#PATH == "404")? this.#GET : Route["404"].GET();
-        if(GET==undefined) this.#GET = default_get();
-        else if(GET==null) this.#GET = process_404;
+        if(GET === undefined) this.#GET = default_get();
+        else if(GET === null) this.#GET = process_404;
         this.#PUT = PUT || process_404;
         this.#POST = POST || process_404;
         this.#DELETE = DELETE || process_404;
@@ -229,6 +229,7 @@ export class Route {
      */
     DELETE(): HandlerFunction;
     DELETE(process: HandlerFunction): Route;
+    DELETE(process: Response): Route;
     DELETE(process?: HandlerFunction | Response): HandlerFunction | Route {
 
         if(!process) return this.#DELETE;
@@ -410,7 +411,9 @@ export class Route {
 
     /**
      * 指定したURLを含むルートオブジェクトを取得する。
-     * @param url Get a Route object containing the specified URL.
+     * Get a Route object containing the specified URL.
+     * @param url URL to be used to identify the Route.
+     * @param variables An object that stores the variables contained in a URL.
      * @returns Route object.
      */
     static getRouteByUrl(url: string, variables: {[key: string]: string;} = {}): Route | undefined {
@@ -421,18 +424,18 @@ export class Route {
             for(let registeredURL of urls) {
                 const span = `${registeredURL}/`.replace(/\/+/g, "/").split("/");
                 if(targets.length != span.length) continue;
-                let flug = true;
+                let flag = true;
                 for(let i in span) {
                     if(span[i][0] == ":") {
                         variables[span[i].slice(1)] = targets[i];
                         continue;
                     }
                     if(span[i] != targets[i]) {
-                        flug = false;
+                        flag = false;
                         break;
                     }
                 }
-                if(flug) {
+                if(flag) {
                     result = Route.getRouteByPath(route.PATH());
                     break;
                 }

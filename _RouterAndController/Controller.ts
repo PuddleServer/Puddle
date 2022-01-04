@@ -8,29 +8,30 @@ import {
  * @param request SystemRequest object.
  * @param route Route object.
  */
-export async function control(requestEvent: Deno.RequestEvent, variables: {[key:string]:string;}, route: Route) {
-    if(route.AUTH()) await authDigest(requestEvent, route);
-    switch (requestEvent.request.method) {
+export async function control(request: Request, variables: {[key:string]:string;}, route: Route): Promise<Response> {
+    if(route.AUTH()) {
+        const res = await authDigest(request, route);
+        if(res) return res;
+    }
+    switch (request.method) {
         case "GET":
-            if(route.isWebSocket) await webSocketController(requestEvent, variables, route.WebSocket());
-            else await controller(requestEvent, variables, route.GET());
-            break;
+            if(route.isWebSocket) return await webSocketController(request, variables, route.WebSocket());
+            else return await controller(request, variables, route.GET());
+
         case "PUT":
-            await controller(requestEvent, variables, route.PUT());
-            break;
+            return await controller(request, variables, route.PUT());
+
         case "POST":
-            await controller(requestEvent, variables, route.POST());
-            break;
+            return await controller(request, variables, route.POST());
+
         case "DELETE":
-            await controller(requestEvent, variables, route.DELETE());
-            break;
+            return await controller(request, variables, route.DELETE());
+
         case "PATCH":
-            await controller(requestEvent, variables, route.PATCH());
-            break;
+            return await controller(request, variables, route.PATCH());
 
         default:
-            await controller(requestEvent, variables, Route["500"].GET());
-            break;
+            return await controller(request, variables, Route["500"].GET());
     }
 }
 
@@ -40,12 +41,15 @@ export async function control(requestEvent: Deno.RequestEvent, variables: {[key:
  * @param respondWidth Function for response
  * @param process Function.
  */
-async function controller(requestEvent: Deno.RequestEvent, variables: { [key: string]: string; }, process: HandlerFunction) {
-    const request = new SystemRequest(requestEvent.request, variables);
-    const response = new SystemResponse(requestEvent);
-    const res = await process(request, response);
-    if(res) await response.send(res);
-    else await response.send();
+async function controller(request: Request, variables: { [key: string]: string; }, process: HandlerFunction): Promise<Response> {
+    const sRequest = new SystemRequest(request, variables);
+    const sResponse = new SystemResponse(request);
+
+    const res = await process(sRequest, sResponse);
+    if(res) await sResponse.send(res);
+    else await sResponse.send();
+    
+    return sResponse.response;
 }
 
 /**
@@ -54,10 +58,10 @@ async function controller(requestEvent: Deno.RequestEvent, variables: { [key: st
  * @param request SystemRequest object.
  * @param wsRoute WebSocketRoute object.
  */
-async function webSocketController(requestEvent: Deno.RequestEvent, variables: { [key: string]: string; }, wsRoute: WebSocketRoute) {
+async function webSocketController(request: Request, variables: { [key: string]: string; }, wsRoute: WebSocketRoute): Promise<Response> {
 
-    const { socket, response } = Deno.upgradeWebSocket(requestEvent.request);
-    const client = new WebSocketClient(socket, requestEvent.request.url, variables);
+    const { socket, response } = Deno.upgradeWebSocket(request);
+    const client = new WebSocketClient(socket, request.url, variables);
 
     socket.onopen = (ev) => {
         wsRoute.onopen()(client, ev);
@@ -82,6 +86,6 @@ async function webSocketController(requestEvent: Deno.RequestEvent, variables: {
         delete WebSocketClient.list[client.id];
     };
 
-    requestEvent.respondWith(response);
+    return response;
 
 }

@@ -10,13 +10,12 @@ import { System, Route } from "../mod.ts";
  */
 export function assignToVariables(html: string, params: { [key: string]: ( string | Number ); }, filePath?: string): string {
     const paths = html.match(/\{\{\s*createPath\(.+\)\s*\}\}/g);
-    const filePathArray = (filePath || "").split("/");
-    filePathArray.pop();
-    filePath = filePathArray.join("/").replace("./", "/");
     if(paths) {
+        const filePathArray = (filePath || "").split("/").slice(0, -1);
+        filePath = filePathArray.join("/").replace("./", "/");
         for(let path of paths) {
-            let _path = (path?.match(/(?<=\().+(?=\))/)||"")[0] || "";
-            if(filePath.length) _path = _path.replace("./", `${filePath}/`).replace(/\"|\'|\`/g, "");
+            let _path = (path?.replace(/\"|\'|\`/g, "")?.match(/(?<=\().+(?=\))/)||"")[0] || "";
+            if(filePath.length) _path = _path.replace("./", `${filePath}/`);
             html = html.replace(path, _path);
             if(!Route.isThePathInUse(`.${_path}`))System.createRoute(`.${_path}`);
         }

@@ -44,7 +44,7 @@ export class SystemRequest {
 
     constructor(request: Request, variables: {[key:string]:string;}) {
         this.#request = request;
-        this.#url = request.url.replace(/\/+/g, "/");
+        this.#url = request.url.replace(/(?<!:)\/+/g, "/");
         this.#method = request.method;
         this.#headers = request.headers;
         this.#body = request.body;

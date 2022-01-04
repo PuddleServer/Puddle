@@ -3,10 +3,11 @@
  * Released under the MIT license
  * https://github.com/denoland/deno/blob/main/LICENSE.md
 */
-export * from "https://deno.land/std@0.113.0/http/cookie.ts";
-export * as path from "https://deno.land/std@0.113.0/path/mod.ts";
-export * from "https://deno.land/std@0.113.0/hash/mod.ts";
-export * from "https://deno.land/std@0.113.0/fs/walk.ts";
+export * from "https://deno.land/std@0.116.0/http/cookie.ts";
+export * from "https://deno.land/std@0.116.0/http/server.ts";
+export * as path from "https://deno.land/std@0.116.0/path/mod.ts";
+export * from "https://deno.land/std@0.116.0/hash/mod.ts";
+export * from "https://deno.land/std@0.116.0/fs/walk.ts";
 
 /*!
  * Copyright(c) 2014 Jonathan Ong
@@ -21,6 +22,7 @@ export * from "./System.ts";
 export * from "./_FileOperations/FileManager.ts";
 export * from "./_RequestAndResponse/SystemRequest.ts";
 export * from "./_RequestAndResponse/SystemResponse.ts";
+export * from "./_WebSocket/WebSocketClient.ts";
 export * from "./_RouterAndController/Router.ts";
 export * from "./_RouterAndController/WebSocketRouter.ts";
 export * from "./_RouterAndController/Controller.ts";
