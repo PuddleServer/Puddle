@@ -412,7 +412,7 @@
 > ```typescript
 > true
 > ```
-> `headers.get("Set-Cookie")`
+> `sResponse.headers.get("Set-Cookie")`
 > ```typescript
 > "Puddle=; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
 > ```
