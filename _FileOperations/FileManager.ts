@@ -405,7 +405,7 @@ export class SelectedRows {
      * Get the data.
      */
     get rows(): ROW[] {
-        return this.RESULT();
+        return this.list;
     }
 
     /**
