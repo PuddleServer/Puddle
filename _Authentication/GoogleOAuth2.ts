@@ -158,10 +158,10 @@ export class GoogleOAuth2 {
             try {
 				const access_token = await getAccessToken(this.#client_id, this.#client_secret, this.#redirect_uri, request.getURL().searchParams.get("code")||"");
 				const profile_info = await getProfileInfo(access_token);
-                process(request, response, profile_info);
+                await process(request, response, profile_info);
 			} catch(error) {
                 new ErrorLog("error", error.message);
-				process(request, response, undefined);
+				await process(request, response, undefined);
 			}
         });
         return this;
