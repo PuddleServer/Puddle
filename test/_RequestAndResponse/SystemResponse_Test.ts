@@ -5,7 +5,8 @@ import {
 import {
     SystemRequest,
     SystemResponse,
-    DecodedURL
+    DecodedURL,
+    assignToVariables
 } from "../../mod.ts";
 
 Deno.test({
@@ -131,31 +132,15 @@ Deno.test({
 });
 
 Deno.test({
-    name: "setFile2",
-    async fn(): Promise<void> {
-        const request   = new Request("http://example.com");
-        const sResponse = new SystemResponse(request);
-        const result    = await sResponse.setFile("../testdata/assets/PuddleLogo.png");
-        const RS_unit8  = (await fetch(new URL("../testdata/assets/PuddleLogo.png", import.meta.url))).body;
-
-        assertEquals(result instanceof SystemResponse, true);
-        assertStrictEquals(sResponse.body, RS_unit8);
-        assertEquals(sResponse.status, 200);
-    },
-    sanitizeResources: false,
-    sanitizeOps: false,
-});
-
-/*
-Deno.test({
     name: "preset",
     fn(): void {
         const request   = new Request("http://example.com");
         const sResponse = new SystemResponse(request);
         const result    = sResponse.preset({test: "Hello world!"});
+        sResponse.setText("{{test}}");
 
         assertEquals(result instanceof SystemResponse, true);
-        assertEquals(assignToVariables("{{test}}", this.#preset), "Hello world!");
+        assertEquals(sResponse.body, "Hello world!");
     },
 });
 
@@ -179,15 +164,75 @@ Deno.test({
         const result    = sResponse.deleteCookie("Puddle");
 
         assertEquals(result instanceof SystemResponse, true);
-        assertEquals(headers.get("Set-Cookie"), "Puddle=; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
-    },
-});*/
-/*
-Deno.test({
-    name: "",
-    fn(): void {
-
-        assertEquals(, );
+        assertEquals(sResponse.headers.get("Set-Cookie"), "Puddle=; Expires=Thu, 01 Jan 1970 00:00:00 GMT");
     },
 });
-*/
+
+Deno.test({
+    name: "send1",
+    fn(): void {
+        const request   = new Request("http://example.com");
+        const sResponse = new SystemResponse(request);
+        let before, after;
+        try {
+            before = sResponse.responded;
+        } finally {
+            sResponse.send();
+            after = sResponse.responded;
+        }
+
+        assertEquals(before, false);
+        assertEquals(after, true);
+    },
+});
+
+Deno.test({
+    name: "send2",
+    fn(): void {
+        const request   = new Request("http://example.com");
+        const sResponse = new SystemResponse(request);
+        let before, after;
+        try {
+            before = sResponse.responded;
+        } finally {
+            sResponse.send("Hello world!");
+            after = sResponse.responded;
+        }
+
+        assertEquals(before, false);
+        assertEquals(after, true);
+        assertEquals(sResponse.body, "Hello world!");
+    },
+});
+
+Deno.test({
+    name: "send3",
+    fn(): void {
+        const request   = new Request("http://example.com");
+        const sResponse = new SystemResponse(request);
+        const response = new Response("Hello world!", { "status" : 200 });
+        let before, after;
+        try {
+            before = sResponse.responded;
+        } finally {
+            sResponse.send(response);
+            after = sResponse.responded;
+        }
+
+        assertEquals(before, false);
+        assertEquals(after, true);
+        assertStrictEquals(sResponse.response, response);
+    },
+});
+
+Deno.test({
+    name: "redirect",
+    fn(): void {
+        const request   = new Request("http://example.com");
+        const sResponse = new SystemResponse(request);
+        sResponse.redirect("http://example.com/test");
+
+        assertEquals(sResponse.status, 302);
+        assertEquals(sResponse.headers.get('Location'), "http://example.com/test");
+    },
+});

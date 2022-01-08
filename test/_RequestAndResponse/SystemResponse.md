@@ -340,6 +340,7 @@
 > const request   = new Request("http://example.com");
 > const sResponse = new SystemResponse(request);
 > const result    = sResponse.preset({test: "Hello world!"});
+> sResponse.setText("{{test}}");
 > ```
 > 
 > Implementation  
@@ -347,7 +348,7 @@
 > ```typescript
 > true
 > ```
-> `assignToVariables("{{test}}", this.#preset)`
+> `sResponse.body`
 > ```typescript
 > "Hello world!"
 > ```
@@ -411,7 +412,7 @@
 > ```typescript
 > true
 > ```
-> `headers.get("Set-Cookie")`
+> `sResponse.headers.get("Set-Cookie")`
 > ```typescript
 > "Puddle=; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
 > ```
