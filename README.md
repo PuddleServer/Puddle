@@ -128,10 +128,10 @@ import { System, Config, SystemRequest, WebSocketClient } from "https://github.c
 System.createRoute("./webSocket.html").URL("/", "/top");
 
 System.createRoute("/ws").WebSocket()
-.onopen((client: WebSocketClient) => {
+.OPEN((client: WebSocketClient) => {
     client.reply("Connection to server complete.");
 })
-.onmessage((client: WebSocketClient) => {
+.MESSAGE((client: WebSocketClient) => {
     client.sendAll(client.message);
 });
 

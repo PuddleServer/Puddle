@@ -88,13 +88,13 @@ Configure the processing for each event of the web socket.
 ```typescript
 import { System, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/v1.1.2-beta/mod.ts";
 System.createRoute("/ws").WebSocket()
-.onopen((ws: WebSocketClient) => {
+.OPEN((ws: WebSocketClient) => {
     console.log("Opening new connection.");
 })
-.onmessage((ws: WebSocketClient) => {
+.MESSAGE((ws: WebSocketClient) => {
     ws.sendAll(ws.message);
 })
-.onclose((ws: WebSocketClient) => {
+.CLOSE((ws: WebSocketClient) => {
     console.log("Connection closed.");
 });
 ```
