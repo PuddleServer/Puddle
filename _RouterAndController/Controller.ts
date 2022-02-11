@@ -64,25 +64,25 @@ async function webSocketController(request: Request, variables: { [key: string]:
     const client = new WebSocketClient(socket, request.url, variables);
 
     socket.onopen = (ev) => {
-        wsRoute.onopen()(client, ev);
+        wsRoute.OPEN()(client, ev);
     };
 
     socket.onmessage = (ev) => {
         client.setMessage(ev.data);
         client.to([]);
-        wsRoute.onmessage()(client, ev);
+        wsRoute.MESSAGE()(client, ev);
     };
 
     socket.onerror = (ev) => {
         client.setMessage("");
         client.to([]);
-        wsRoute.onerror()(client, ev);
+        wsRoute.ERROR()(client, ev);
     };
 
     socket.onclose = (ev) => {
         client.setMessage("");
         client.to([]);
-        wsRoute.onclose()(client, ev);
+        wsRoute.CLOSE()(client, ev);
         delete WebSocketClient.list[client.id];
     };
 

@@ -27,7 +27,7 @@ export class WebSocketRoute {
      * @param request SystemRequest.
      * @param client WebSocketClient.
      */
-    #onopen: WebSocketHandlerFunction;
+    onopen: WebSocketHandlerFunction;
 
     /**
      * クライアントとの接続が切れたときに実行される関数。
@@ -35,7 +35,7 @@ export class WebSocketRoute {
      * @param request SystemRequest.
      * @param client WebSocketClient.
      */
-    #onclose: WebSocketHandlerFunction;
+    onclose: WebSocketHandlerFunction;
 
     /**
      * クライアントからメッセージが送られてきたときに実行される関数。
@@ -44,15 +44,15 @@ export class WebSocketRoute {
      * @param client WebSocketClient.
      * @param message A message sent by the client.
      */
-    #onmessage: WebSocketHandlerFunction;
+    onmessage: WebSocketHandlerFunction;
 
-    #onerror: WebSocketHandlerFunction;
+    onerror: WebSocketHandlerFunction;
 
     constructor(event?: WebSocketEvent) {
-        this.#onopen = event?.onopen || default_onopen;
-        this.#onclose = event?.onclose || function(){};
-        this.#onmessage = event?.onmessage || default_onmessage;
-        this.#onerror = event?.onerror || function(){};
+        this.onopen = event?.onopen || default_onopen;
+        this.onclose = event?.onclose || function(){};
+        this.onmessage = event?.onmessage || default_onmessage;
+        this.onerror = event?.onerror || function(){};
     }
 
     /**
@@ -68,14 +68,14 @@ export class WebSocketRoute {
      *  });
      * ```
      */
-    onopen(): WebSocketHandlerFunction;
-    onopen(process: WebSocketHandlerFunction): WebSocketRoute;
-    onopen(process?: WebSocketHandlerFunction): WebSocketHandlerFunction | WebSocketRoute {
+    OPEN(): WebSocketHandlerFunction;
+    OPEN(process: WebSocketHandlerFunction): WebSocketRoute;
+    OPEN(process?: WebSocketHandlerFunction): WebSocketHandlerFunction | WebSocketRoute {
         if(process) {
-            this.#onopen = process;
+            this.onopen = process;
             return this;
         }
-        return this.#onopen;
+        return this.onopen;
     }
 
     /**
@@ -91,14 +91,14 @@ export class WebSocketRoute {
      *  });
      * ```
      */
-    onclose(): WebSocketHandlerFunction;
-    onclose(process: WebSocketHandlerFunction): WebSocketRoute;
-    onclose(process?: WebSocketHandlerFunction): WebSocketHandlerFunction | WebSocketRoute {
+    CLOSE(): WebSocketHandlerFunction;
+    CLOSE(process: WebSocketHandlerFunction): WebSocketRoute;
+    CLOSE(process?: WebSocketHandlerFunction): WebSocketHandlerFunction | WebSocketRoute {
         if(process) {
-            this.#onclose = process;
+            this.onclose = process;
             return this;
         }
-        return this.#onclose;
+        return this.onclose;
     }
 
     /**
@@ -114,23 +114,23 @@ export class WebSocketRoute {
      *  });
      * ```
      */
-    onmessage(): WebSocketHandlerFunction;
-    onmessage(process: WebSocketHandlerFunction): WebSocketRoute;
-    onmessage(process?: WebSocketHandlerFunction): WebSocketHandlerFunction | WebSocketRoute {
+    MESSAGE(): WebSocketHandlerFunction;
+    MESSAGE(process: WebSocketHandlerFunction): WebSocketRoute;
+    MESSAGE(process?: WebSocketHandlerFunction): WebSocketHandlerFunction | WebSocketRoute {
         if(process) {
-            this.#onmessage = process;
+            this.onmessage = process;
             return this;
         }
-        return this.#onmessage;
+        return this.onmessage;
     }
 
-    onerror(): WebSocketHandlerFunction;
-    onerror(process: WebSocketHandlerFunction): WebSocketRoute;
-    onerror(process?: WebSocketHandlerFunction): WebSocketHandlerFunction | WebSocketRoute {
+    ERROR(): WebSocketHandlerFunction;
+    ERROR(process: WebSocketHandlerFunction): WebSocketRoute;
+    ERROR(process?: WebSocketHandlerFunction): WebSocketHandlerFunction | WebSocketRoute {
         if(process) {
-            this.#onerror = process;
+            this.onerror = process;
             return this;
         }
-        return this.#onerror;
+        return this.onerror;
     }
 }

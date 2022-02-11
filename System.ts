@@ -203,6 +203,21 @@ export class System {
                     if(path.includes("../") || !fileName?.includes(".")) continue;
                     System.createRoute(`./${path}`);
                 }
+                (async function(){
+                    const watcher = Deno.watchFs(pathOrRouteOption.replace(/\*/g, ""));
+                    for await (const event of watcher) {
+                        if(event.kind === "create") {
+                            event.paths.forEach(path => {
+                                System.createRoute(new URL(path).toString());
+                            });
+                        } else if(event.kind === "remove") {
+                            event.paths.forEach(path => {
+                                System.deleteRoute(new URL(path).toString());
+                            });
+                        }
+                    }
+                })();
+                
             } else new Route(
                 pathOrRouteOption.PATH,
                 pathOrRouteOption.URL || [],

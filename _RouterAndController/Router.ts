@@ -63,7 +63,7 @@ export class Route {
      * @param request SystemRequest.
      * @param response SystemResponse.
      */
-    #GET: HandlerFunction;
+    onget: HandlerFunction;
 
     /**
      * PUTリクエスト時の処理をまとめた関数。
@@ -71,7 +71,7 @@ export class Route {
      * @param request SystemRequest.
      * @param response SystemResponse.
      */
-    #PUT: HandlerFunction;
+    onput: HandlerFunction;
 
     /**
      * POSTリクエスト時の処理をまとめた関数。
@@ -79,7 +79,7 @@ export class Route {
      * @param request SystemRequest.
      * @param response SystemResponse.
      */
-    #POST: HandlerFunction;
+    onpost: HandlerFunction;
 
     /**
      * DELETEリクエスト時の処理をまとめた関数。
@@ -87,7 +87,7 @@ export class Route {
      * @param request SystemRequest.
      * @param response SystemResponse.
      */
-    #DELETE: HandlerFunction;
+    ondelete: HandlerFunction;
 
     /**
      * PATCHリクエスト時の処理をまとめた関数。
@@ -122,13 +122,13 @@ export class Route {
         URL.unshift(_path.replace(".html", ""));
         if(URL[0] != _path) URL.push(_path);
         this.URL.apply(this, URL);
-        this.#GET = GET || default_get();
-        const process_404: HandlerFunction = (this.#PATH == "404")? this.#GET : Route["404"].GET();
-        if(GET === undefined) this.#GET = default_get();
-        else if(GET === null) this.#GET = process_404;
-        this.#PUT = PUT || process_404;
-        this.#POST = POST || process_404;
-        this.#DELETE = DELETE || process_404;
+        this.onget = GET || default_get();
+        const process_404: HandlerFunction = (this.#PATH == "404")? this.onget : Route["404"].GET();
+        if(GET === undefined) this.onget = default_get();
+        else if(GET === null) this.onget = process_404;
+        this.onput = PUT || process_404;
+        this.onpost = POST || process_404;
+        this.ondelete = DELETE || process_404;
         this.#PATCH = PATCH || process_404;
         this.#AUTH = undefined;
         this.#wsRoute = undefined;
@@ -173,9 +173,9 @@ export class Route {
     GET(process: Response): Route;
     GET(process?: HandlerFunction | Response): HandlerFunction | Route {
 
-        if(!process) return this.#GET;
-        if(typeof process == "object") this.#GET = ()=>process;
-        else this.#GET = process;
+        if(!process) return this.onget;
+        if(typeof process == "object") this.onget = ()=>process;
+        else this.onget = process;
         return this;
 
     }
@@ -192,10 +192,10 @@ export class Route {
     PUT(process: Response): Route;
     PUT(process?: HandlerFunction | Response): HandlerFunction | Route {
 
-        if(!process) return this.#PUT;
+        if(!process) return this.onput;
 
-        if(typeof process == "object") this.#PUT = ()=>process;
-        else this.#PUT = process;
+        if(typeof process == "object") this.onput = ()=>process;
+        else this.onput = process;
         return this;
 
     }
@@ -212,10 +212,10 @@ export class Route {
     POST(process: Response): Route;
     POST(process?: HandlerFunction | Response): HandlerFunction | Route {
 
-        if(!process) return this.#POST;
+        if(!process) return this.onpost;
 
-        if(typeof process == "object") this.#POST = ()=>process;
-        else this.#POST = process;
+        if(typeof process == "object") this.onpost = ()=>process;
+        else this.onpost = process;
         return this;
 
     }
@@ -232,10 +232,10 @@ export class Route {
     DELETE(process: Response): Route;
     DELETE(process?: HandlerFunction | Response): HandlerFunction | Route {
 
-        if(!process) return this.#DELETE;
+        if(!process) return this.ondelete;
 
-        if(typeof process == "object") this.#DELETE = ()=>process;
-        else this.#DELETE = process;
+        if(typeof process == "object") this.ondelete = ()=>process;
+        else this.ondelete = process;
         return this;
 
     }

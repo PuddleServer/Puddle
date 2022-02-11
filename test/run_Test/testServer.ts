@@ -77,3 +77,5 @@ System.listen("./.env", (conf: Config)=>{
 System.createRoute("imgTest").URL("/img").GET(async (req: SystemRequest, res: SystemResponse)=>{
     await res.setFile("./assets/PuddleLogo.png");
 });
+
+System.createRoutes("./assets/folder/*");
