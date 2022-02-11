@@ -267,6 +267,17 @@ export class System {
     static Route(path: string): Route {
         return Route.getRouteByPath(path);
     }
+    static getRouteByPath(path: string): Route | undefined {
+        for(let route of Route.list) {
+            if(route.PATH() == path) {
+                return route;
+            }
+        }
+    }
+
+    static getRouteByUrl(url: string): Route | undefined {
+        return Route.getRouteByUrl(url);
+    }
 
     /**
      * Google OAuth2.0 を実装する。

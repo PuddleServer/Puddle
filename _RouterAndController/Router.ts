@@ -526,8 +526,14 @@ export class Route {
      * @returns Route object; If it does not exist, create a new one.
      */
     static getRouteByPath(path: string): Route {
-        const routes: Route[] = Route.list.filter( (route: Route) => route.PATH() == path );
-        if(routes.length) return routes[0];
+        let route: Route | undefined;
+        for(let _route of Route.list) {
+            if(_route.PATH() == path) {
+                route = _route;
+                break;
+            }
+        }
+        if(route) return route;
         else {
             console.log(`\n[ warning ]\n
             There is no Route with the PATH "${path}".\n
@@ -575,6 +581,10 @@ export class Route {
             }
         }
         return result;
+    }
+
+    delete() {
+        Route.list = Route.list.filter(route=>route.PATH() !== this.PATH());
     }
 
 }
