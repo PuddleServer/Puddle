@@ -1,8 +1,23 @@
-import { SystemRequest, SystemResponse, createHash, WebSocketRoute, WebSocketEvent, default_get, default_error, redirect, ErrorLog } from "../mod.ts";
+import { SystemRequest, SystemResponse, createHash, WebSocketClient, default_get, default_onmessage, default_onopen, default_error, redirect, ErrorLog } from "../mod.ts";
 
 export type HandlerFunction = {
     (request: SystemRequest, response: SystemResponse): Response | Promise<Response> | void | Promise<void>;
 };
+
+export type WebSocketHandlerFunction = {
+    (client: WebSocketClient, ev?: Event | MessageEvent<any> | ErrorEvent | CloseEvent): void;
+}
+
+/**
+ * WebSocketRouteを初期化する際の引数として使用されるオブジェクト。
+ * An object used as an argument when initializing a WebSocketRoute.
+ */
+export interface WebSocketEvent {
+    onopen?: WebSocketHandlerFunction;
+    onclose?: WebSocketHandlerFunction;
+    onmessage?: WebSocketHandlerFunction;
+    onerror?: WebSocketHandlerFunction;
+}
 
 /**
  * サーバーのルーティングに関する設定を行う。
@@ -90,6 +105,33 @@ export class Route {
     ondelete: HandlerFunction;
 
     /**
+     * クライアントとの通信開始時に実行される関数。
+     * Function executed at the start of communication with the client.
+     * @param request SystemRequest.
+     * @param client WebSocketClient.
+     */
+    onopen: WebSocketHandlerFunction;
+
+    /**
+      * クライアントとの接続が切れたときに実行される関数。
+      * Function to be executed when the connection to the client is lost.
+      * @param request SystemRequest.
+      * @param client WebSocketClient.
+      */
+    onclose: WebSocketHandlerFunction;
+ 
+    /**
+     * クライアントからメッセージが送られてきたときに実行される関数。
+     * A function that is executed when a message is sent from a client.
+     * @param request SystemRequest.
+     * @param client WebSocketClient.
+     * @param message A message sent by the client.
+     */
+    onmessage: WebSocketHandlerFunction;
+
+    onerror: WebSocketHandlerFunction;
+
+    /**
      * PATCHリクエスト時の処理をまとめた関数。
      * A function that summarizes the process when a PATCH request is made.
      * @param request SystemRequest.
@@ -103,11 +145,7 @@ export class Route {
      */
     #AUTH: string[] | undefined;
 
-    /**
-     * WebSocket通信を利用する場合にWebSocketRouteオブジェクトを格納する変数。WebSocket通信を利用しない場合は"undefined"。
-     * Variable that stores the WebSocketRoute object when WebSocket communication is used; `"undefined"` when WebSocket communication is not used.
-     */
-    #wsRoute: WebSocketRoute | undefined;
+    #isWebSocket: boolean = false;
 
     constructor(PATH: string, URL: string[] = [], GET?: HandlerFunction | null, POST?: HandlerFunction | null, PUT?: HandlerFunction | null, DELETE?: HandlerFunction | null, PATCH?: HandlerFunction | null) {
         if(Route.isThePathInUse(PATH)) {
@@ -129,9 +167,12 @@ export class Route {
         this.onput = PUT || process_404;
         this.onpost = POST || process_404;
         this.ondelete = DELETE || process_404;
+        this.onopen = default_onopen;
+        this.onclose = function(){};
+        this.onmessage = default_onmessage;
+        this.onerror = function(){};
         this.#PATCH = PATCH || process_404;
         this.#AUTH = undefined;
-        this.#wsRoute = undefined;
         Route.list.push(this);
     }
 
@@ -241,6 +282,134 @@ export class Route {
     }
 
     /**
+     * WebSocket通信を使用するルートかどうか。
+     * Whether the Route uses WebSocket communication.
+     * @return True if WebSocket is used.
+     */
+    get isWebSocket(): boolean {
+        return this.#isWebSocket;
+    }
+
+    /**
+     * Routeのゲッター兼セッター。
+     * Getter and Setter for Route.
+     * @param event An associative array that stores the respective processes with onopen, onclose, and onmessage as keys.
+     * @returns Route object.
+     * 
+     * ```ts
+     * System.createRoute("/ws").WebSocket({
+     *      onopen: ((client: WebSocketClient) => {
+     *          console.log(`>> WebSocket opened.`);
+     *          client.reply("Connected");
+     *      },
+     *      onmessage: (client: WebSocketClient) => {
+     *          client.sendAll(client.message);
+     *      }
+     * });
+     * 
+     * System.createRoute("/ws").WebSocket()
+     *      .onopen((client: WebSocketClient) => {
+     *          console.log(`>> WebSocket opened.`);
+     *          client.reply("Connected");
+     *      })
+     *      .onmessage((client: WebSocketClient) => {
+     *          client.sendAll(client.message);
+     *      });
+     * ```
+     */
+    WebSocket(event?: WebSocketEvent): Route {
+        this.#isWebSocket = true;
+        if(event?.onopen) this.onopen = event.onopen;
+        if(event?.onclose) this.onclose = event.onclose;
+        if(event?.onmessage) this.onmessage = event.onmessage;
+        if(event?.onerror) this.onerror = event.onerror;
+        return this;
+    }
+
+    /**
+     * クライアントとの通信開始時に実行される関数のセッター兼ゲッター。
+     * Setter and getter of the function to be executed when communication with the client starts.
+     * @param process function (request: SystemRequest, client: WebSocketClient)
+     * @return Function or Route.
+     * 
+     * ```ts
+     * System.createRoute("./ws").WebSocket()
+     *  .onopen((req: SystemRequest, client: WebSocketClient) => {
+     *      // process
+     *  });
+     * ```
+     */
+    OPEN(): WebSocketHandlerFunction;
+    OPEN(process: WebSocketHandlerFunction): Route;
+    OPEN(process?: WebSocketHandlerFunction): WebSocketHandlerFunction | Route {
+        if(process) {
+            this.#isWebSocket = true;
+            this.onopen = process;
+            return this;
+        }
+        return this.onopen;
+    }
+
+    /**
+     * クライアントとの接続が切れたときに実行される関数のセッター兼ゲッター。
+     * Setter and getter for the function to be executed when the connection to the client is lost.
+     * @param process function (request: SystemRequest, client: WebSocketClient)
+     * @return Function or Route.
+     * 
+     * ```ts
+     * System.createRoute("./ws").WebSocket()
+     *  .onclose((req: SystemRequest, client: WebSocketClient) => {
+     *      // process
+     *  });
+     * ```
+     */
+    CLOSE(): WebSocketHandlerFunction;
+    CLOSE(process: WebSocketHandlerFunction): Route;
+    CLOSE(process?: WebSocketHandlerFunction): WebSocketHandlerFunction | Route {
+        if(process) {
+            this.#isWebSocket = true;
+            this.onclose = process;
+            return this;
+        }
+        return this.onclose;
+    }
+
+    /**
+     * クライアントからメッセージが送られてきたときに実行される関数のゲッター兼セッター。
+     * A getter and setter for a function that is executed when a message is sent from a client.
+     * @param process function (request: SystemRequest, client: WebSocketClient, message: string)
+     * @return Function or Route.
+     * 
+     * ```ts
+     * System.createRoute("./ws").WebSocket()
+     *  .onmessage((req: SystemRequest, client: WebSocketClient, message: string) => {
+     *      client.sendAll(message);
+     *  });
+     * ```
+     */
+    MESSAGE(): WebSocketHandlerFunction;
+    MESSAGE(process: WebSocketHandlerFunction): Route;
+    MESSAGE(process?: WebSocketHandlerFunction): WebSocketHandlerFunction | Route {
+        if(process) {
+            this.#isWebSocket = true;
+            this.onmessage = process;
+            return this;
+        }
+        return this.onmessage;
+    }
+
+    ERROR(): WebSocketHandlerFunction;
+    ERROR(process: WebSocketHandlerFunction): Route;
+    ERROR(process?: WebSocketHandlerFunction): WebSocketHandlerFunction | Route {
+        if(process) {
+            this.#isWebSocket = true;
+            this.onerror = process;
+            return this;
+        }
+        return this.onerror;
+    }
+
+    /**
      * PATCHリクエスト時の処理のゲッター兼セッター。
      * A getter and setter for processing PATCH requests.
      * @param process Handler function describing the process.
@@ -302,47 +471,6 @@ export class Route {
         }
         this.#AUTH = hash;
         return this;
-    }
-
-    /**
-     * WebSocket通信を使用するルートかどうか。
-     * Whether the Route uses WebSocket communication.
-     * @return True if WebSocket is used.
-     */
-    get isWebSocket(): boolean {
-        return Boolean(this.#wsRoute);
-    }
-
-    /**
-     * WebSocketRouteのゲッター兼セッター。
-     * Getter and Setter for WebSocketRoute.
-     * @param event An associative array that stores the respective processes with onopen, onclose, and onmessage as keys.
-     * @returns WebSocketRoute object.
-     * 
-     * ```ts
-     * System.createRoute("/ws").WebSocket({
-     *      onopen: ((client: WebSocketClient) => {
-     *          console.log(`>> WebSocket opened.`);
-     *          client.reply("Connected");
-     *      },
-     *      onmessage: (client: WebSocketClient) => {
-     *          client.sendAll(client.message);
-     *      }
-     * });
-     * 
-     * System.createRoute("/ws").WebSocket()
-     *      .onopen((client: WebSocketClient) => {
-     *          console.log(`>> WebSocket opened.`);
-     *          client.reply("Connected");
-     *      })
-     *      .onmessage((client: WebSocketClient) => {
-     *          client.sendAll(client.message);
-     *      });
-     * ```
-     */
-    WebSocket(event?: WebSocketEvent): WebSocketRoute {
-        if(!this.#wsRoute) this.#wsRoute = new WebSocketRoute(event);
-        return this.#wsRoute;
     }
 
     /**
@@ -425,23 +553,26 @@ export class Route {
                 const span = `${registeredURL}/`.replace(/\/+/g, "/").split("/");
                 if(targets.length != span.length) continue;
                 let flag = true;
-                for(let i in span) {
-                    if(span[i][0] == ":") {
-                        variables[span[i].slice(1)] = targets[i];
-                        continue;
+                if(true || registeredURL.includes(':')) {
+                    for(let i in span) {
+                        if(span[i][0] == ":") {
+                            variables[span[i].slice(1)] = targets[i];
+                            continue;
+                        }
+                        if(span[i] != targets[i]) {
+                            flag = false;
+                            break;
+                        }
                     }
-                    if(span[i] != targets[i]) {
-                        flag = false;
-                        break;
-                    }
+                } else if(registeredURL === url){
+                    return Route.getRouteByPath(route.PATH());
                 }
+
                 if(flag) {
-                    result = Route.getRouteByPath(route.PATH());
-                    break;
+                    return Route.getRouteByPath(route.PATH());
                 }
                 
             }
-            if(result) break;
         }
         return result;
     }
