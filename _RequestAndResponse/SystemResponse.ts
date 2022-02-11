@@ -193,9 +193,10 @@ export class SystemResponse {
         }
         this.#init.status = this.status;
         if(this.#init.statusText) this.#init.statusText = encodeURIComponent(this.#init.statusText);
+        if(typeof response == "string") {
+            this.setText(response);
+        } else if(response) this.#response = response;
         this.#response = new Response(this.body, this.#init);
-        if(typeof response == "string") this.setText(response);
-        else if(response) this.#response = response;
     }
 
     /**

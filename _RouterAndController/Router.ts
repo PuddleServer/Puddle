@@ -1,7 +1,7 @@
 import { SystemRequest, SystemResponse, createHash, WebSocketClient, default_get, default_onmessage, default_onopen, default_error, redirect, ErrorLog } from "../mod.ts";
 
 export type HandlerFunction = {
-    (request: SystemRequest, response: SystemResponse): Response | Promise<Response> | void | Promise<void>;
+    (request: SystemRequest, response: SystemResponse): Response | Promise<Response> | string | Promise<string> | void | Promise<void>;
 };
 
 export type WebSocketHandlerFunction = {
