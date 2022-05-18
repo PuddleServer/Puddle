@@ -75,19 +75,11 @@ System.createRoute("HelloWorld!").URL("/greeting")
 ```
 ---
 
-## How to create a Websocket Route
-By connecting the WebSocket method to the Route you have created, you can perform Web socket communication.
-```typescript
-// Client: new WebSocket(`ws://localhost:8080/ws`);
-System.createRoute("/ws").WebSocket();
-
-System.Route("/ws").isWebSocket; // true
-```
 ## Configuring Web Socket Events
 Configure the processing for each event of the web socket.
 ```typescript
 import { System, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/v1.1.2-beta/mod.ts";
-System.createRoute("/ws").WebSocket()
+System.createRoute("/ws")
 .OPEN((ws: WebSocketClient) => {
     console.log("Opening new connection.");
 })

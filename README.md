@@ -112,8 +112,8 @@ Websockets server routing can be done in the same way as web server routing!
 ```typescript
 import { System, Config, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/v1.1.2-beta/mod.ts";
 
-System.createRoute("./webSocket.html").URL("/", "/top");
-System.createRoute("/ws").WebSocket();
+const ws = System.createRoute("./webSocket.html").URL("/", "/top", "/ws");
+ws.WebSocket();
 
 System.listen(8080, (conf: Config)=>{
     console.log(`The server running on http://${conf.hostname}:${conf.port}`);
@@ -127,7 +127,7 @@ import { System, Config, SystemRequest, WebSocketClient } from "https://github.c
 
 System.createRoute("./webSocket.html").URL("/", "/top");
 
-System.createRoute("/ws").WebSocket()
+System.createRoute("/ws")
 .OPEN((client: WebSocketClient) => {
     client.reply("Connection to server complete.");
 })

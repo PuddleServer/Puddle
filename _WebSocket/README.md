@@ -4,7 +4,7 @@
 Configure the processing for each event of the web socket.
 ```typescript
 import { System, SystemRequest, WebSocketClient } from "https://github.com/PuddleServer/Puddle/raw/v1.1.1-beta/mod.ts";
-System.createRoute("/ws").WebSocket()
+System.createRoute("/ws")
 .OPEN((ws: WebSocketClient) => {
     console.log("Opening new connection.");
 })
