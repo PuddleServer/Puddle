@@ -70,7 +70,7 @@ export class Route {
      * リクエストを許可するURLのPathname。
      * Pathname of the URL to allow the request.
      */
-    #URL: string[];
+    #URL: string[] = [];
 
     /**
      * GETリクエスト時の処理をまとめた関数。
@@ -107,7 +107,6 @@ export class Route {
     /**
      * クライアントとの通信開始時に実行される関数。
      * Function executed at the start of communication with the client.
-     * @param request SystemRequest.
      * @param client WebSocketClient.
      */
     onopen: WebSocketHandlerFunction;
@@ -115,7 +114,6 @@ export class Route {
     /**
       * クライアントとの接続が切れたときに実行される関数。
       * Function to be executed when the connection to the client is lost.
-      * @param request SystemRequest.
       * @param client WebSocketClient.
       */
     onclose: WebSocketHandlerFunction;
@@ -123,9 +121,7 @@ export class Route {
     /**
      * クライアントからメッセージが送られてきたときに実行される関数。
      * A function that is executed when a message is sent from a client.
-     * @param request SystemRequest.
      * @param client WebSocketClient.
-     * @param message A message sent by the client.
      */
     onmessage: WebSocketHandlerFunction;
 
@@ -155,7 +151,6 @@ export class Route {
             "${PATH}"というパスは既に使用されています。\n`);
         }
         this.#PATH = PATH;
-        this.#URL = [];
         const _path = (this.#PATH[0] == "." ? "/" + this.#PATH.slice(1) : "/" + this.#PATH).replace("//", "/");
         URL.unshift(_path.replace(".html", ""));
         if(URL[0] != _path) URL.push(_path);
