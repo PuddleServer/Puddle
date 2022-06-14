@@ -132,9 +132,7 @@ export class SystemRequest {
      * @returns Body information.
      */
     async readBody(decodeURI: boolean = true): Promise<string> {
-        const result = await this.#body?.getReader().read();
-        const decoder = new TextDecoder('utf-8');
-        const body: string = decoder.decode(result?.value);
+        const body = await (new Response(this.#body).text());
         if(decodeURI) return decodeURIComponent(body);
         return body;
     }
